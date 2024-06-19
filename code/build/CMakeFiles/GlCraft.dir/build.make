@@ -97,10 +97,80 @@ CMakeFiles/GlCraft.dir/src/utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/utils.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/utils.cpp -o CMakeFiles/GlCraft.dir/src/utils.cpp.s
 
+CMakeFiles/GlCraft.dir/src/Renderer.cpp.o: CMakeFiles/GlCraft.dir/flags.make
+CMakeFiles/GlCraft.dir/src/Renderer.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/Renderer.cpp
+CMakeFiles/GlCraft.dir/src/Renderer.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/GlCraft.dir/src/Renderer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/src/Renderer.cpp.o -MF CMakeFiles/GlCraft.dir/src/Renderer.cpp.o.d -o CMakeFiles/GlCraft.dir/src/Renderer.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/Renderer.cpp
+
+CMakeFiles/GlCraft.dir/src/Renderer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GlCraft.dir/src/Renderer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/Renderer.cpp > CMakeFiles/GlCraft.dir/src/Renderer.cpp.i
+
+CMakeFiles/GlCraft.dir/src/Renderer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/Renderer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/Renderer.cpp -o CMakeFiles/GlCraft.dir/src/Renderer.cpp.s
+
+CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o: CMakeFiles/GlCraft.dir/flags.make
+CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/IndexBuffer.cpp
+CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o -MF CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o.d -o CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/IndexBuffer.cpp
+
+CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/IndexBuffer.cpp > CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.i
+
+CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/IndexBuffer.cpp -o CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.s
+
+CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o: CMakeFiles/GlCraft.dir/flags.make
+CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/VertexBuffer.cpp
+CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o -MF CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o.d -o CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/VertexBuffer.cpp
+
+CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/VertexBuffer.cpp > CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.i
+
+CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/VertexBuffer.cpp -o CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.s
+
+CMakeFiles/GlCraft.dir/src/block.cpp.o: CMakeFiles/GlCraft.dir/flags.make
+CMakeFiles/GlCraft.dir/src/block.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/block.cpp
+CMakeFiles/GlCraft.dir/src/block.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/GlCraft.dir/src/block.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/src/block.cpp.o -MF CMakeFiles/GlCraft.dir/src/block.cpp.o.d -o CMakeFiles/GlCraft.dir/src/block.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/block.cpp
+
+CMakeFiles/GlCraft.dir/src/block.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GlCraft.dir/src/block.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/block.cpp > CMakeFiles/GlCraft.dir/src/block.cpp.i
+
+CMakeFiles/GlCraft.dir/src/block.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/block.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/block.cpp -o CMakeFiles/GlCraft.dir/src/block.cpp.s
+
+CMakeFiles/GlCraft.dir/src/chunk.cpp.o: CMakeFiles/GlCraft.dir/flags.make
+CMakeFiles/GlCraft.dir/src/chunk.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/chunk.cpp
+CMakeFiles/GlCraft.dir/src/chunk.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/GlCraft.dir/src/chunk.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/src/chunk.cpp.o -MF CMakeFiles/GlCraft.dir/src/chunk.cpp.o.d -o CMakeFiles/GlCraft.dir/src/chunk.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/chunk.cpp
+
+CMakeFiles/GlCraft.dir/src/chunk.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GlCraft.dir/src/chunk.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/chunk.cpp > CMakeFiles/GlCraft.dir/src/chunk.cpp.i
+
+CMakeFiles/GlCraft.dir/src/chunk.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GlCraft.dir/src/chunk.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lucky/Computer_Graphics/Minecraft_Clone/code/src/chunk.cpp -o CMakeFiles/GlCraft.dir/src/chunk.cpp.s
+
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_impl_glfw.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_impl_glfw.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.i: cmake_force
@@ -114,7 +184,7 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.s: cmake_force
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_impl_opengl3.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_impl_opengl3.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.i: cmake_force
@@ -128,7 +198,7 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.s: cmake_force
 CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.i: cmake_force
@@ -142,7 +212,7 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.s: cmake_force
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_demo.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_demo.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.i: cmake_force
@@ -156,7 +226,7 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui_demo.cpp.s: cmake_force
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_draw.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_draw.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.i: cmake_force
@@ -170,7 +240,7 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui_draw.cpp.s: cmake_force
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o: CMakeFiles/GlCraft.dir/flags.make
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o: /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_widgets.cpp
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o: CMakeFiles/GlCraft.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o -MF CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o.d -o CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.o -c /home/lucky/Computer_Graphics/Minecraft_Clone/code/depends/imgui/imgui_widgets.cpp
 
 CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.i: cmake_force
@@ -185,6 +255,11 @@ CMakeFiles/GlCraft.dir/depends/imgui/imgui_widgets.cpp.s: cmake_force
 GlCraft_OBJECTS = \
 "CMakeFiles/GlCraft.dir/src/main.cpp.o" \
 "CMakeFiles/GlCraft.dir/src/utils.cpp.o" \
+"CMakeFiles/GlCraft.dir/src/Renderer.cpp.o" \
+"CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o" \
+"CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o" \
+"CMakeFiles/GlCraft.dir/src/block.cpp.o" \
+"CMakeFiles/GlCraft.dir/src/chunk.cpp.o" \
 "CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o" \
 "CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o" \
 "CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o" \
@@ -197,6 +272,11 @@ GlCraft_EXTERNAL_OBJECTS =
 
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/main.cpp.o
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/utils.cpp.o
+/home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/Renderer.cpp.o
+/home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/IndexBuffer.cpp.o
+/home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/VertexBuffer.cpp.o
+/home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/block.cpp.o
+/home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/src/chunk.cpp.o
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_glfw.cpp.o
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/depends/imgui/imgui_impl_opengl3.cpp.o
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/depends/imgui/imgui.cpp.o
@@ -209,7 +289,7 @@ GlCraft_EXTERNAL_OBJECTS =
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: /usr/lib/x86_64-linux-gnu/libglfw.so.3.3
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: /usr/lib/x86_64-linux-gnu/libGLEW.so
 /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft: CMakeFiles/GlCraft.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable /home/lucky/Computer_Graphics/Minecraft_Clone/code/GlCraft"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/GlCraft.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

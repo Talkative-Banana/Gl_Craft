@@ -9,8 +9,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+
+
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "block.h"
+#include "chunk.h"
+
+
 //Globals
-int screen_width = 640, screen_height=640;
+int screen_width = 640, screen_height = 640;
 GLint vModel_uniform, vView_uniform, vProjection_uniform;
 GLint vColor_uniform;
 glm::mat4 modelT, viewT, projectionT;//The model, view and projection transformations
@@ -46,7 +55,7 @@ int main(int, char**)
 
 	glUseProgram(shaderProgram);
 
-	//setupModelTransformation(shaderProgram);
+	// setupModelTransformation(shaderProgram);
 	// Modelling transformation is setup in the display loop
 
 	unsigned int cube_VAO, axis_VAO;
@@ -61,77 +70,74 @@ int main(int, char**)
 	// Get key presses
         if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
           strcpy(textKeyStatus, "Key status: Left");
-	  //TODO:
-	  change.x += speed;
+			//TODO:
+			change.x += speed;
         }
         else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
           strcpy(textKeyStatus, "Key status: Right");
-	  //TODO:
-	  change.x -= speed;
+			//TODO:
+			change.x -= speed;
         }
         else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
           if(io.KeyShift){
             strcpy(textKeyStatus, "Key status: Shift + Up");
-	    //TODO:
-	    change.z -= speed;
-	  }
-          else{ 
-            strcpy(textKeyStatus, "Key status: Up");
-	    //TODO:
-	    change.y += speed;
-	  }
+			//TODO:
+			change.z -= speed;
+	  		}
+			else{ 
+				strcpy(textKeyStatus, "Key status: Up");
+				//TODO:
+				change.y += speed;
+			}
         }
         else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-          if(io.KeyShift){
-            strcpy(textKeyStatus, "Key status: Shift + Down");
-	    			//TODO:
-	    			change.z += speed;
-	  			}
-          else{ 
-            strcpy(textKeyStatus, "Key status: Down");
-	    			//TODO:
-	    			change.y -= speed;
-	  			}
+			if(io.KeyShift){
+				strcpy(textKeyStatus, "Key status: Shift + Down");
+				//TODO:
+				change.z += speed;
+			} else{ 
+				strcpy(textKeyStatus, "Key status: Down");
+				//TODO:
+				change.y -= speed;
+			}
         }
         else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
-		if(io.KeyCtrl){
-			strcpy(textKeyStatus, "Key status: Ctrl + z");
-			// Move camera to [0, 0, 100] i.e. => along z axis
-			if(!Perspective || Perspective){
-				camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
+			if(io.KeyCtrl){
+				strcpy(textKeyStatus, "Key status: Ctrl + z");
+				// Move camera to [0, 0, 100] i.e. => along z axis
+				if(!Perspective || Perspective){
+					camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
+				}
+			} else{
+					strcpy(textKeyStatus, "Key status: z");
+					Perspective = false;
 			}
-		}
-		else{
-        		strcpy(textKeyStatus, "Key status: z");
-        		Perspective = false;
-		}
         }
         else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
-		if(io.KeyCtrl){
-			strcpy(textKeyStatus, "Key status: Ctrl + x");
-			// Move camera to [100, 0, 0] i.e. => along x axis
-			if(!Perspective || Perspective){
-				camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
-			}	
-		}
-		else{
-        		strcpy(textKeyStatus, "Key status: x");
-        		Perspective = true;
-		}
-	}
-	else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))){
-		if(io.KeyCtrl){
-			strcpy(textKeyStatus, "Key status: Ctrl + y");
-			// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
-			// So Moved with some offset
-			if(!Perspective || Perspective){
-				camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
+			if(io.KeyCtrl){
+				strcpy(textKeyStatus, "Key status: Ctrl + x");
+				// Move camera to [100, 0, 0] i.e. => along x axis
+				if(!Perspective || Perspective){
+					camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
+				}	
+			} else{
+					strcpy(textKeyStatus, "Key status: x");
+					Perspective = true;
 			}
 		}
-	}
+		else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))){
+			if(io.KeyCtrl){
+				strcpy(textKeyStatus, "Key status: Ctrl + y");
+				// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
+				// So Moved with some offset
+				if(!Perspective || Perspective){
+					camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
+				}
+			}
+		}
         else{ 
           strcpy(textKeyStatus, "Key status:");
-				}	
+		}	
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -158,17 +164,19 @@ int main(int, char**)
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Setup MVP matrix
 		setupModelTransformationCube(shaderProgram);
 		camTrans(change);
 		setupViewTransformation(shaderProgram);
 		setupProjectionTransformation(shaderProgram);
+
 		glBindVertexArray(cube_VAO); 
 		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-		glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+		glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, nullptr);
 		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-		glDrawArrays(GL_LINE_STRIP, 0, 6*2*3);
+		glDrawElements(GL_LINE_STRIP, 6*2*3, GL_UNSIGNED_INT, nullptr);
 
-    glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
+		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
 
 		glBindVertexArray(axis_VAO); 
 		setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
@@ -183,7 +191,7 @@ int main(int, char**)
 		glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
 		glDrawArrays(GL_LINES, 0, 2);
 
-    glEnable(GL_DEPTH_TEST); // Enable depth test again
+		glEnable(GL_DEPTH_TEST); // Enable depth test again
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -271,7 +279,6 @@ void camTrans(glm::vec3& Change)
 void createCubeObject(unsigned int &program, unsigned int &cube_VAO)
 {
 	glUseProgram(program);
-
 	//Bind shader variables
 	int vVertex_attrib = glGetAttribLocation(program, "vVertex");
 	if(vVertex_attrib == -1) {
@@ -279,39 +286,31 @@ void createCubeObject(unsigned int &program, unsigned int &cube_VAO)
 		exit(0);
 	}
 
-	//Cube data
-	GLfloat cube_vertices[] = {10, 10, -10, -10, 10, -10, -10, -10, -10, 10, -10, -10, //Front
-		10, 10, 10, -10, 10, 10, -10, -10, 10, 10, -10, 10}; //Back
-	GLushort cube_indices[] = {
-		0, 1, 2, 0, 2, 3, //Front
-		4, 7, 5, 5, 7, 6, //Back
-		1, 6, 2, 1, 5, 6, //Left
-		0, 3, 4, 4, 7, 3, //Right
-		0, 4, 1, 4, 5, 1, //Top
-		2, 6, 3, 3, 6, 7 //Bottom
-	};
+	// Block
+	glm::vec3 pos = {0.0, 0.0, 0.0};
+	block b = block(20.0, pos, true);
+	b.Render();
 
+	//Cube data
+	float cube_vertices[24] = {};
+	for(int i = 0; i < 24; i++) cube_vertices[i] = b.rendervert[i];
+	unsigned int cube_indices[36] = {};
+	for(int i = 0; i < 36; i++) cube_indices[i] = b.indices[i];
+	
 	//Generate VAO object
 	glGenVertexArrays(1, &cube_VAO);
 	glBindVertexArray(cube_VAO);
 
 	//Create VBOs for the VAO
-	//Position information (data + format)
-	int nVertices = (6*2)*3; //(6 faces) * (2 triangles each) * (3 vertices each)
-	GLfloat *expanded_vertices = new GLfloat[nVertices*3];
-	for(int i=0; i<nVertices; i++) {
-		expanded_vertices[i*3] = cube_vertices[cube_indices[i]*3];
-		expanded_vertices[i*3 + 1] = cube_vertices[cube_indices[i]*3+1];
-		expanded_vertices[i*3 + 2] = cube_vertices[cube_indices[i]*3+2];
-	}
-	GLuint vertex_VBO;
-	glGenBuffers(1, &vertex_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_VBO);
-	glBufferData(GL_ARRAY_BUFFER, nVertices*3*sizeof(GLfloat), expanded_vertices, GL_STATIC_DRAW);
+	VertexBuffer vb(cube_vertices, 8 * 3 * sizeof(GLfloat));
+	// Position information (data + format)
 	glEnableVertexAttribArray(vVertex_attrib);
-	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	delete []expanded_vertices;
+	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
 
+	IndexBuffer ib(cube_indices, 36);
+	ib.Bind();
+
+	// delete []expanded_vertices;
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
 }
