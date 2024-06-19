@@ -7,8 +7,7 @@ private:
     GLuint side;
     GLboolean displaychunk;
     glm::vec3 chunkpos;
-    GLuint filled[64][64][128];
-    block *blocks[64][64][128];
+    block *blocks[64][128][64];
 public:
     GLuint count;
     GLuint filled[64][128][64];

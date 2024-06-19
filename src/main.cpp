@@ -59,7 +59,7 @@ int main(int, char**)
 	// Modelling transformation is setup in the display loop
 
 	unsigned int cube_VAO, axis_VAO;
-	GLuint cntblocks = 0;
+	GLuint cntblocks = 0, Nokeypressed;
 	RenderChunk(shaderProgram, cube_VAO, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
@@ -67,17 +67,23 @@ int main(int, char**)
 		glfwPollEvents();
 
 		glm::vec3 change(0.0f, 0.0f, 0.0f);
-
+		Nokeypressed = 1;
 		// Key events
 		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
 			strcpy(textKeyStatus, "Left");
 			strcpy(textKeyDescription, "Rotate clockwise along X axis");
 			change.x += speed;
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
+			Nokeypressed = 0;
+		}
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
 			strcpy(textKeyStatus, "Right");
 			strcpy(textKeyDescription, "Rotate counter clockwise along X axis");
 			change.x -= speed;
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+			Nokeypressed = 0;
+		}
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
 			if (io.KeyShift){
 				strcpy(textKeyStatus, "Shift + Up");
 				strcpy(textKeyDescription, "Zoom in");
@@ -87,7 +93,10 @@ int main(int, char**)
 				strcpy(textKeyDescription, "Rotate clockwise along Y axis");
 				change.y += speed;
 			}
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+			Nokeypressed = 0;
+		} 
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
 			if (io.KeyShift){
 				strcpy(textKeyStatus, "Shift + Down");
 				strcpy(textKeyDescription, "Zoom out");
@@ -97,43 +106,49 @@ int main(int, char**)
 				strcpy(textKeyDescription, "Rotate counter clockwise along Y axis");
 				change.y -= speed;
 			}
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
+			Nokeypressed = 0;
+		} 
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
 			if (io.KeyCtrl) {
 				strcpy(textKeyStatus, "Ctrl + Z");
 				strcpy(textKeyDescription, "Focus camera on Z axis");
 				// Move camera to [0, 0, 100] i.e. => along z axis
-				if(!Perspective || Perspective){
-					camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
-				}
+				camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
 			} else {
 				strcpy(textKeyStatus, "Z");
 				strcpy(textKeyDescription, "Clear perspective");
 				Perspective = false;
 			}
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
+			Nokeypressed = 0;
+		} 
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
 			if (io.KeyCtrl) {
 				strcpy(textKeyStatus, "Ctrl + X");
 				strcpy(textKeyDescription, "Focus camera on X axis");
 				// Move camera to [100, 0, 0] i.e. => along x axis
-				if(!Perspective || Perspective){
-					camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
-				}	
+				camPosition = {100.0f, 0.0f, 0.0f, 1.0f};	
 			} else {
 				strcpy(textKeyStatus, "X");
 				strcpy(textKeyDescription, "Set perspective");
 				Perspective = true;
 			}
-		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))) {
+			Nokeypressed = 0;
+		} 
+		
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))) {
 			if (io.KeyCtrl) {
 				strcpy(textKeyStatus, "Ctrl + Y");
 				strcpy(textKeyDescription, "Focus camera on Y axis");
 				// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
 				// So Moved with some offset
-				if(!Perspective || Perspective) {
-					camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
-				}
+				camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
 			}
-		} else { 
+			Nokeypressed = 0;
+		}
+
+		if(Nokeypressed) { 
 			strcpy(textKeyStatus, "Listening for key events...");
 			strcpy(textKeyDescription, "Listening for key events...");
 		}
@@ -289,7 +304,7 @@ void RenderChunk(unsigned int &program, unsigned int &cube_VAO, unsigned int& cn
 
 	// Chunk
 	glm::vec3 pos = {0.0, 0.0, 0.0};
-	chunk c = chunk(20.0, pos, true);
+	chunk c = chunk(20, pos, true);
 	c.Render();
 	//Cube data
 	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count;

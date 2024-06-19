@@ -20,12 +20,12 @@ public:
     std::vector<glm::vec3> verticies;
     std::vector<GLfloat> rendervert;
     std::vector<GLuint> indices;
-    std::vector<std::vector<GLuint>> faceindices = {{2, 3, 0, 0, 1, 2}, // Back
-                                                    {4, 7, 6, 4, 6, 5}, // Front
-                                                    {0, 4, 5, 0, 5, 1}, // Left
+    std::vector<std::vector<GLuint>> faceindices = {{2, 3, 0, 2, 0, 1}, // Back
+                                                    {7, 6, 5, 7, 5, 4}, // Front
+                                                    {4, 5, 1, 4, 1, 0}, // Left
                                                     {3, 2, 6, 3, 6, 7}, // Right
-                                                    {1, 5, 2, 5, 6, 2}, // Top
-                                                    {4, 0, 3, 4, 3, 7}};// Bottom
+                                                    {6, 2, 1, 6, 1, 5}, // Top
+                                                    {3, 7, 4, 3, 4, 0}};// Bottom
 
 
     block(GLuint s, glm::vec3 pos, GLboolean solid);

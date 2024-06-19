@@ -11,7 +11,7 @@ chunk::chunk(GLuint s, glm::vec3 position, GLboolean display){
 
  GLboolean chunk::isSolid(std::vector<GLint> position){
     if((position[0] >= 0) && (position[0] < 64) && (position[1] >= 0) && (position[1] < 128) && (position[2] >= 0) && (position[2] < 64)){
-        return filled[(GLuint)position[0]][(GLuint)position[1]][(GLuint)position[2]];
+        return filled[position[0]][position[1]][position[2]];
     }
     return false;
 }
@@ -25,34 +25,34 @@ GLuint chunk::RenderFace(std::vector<GLint> position){
     for(GLuint face = 1; face <= 6; face++){
         if(face == 1){
             // No Need to draw back face if block behind is solid
-            tmp[2] -= 1.0;
+            tmp[2] -= 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[2] += 1.0;
+            tmp[2] += 1;
         } else if(face == 2){
             // No Need to draw front face if block in front is solid
-            tmp[2] += 1.0;
+            tmp[2] += 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[2] -= 1.0;
+            tmp[2] -= 1;
         } else if(face == 3){
             // No Need to draw left face if block in left is solid
-            tmp[0] -= 1.0;
+            tmp[0] -= 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[0] += 1.0;
+            tmp[0] += 1;
         } else if(face == 4){
             // No Need to draw right face if block in right is solid
-            tmp[0] += 1.0;
+            tmp[0] += 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[0] -= 1.0;
+            tmp[0] -= 1;
         } else if(face == 5){
             // No Need to draw top face if block on top is solid
-            tmp[1] += 1.0;
+            tmp[1] += 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[1] -= 1.0;
+            tmp[1] -= 1;
         } else if(face == 6){
             // No Need to draw bottom face if block on bottom is solid
-            tmp[1] -= 1.0;
+            tmp[1] -= 1;
             if(!isSolid(tmp)) mask |= (1 << (face - 1));
-            tmp[1] += 1.0;
+            tmp[1] += 1;
         }
     }
     return mask;
@@ -65,11 +65,11 @@ void chunk::Render(){
     for(int i = 0; i < 64; i++){
         for(int j = 0; j < 128; j++){
             for(int k = 0; k < 64; k++){
-                filled[i][j][k] = 1;
+                if(j < 10) filled[i][j][k] = 1;
             }
         }
     }
-    
+
     for(int i = 0; i < 64; i++){
         for(int j = 0; j < 128; j++){
             for(int k = 0; k < 64; k++){
@@ -79,7 +79,6 @@ void chunk::Render(){
                 glm::vec3 pos = chunkpos + ofs;
                 std::vector<GLint> Idx = {i, j, k};
                 GLuint mask = chunk::RenderFace(Idx);
-                
                 block b = block(side, pos, true); b.Render(mask);
                 std::vector<GLfloat> blockrendervert = b.rendervert;
                 std::vector<GLuint> blockindices = b.indices;
