@@ -9,14 +9,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-
-
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "block.h"
 #include "chunk.h"
-
 
 //Globals
 int screen_width = 640, screen_height = 640;
@@ -64,140 +61,141 @@ int main(int, char**)
 	createAxesLine(shaderProgram, axis_VAO);
 
 	while (!glfwWindowShouldClose(window))
-	{
-		glfwPollEvents();
+		{
+			glfwPollEvents();
 
-	glm::vec3 change(0.0f, 0.0f, 0.0f);
-	// Get key presses
-        if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
-          strcpy(textKeyStatus, "Key status: Left");
-			//TODO:
-			change.x += speed;
-        }
-        else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
-          strcpy(textKeyStatus, "Key status: Right");
-			//TODO:
-			change.x -= speed;
-        }
-        else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-          if(io.KeyShift){
-            strcpy(textKeyStatus, "Key status: Shift + Up");
-			//TODO:
-			change.z -= speed;
-	  		}
-			else{ 
-				strcpy(textKeyStatus, "Key status: Up");
+			glm::vec3 change(0.0f, 0.0f, 0.0f);
+			// Get key presses
+			if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
+				strcpy(textKeyStatus, "Key status: Left");
 				//TODO:
-				change.y += speed;
+				change.x += speed;
 			}
-        }
-        else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-			if(io.KeyShift){
-				strcpy(textKeyStatus, "Key status: Shift + Down");
+			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
+				strcpy(textKeyStatus, "Key status: Right");
 				//TODO:
-				change.z += speed;
-			} else{ 
-				strcpy(textKeyStatus, "Key status: Down");
-				//TODO:
-				change.y -= speed;
+				change.x -= speed;
 			}
-        }
-        else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
-			if(io.KeyCtrl){
-				strcpy(textKeyStatus, "Key status: Ctrl + z");
-				// Move camera to [0, 0, 100] i.e. => along z axis
-				if(!Perspective || Perspective){
-					camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
+			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+				if(io.KeyShift){
+					strcpy(textKeyStatus, "Key status: Shift + Up");
+					//TODO:
+					change.z -= speed;
 				}
-			} else{
+				else{ 
+					strcpy(textKeyStatus, "Key status: Up");
+					//TODO:
+					change.y += speed;
+				}
+			}
+			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+				if(io.KeyShift){
+					strcpy(textKeyStatus, "Key status: Shift + Down");
+					//TODO:
+					change.z += speed;
+				} else{ 
+					strcpy(textKeyStatus, "Key status: Down");
+					//TODO:
+					change.y -= speed;
+				}
+			}
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
+				if(io.KeyCtrl){
+					strcpy(textKeyStatus, "Key status: Ctrl + z");
+					// Move camera to [0, 0, 100] i.e. => along z axis
+					if(!Perspective || Perspective){
+						camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
+					}
+				} else{
 					strcpy(textKeyStatus, "Key status: z");
 					Perspective = false;
-			}
-        }
-        else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
-			if(io.KeyCtrl){
-				strcpy(textKeyStatus, "Key status: Ctrl + x");
-				// Move camera to [100, 0, 0] i.e. => along x axis
-				if(!Perspective || Perspective){
-					camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
-				}	
-			} else{
-					strcpy(textKeyStatus, "Key status: x");
-					Perspective = true;
-			}
-		}
-		else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))){
-			if(io.KeyCtrl){
-				strcpy(textKeyStatus, "Key status: Ctrl + y");
-				// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
-				// So Moved with some offset
-				if(!Perspective || Perspective){
-					camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
 				}
 			}
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
+				if(io.KeyCtrl){
+					strcpy(textKeyStatus, "Key status: Ctrl + x");
+					// Move camera to [100, 0, 0] i.e. => along x axis
+					if(!Perspective || Perspective){
+						camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
+					}	
+				} else{
+					strcpy(textKeyStatus, "Key status: x");
+					Perspective = true;
+				}
+			}
+			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))){
+				if(io.KeyCtrl){
+					strcpy(textKeyStatus, "Key status: Ctrl + y");
+					// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
+					// So Moved with some offset
+					if(!Perspective || Perspective){
+						camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
+					}
+				}
+			}
+			else{ 
+				strcpy(textKeyStatus, "Key status:");
+			}	
+
+			// Start the Dear ImGui frame
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			glUseProgram(shaderProgram);
+
+			//ImGui UI menu
+			ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);                          
+			if(ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::Text("%s", textKeyStatus);
+					ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x, camPosition.y, camPosition.z);
+				}
+			ImGui::End();
+
+			// Rendering
+			ImGui::Render();
+			int display_w, display_h;
+			glfwGetFramebufferSize(window, &display_w, &display_h);
+			glViewport(0, 0, display_w, display_h);
+			glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// Setup MVP matrix
+			setupModelTransformationCube(shaderProgram);
+			camTrans(change);
+			setupViewTransformation(shaderProgram);
+			setupProjectionTransformation(shaderProgram);
+
+			glBindVertexArray(cube_VAO); 
+			glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
+			glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+			glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+			glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+
+			glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
+			glEnable(GL_CULL_FACE);
+
+			glBindVertexArray(axis_VAO); 
+			setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
+			glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
+			glDrawArrays(GL_LINES, 0, 2);
+
+			setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
+			glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
+			glDrawArrays(GL_LINES, 0, 2);
+
+			setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
+			glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
+			glDrawArrays(GL_LINES, 0, 2);
+
+			glEnable(GL_DEPTH_TEST); // Enable depth test again
+
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			glfwSwapBuffers(window);
 		}
-        else{ 
-          strcpy(textKeyStatus, "Key status:");
-		}	
-
-		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		glUseProgram(shaderProgram);
-
-		//ImGui UI menu
-		ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);                          
-		if(ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen))
-		{
-		  ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::Text("%s", textKeyStatus);
-			ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x, camPosition.y, camPosition.z);
-		}
-		ImGui::End();
-
-		// Rendering
-		ImGui::Render();
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
-		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Setup MVP matrix
-		setupModelTransformationCube(shaderProgram);
-		camTrans(change);
-		setupViewTransformation(shaderProgram);
-		setupProjectionTransformation(shaderProgram);
-
-		glBindVertexArray(cube_VAO); 
-		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-		glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-		glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-
-		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
-
-		glBindVertexArray(axis_VAO); 
-		setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
-		glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
-		glDrawArrays(GL_LINES, 0, 2);
-
-		setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
-		glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
-		glDrawArrays(GL_LINES, 0, 2);
-
-		setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
-		glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
-		glDrawArrays(GL_LINES, 0, 2);
-
-		glEnable(GL_DEPTH_TEST); // Enable depth test again
-
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		glfwSwapBuffers(window);
-	}
 
 	// Cleanup
 	cleanup(window);
@@ -207,9 +205,9 @@ int main(int, char**)
 
 void camTrans(glm::vec3& Change)
 {
-// 1) Move from World Space to Camera Space
-// 2) Perform Translation based on key values
-// 3) Move back to World Space
+	// 1) Move from World Space to Camera Space
+	// 2) Perform Translation based on key values
+	// 3) Move back to World Space
 
 	// uvw of camera space
 	glm::vec3 t = {0.0f, 1.0f, 0.0f};
@@ -220,34 +218,34 @@ void camTrans(glm::vec3& Change)
 
 	//Traslation Matrix
 	glm::mat4 matT = {1, 0, 0, 0, 
-			  0, 1, 0, 0,
-			  0, 0, 1, 0,
-			  Change.x, Change.y, Change.z, 1};
+					  0, 1, 0, 0,
+					  0, 0, 1, 0,
+					  Change.x, Change.y, Change.z, 1};
 
 	// XYZ wrt UVW
 	glm::mat3 temp = {u.x, v.x, w.x, 
-		          u.y, v.y, w.y,
-		          u.z, v.z, w.z};
+					  u.y, v.y, w.y,
+					  u.z, v.z, w.z};
 
-  // Solution of 3x3 XYZ matrix
+	// Solution of 3x3 XYZ matrix
 	glm::mat3 rev = glm::inverse(temp);
 
 	glm::vec3 X = glm::normalize(rev[0]);
-  glm::vec3 Y = glm::normalize(rev[1]);
+	glm::vec3 Y = glm::normalize(rev[1]);
 	glm::vec3 Z = glm::normalize(rev[2]);	
 
 
 	// World to Camera Matrix Rotation
 	glm::mat4 w2cr = {X.x, Y.x, Z.x, 0, 
-			  X.y, Y.y, Z.y, 0,
-			  X.z, Y.z, Z.z, 0,
-			  0, 0, 0, 1};
+					  X.y, Y.y, Z.y, 0,
+					  X.z, Y.z, Z.z, 0,
+					  0, 0, 0, 1};
 
 	// World to Camera Matrix Transaltion
 	glm::mat4 w2ct = {1, 0, 0, 0, 
-			 0, 1, 0, 0,
-			 0, 0, 1, 0,
-			 -camPosition.x, -camPosition.y, -camPosition.z, 1};
+					  0, 1, 0, 0,
+					  0, 0, 1, 0,
+					  -camPosition.x, -camPosition.y, -camPosition.z, 1};
 	
 	// World to Camera Matrix
 	glm::mat4 w2c = w2cr * w2ct;
@@ -257,15 +255,15 @@ void camTrans(glm::vec3& Change)
 
 	// Camera to World Matrix Rotation
 	glm::mat4 c2wr = {u.x, u.y, u.z, 0, 
-			  v.x, v.y, v.z, 0,
-			  w.x, w.y, w.z, 0,
-			  0, 0, 0, 1};
+					  v.x, v.y, v.z, 0,
+					  w.x, w.y, w.z, 0,
+					  0, 0, 0, 1};
 
-  // Camera to World Matrix Transalation
+	// Camera to World Matrix Transalation
 	glm::mat4 c2wt = {1, 0, 0, 0, 
-			  0, 1, 0, 0,
-			  0, 0, 1, 0,
-			  adjustedvec.x, adjustedvec.y, adjustedvec.z, 1};
+					  0, 1, 0, 0,
+					  0, 0, 1, 0,
+					  adjustedvec.x, adjustedvec.y, adjustedvec.z, 1};
 
 	// Camera to World Matrix
 	glm::mat4 c2w = c2wr * c2wt;
@@ -320,7 +318,7 @@ void RenderChunk(unsigned int &program, unsigned int &cube_VAO, unsigned int& cn
 
 void createAxesLine(unsigned int & program, unsigned int &axis_VAO)
 {
-  glUseProgram(program);
+	glUseProgram(program);
 
 	//Bind shader variables
 	int vVertex_attrib_position = glGetAttribLocation(program, "vVertex");
@@ -331,7 +329,7 @@ void createAxesLine(unsigned int & program, unsigned int &axis_VAO)
 
 	//Axes data
 	GLfloat axis_vertices[] = {	0, 0, 0, 20, 0, 0}; //X-axis
-  glGenVertexArrays(1, &axis_VAO);
+	glGenVertexArrays(1, &axis_VAO);
 	glBindVertexArray(axis_VAO);
 
 	//Create VBO for the VAO
@@ -401,7 +399,7 @@ void setupProjectionTransformation(unsigned int &program)
 		projectionT = glm::perspective(45.0f, (GLfloat)screen_width/(GLfloat)screen_height, 0.1f, 1000.0f);
 	} else{
 		//Window Size => l, r, b, u, n, f
-			projectionT = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -5000.0f, 5000.0f);
+		projectionT = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -5000.0f, 5000.0f);
 	}
 
 	//Pass on the projection matrix to the vertex shader

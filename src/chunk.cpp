@@ -12,9 +12,9 @@ chunk::chunk(GLuint s, glm::vec3 position, GLboolean display){
 void chunk::Render(){
     if(!displaychunk) return;
     GLuint idx = 0;
-    for(int i = 0; i < 64; i++){
-        for(int j = 0; j < 64; j++){
-            for(int k = 0; k < 128; k++){
+    for (int i = 0; i < 64; i++) {
+        for (int j = 0; j < 64; j++) {
+            for (int k = 0; k < 128; k++) {
                 filled[i][0][k] = 1;
                 if(!filled[i][j][k]) continue;
                 glm::vec3 ofs = {i * side, j * side, k * side};
@@ -30,4 +30,4 @@ void chunk::Render(){
     }
 }
 
-chunk::~chunk(){}
+chunk::~chunk() {}
