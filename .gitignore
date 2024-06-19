@@ -1,5 +1,7 @@
-/*.cmake
-/*.DS_Store
-/.user
-/build
+*.cmake
+*.DS_Store
+*.ini
+.user
+build/
 GLCraft
+GLCraft.exe
