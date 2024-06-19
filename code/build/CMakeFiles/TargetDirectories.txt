@@ -1,3 +1,0 @@
-/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles/GlCraft.dir
-/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles/edit_cache.dir
-/home/lucky/Computer_Graphics/Minecraft_Clone/code/build/CMakeFiles/rebuild_cache.dir

@@ -28,7 +28,7 @@ char textKeyStatus[256];
 float speed = 1.0f;
 bool Perspective = false;
 
-void createCubeObject(unsigned int &, unsigned int &);
+void RenderChunk(unsigned int &, unsigned int &, unsigned int&);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
@@ -59,7 +59,8 @@ int main(int, char**)
 	// Modelling transformation is setup in the display loop
 
 	unsigned int cube_VAO, axis_VAO;
-	createCubeObject(shaderProgram, cube_VAO);
+	GLuint cntblocks = 0;
+	RenderChunk(shaderProgram, cube_VAO, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
 	while (!glfwWindowShouldClose(window))
@@ -172,9 +173,9 @@ int main(int, char**)
 
 		glBindVertexArray(cube_VAO); 
 		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-		glDrawElements(GL_TRIANGLES, 2*6*2*3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
 		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-		glDrawElements(GL_LINE_STRIP, 2*6*2*3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
 
@@ -276,7 +277,7 @@ void camTrans(glm::vec3& Change)
 	camPosition.z += newcampos.z;
 }
 
-void createCubeObject(unsigned int &program, unsigned int &cube_VAO)
+void RenderChunk(unsigned int &program, unsigned int &cube_VAO, unsigned int& cntblocks)
 {
 	glUseProgram(program);
 	//Bind shader variables
@@ -290,27 +291,28 @@ void createCubeObject(unsigned int &program, unsigned int &cube_VAO)
 	glm::vec3 pos = {0.0, 0.0, 0.0};
 	chunk c = chunk(20.0, pos, true);
 	c.Render();
-	std::cout << c.rendervert.size() << std::endl;
-	std::cout << c.indices.size() << std::endl;
 	//Cube data
-	float cube_vertices[48] = {};
-	for(int i = 0; i < 48; i++) cube_vertices[i] = c.rendervert[i];
-	unsigned int cube_indices[72] = {};
-	for(int i = 0; i < 72; i++) cube_indices[i] = c.indices[i];
+	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count;
+
+	float* cube_vertices = (float*)malloc(vcnt * sizeof(float));
+	GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
+	
+	for(int i = 0; i < vcnt; i++) cube_vertices[i] = c.rendervert[i];
+	for(int i = 0; i < icnt; i++) cube_indices[i] = c.indices[i];
 	
 	//Generate VAO object
 	glGenVertexArrays(1, &cube_VAO);
 	glBindVertexArray(cube_VAO);
 
 	//Create VBOs for the VAO
-	VertexBuffer vb(cube_vertices, 2 * 8 * 3 * sizeof(GLfloat));
+	VertexBuffer vb(cube_vertices, cnt * 8 * 3 * sizeof(GLfloat));
 	// Position information (data + format)
 	glEnableVertexAttribArray(vVertex_attrib);
 	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
 
-	IndexBuffer ib(cube_indices, 72);
+	IndexBuffer ib(cube_indices, icnt);
 	ib.Bind();
-
+	cntblocks = cnt;
 	// delete []expanded_vertices;
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
