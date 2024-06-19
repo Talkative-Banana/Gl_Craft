@@ -18,6 +18,6 @@ public:
     ~chunk();
 
     void Render();
-    GLuint RenderFace(glm::vec3 position);
-    GLboolean isSolid(glm::vec3 postion);
+    GLuint RenderFace(std::vector<GLint> position);
+    GLboolean isSolid(std::vector<GLint> postion);
 };
