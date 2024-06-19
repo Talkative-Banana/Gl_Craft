@@ -7,10 +7,10 @@ private:
     GLuint side;
     GLboolean displaychunk;
     glm::vec3 chunkpos;
-    GLuint filled[64][64][128];
-    block* blocks[64][64][128];
+    block* blocks[64][128][64];
 public:
     GLuint count;
+    GLuint filled[64][128][64];
     std::vector<GLuint>  indices;
     std::vector<GLfloat> rendervert;
 
@@ -18,4 +18,6 @@ public:
     ~chunk();
 
     void Render();
+    GLuint RenderFace(glm::vec3 position);
+    GLboolean isSolid(glm::vec3 postion);
 };
