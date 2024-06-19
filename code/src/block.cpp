@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "block.h"
-#include <vector>
 
 block::block(GLuint s, glm::vec3 pos, GLboolean solid){
     side = s;

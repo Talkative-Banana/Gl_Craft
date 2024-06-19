@@ -172,9 +172,9 @@ int main(int, char**)
 
 		glBindVertexArray(cube_VAO); 
 		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-		glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 2*6*2*3, GL_UNSIGNED_INT, nullptr);
 		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-		glDrawElements(GL_LINE_STRIP, 6*2*3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_LINE_STRIP, 2*6*2*3, GL_UNSIGNED_INT, nullptr);
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
 
@@ -286,28 +286,29 @@ void createCubeObject(unsigned int &program, unsigned int &cube_VAO)
 		exit(0);
 	}
 
-	// Block
+	// Chunk
 	glm::vec3 pos = {0.0, 0.0, 0.0};
-	block b = block(20.0, pos, true);
-	b.Render();
-
+	chunk c = chunk(20.0, pos, true);
+	c.Render();
+	std::cout << c.rendervert.size() << std::endl;
+	std::cout << c.indices.size() << std::endl;
 	//Cube data
-	float cube_vertices[24] = {};
-	for(int i = 0; i < 24; i++) cube_vertices[i] = b.rendervert[i];
-	unsigned int cube_indices[36] = {};
-	for(int i = 0; i < 36; i++) cube_indices[i] = b.indices[i];
+	float cube_vertices[48] = {};
+	for(int i = 0; i < 48; i++) cube_vertices[i] = c.rendervert[i];
+	unsigned int cube_indices[72] = {};
+	for(int i = 0; i < 72; i++) cube_indices[i] = c.indices[i];
 	
 	//Generate VAO object
 	glGenVertexArrays(1, &cube_VAO);
 	glBindVertexArray(cube_VAO);
 
 	//Create VBOs for the VAO
-	VertexBuffer vb(cube_vertices, 8 * 3 * sizeof(GLfloat));
+	VertexBuffer vb(cube_vertices, 2 * 8 * 3 * sizeof(GLfloat));
 	// Position information (data + format)
 	glEnableVertexAttribArray(vVertex_attrib);
 	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
 
-	IndexBuffer ib(cube_indices, 36);
+	IndexBuffer ib(cube_indices, 72);
 	ib.Bind();
 
 	// delete []expanded_vertices;
