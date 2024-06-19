@@ -11,6 +11,7 @@ private:
     block *blocks[64][64][128];
 public:
     GLuint count;
+    GLuint filled[64][128][64];
     std::vector<GLuint>  indices;
     std::vector<GLfloat> rendervert;
 
@@ -18,4 +19,6 @@ public:
     ~chunk();
 
     void Render();
+    GLuint RenderFace(std::vector<GLint> position);
+    GLboolean isSolid(std::vector<GLint> postion);
 };
