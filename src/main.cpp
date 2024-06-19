@@ -15,13 +15,16 @@
 #include "block.h"
 #include "chunk.h"
 
-//Globals
+#define IMGUI_TEXT_CAPACITY 256
+
+// Globals
 int screen_width = 640, screen_height = 640;
 GLint vModel_uniform, vView_uniform, vProjection_uniform;
 GLint vColor_uniform;
-glm::mat4 modelT, viewT, projectionT;//The model, view and projection transformations
+glm::mat4 modelT, viewT, projectionT; // The model, view and projection transformations
 glm::vec4 camPosition;
-char textKeyStatus[256];
+char textKeyStatus[IMGUI_TEXT_CAPACITY];
+char textKeyDescription[IMGUI_TEXT_CAPACITY];
 float speed = 1.0f;
 bool Perspective = false;
 
@@ -32,7 +35,7 @@ void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
 void setupViewTransformation(unsigned int &);
 void setupProjectionTransformation(unsigned int &);
-void camTrans(glm::vec3&);
+void camTrans(glm::vec3 &);
 
 int main(int, char**)
 {
@@ -43,7 +46,7 @@ int main(int, char**)
 	camPosition = glm::vec4(20.0, 40.0, 80.0, 1.0);
 
 	unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
-	//Get handle to color variable in shader
+	// Get handle to color variable in shader
 	vColor_uniform = glGetUniformLocation(shaderProgram, "vColor");
 	if(vColor_uniform == -1){
 		fprintf(stderr, "Could not bind location: vColor\n");
@@ -60,142 +63,141 @@ int main(int, char**)
 	RenderChunk(shaderProgram, cube_VAO, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
-	while (!glfwWindowShouldClose(window))
-		{
-			glfwPollEvents();
+	while (!glfwWindowShouldClose(window)) {
+		glfwPollEvents();
 
-			glm::vec3 change(0.0f, 0.0f, 0.0f);
-			// Get key presses
-			if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
-				strcpy(textKeyStatus, "Key status: Left");
-				//TODO:
-				change.x += speed;
+		glm::vec3 change(0.0f, 0.0f, 0.0f);
+
+		// Key events
+		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
+			strcpy(textKeyStatus, "Left");
+			strcpy(textKeyDescription, "Rotate clockwise along X axis");
+			change.x += speed;
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
+			strcpy(textKeyStatus, "Right");
+			strcpy(textKeyDescription, "Rotate counter clockwise along X axis");
+			change.x -= speed;
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+			if (io.KeyShift){
+				strcpy(textKeyStatus, "Shift + Up");
+				strcpy(textKeyDescription, "Zoom in");
+				change.z -= speed;
+			} else { 
+				strcpy(textKeyStatus, "Up");
+				strcpy(textKeyDescription, "Rotate clockwise along Y axis");
+				change.y += speed;
 			}
-			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
-				strcpy(textKeyStatus, "Key status: Right");
-				//TODO:
-				change.x -= speed;
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+			if (io.KeyShift){
+				strcpy(textKeyStatus, "Shift + Down");
+				strcpy(textKeyDescription, "Zoom out");
+				change.z += speed;
+			} else { 
+				strcpy(textKeyStatus, "Down");
+				strcpy(textKeyDescription, "Rotate counter clockwise along Y axis");
+				change.y -= speed;
 			}
-			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-				if(io.KeyShift){
-					strcpy(textKeyStatus, "Key status: Shift + Up");
-					//TODO:
-					change.z -= speed;
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
+			if (io.KeyCtrl) {
+				strcpy(textKeyStatus, "Ctrl + Z");
+				strcpy(textKeyDescription, "Focus camera on Z axis");
+				// Move camera to [0, 0, 100] i.e. => along z axis
+				if(!Perspective || Perspective){
+					camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
 				}
-				else{ 
-					strcpy(textKeyStatus, "Key status: Up");
-					//TODO:
-					change.y += speed;
-				}
+			} else {
+				strcpy(textKeyStatus, "Z");
+				strcpy(textKeyDescription, "Clear perspective");
+				Perspective = false;
 			}
-			else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-				if(io.KeyShift){
-					strcpy(textKeyStatus, "Key status: Shift + Down");
-					//TODO:
-					change.z += speed;
-				} else{ 
-					strcpy(textKeyStatus, "Key status: Down");
-					//TODO:
-					change.y -= speed;
-				}
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
+			if (io.KeyCtrl) {
+				strcpy(textKeyStatus, "Ctrl + X");
+				strcpy(textKeyDescription, "Focus camera on X axis");
+				// Move camera to [100, 0, 0] i.e. => along x axis
+				if(!Perspective || Perspective){
+					camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
+				}	
+			} else {
+				strcpy(textKeyStatus, "X");
+				strcpy(textKeyDescription, "Set perspective");
+				Perspective = true;
 			}
-			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
-				if(io.KeyCtrl){
-					strcpy(textKeyStatus, "Key status: Ctrl + z");
-					// Move camera to [0, 0, 100] i.e. => along z axis
-					if(!Perspective || Perspective){
-						camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
-					}
-				} else{
-					strcpy(textKeyStatus, "Key status: z");
-					Perspective = false;
-				}
-			}
-			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
-				if(io.KeyCtrl){
-					strcpy(textKeyStatus, "Key status: Ctrl + x");
-					// Move camera to [100, 0, 0] i.e. => along x axis
-					if(!Perspective || Perspective){
-						camPosition = {100.0f, 0.0f, 0.0f, 1.0f};
-					}	
-				} else{
-					strcpy(textKeyStatus, "Key status: x");
-					Perspective = true;
-				}
-			}
-			else if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))){
-				if(io.KeyCtrl){
-					strcpy(textKeyStatus, "Key status: Ctrl + y");
-					// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
-					// So Moved with some offset
-					if(!Perspective || Perspective){
-						camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
-					}
+		} else if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))) {
+			if (io.KeyCtrl) {
+				strcpy(textKeyStatus, "Ctrl + Y");
+				strcpy(textKeyDescription, "Focus camera on Y axis");
+				// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
+				// So Moved with some offset
+				if(!Perspective || Perspective) {
+					camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
 				}
 			}
-			else{ 
-				strcpy(textKeyStatus, "Key status:");
-			}	
-
-			// Start the Dear ImGui frame
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-
-			glUseProgram(shaderProgram);
-
-			//ImGui UI menu
-			ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);                          
-			if(ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-					ImGui::Text("%s", textKeyStatus);
-					ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x, camPosition.y, camPosition.z);
-				}
-			ImGui::End();
-
-			// Rendering
-			ImGui::Render();
-			int display_w, display_h;
-			glfwGetFramebufferSize(window, &display_w, &display_h);
-			glViewport(0, 0, display_w, display_h);
-			glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			// Setup MVP matrix
-			setupModelTransformationCube(shaderProgram);
-			camTrans(change);
-			setupViewTransformation(shaderProgram);
-			setupProjectionTransformation(shaderProgram);
-
-			glBindVertexArray(cube_VAO); 
-			glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-			glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-			glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-			glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-
-			glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
-			glEnable(GL_CULL_FACE);
-
-			glBindVertexArray(axis_VAO); 
-			setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
-			glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
-			glDrawArrays(GL_LINES, 0, 2);
-
-			setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
-			glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
-			glDrawArrays(GL_LINES, 0, 2);
-
-			setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
-			glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
-			glDrawArrays(GL_LINES, 0, 2);
-
-			glEnable(GL_DEPTH_TEST); // Enable depth test again
-
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-			glfwSwapBuffers(window);
+		} else { 
+			strcpy(textKeyStatus, "Listening for key events...");
+			strcpy(textKeyDescription, "Listening for key events...");
 		}
+			
+
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		glUseProgram(shaderProgram);
+
+		//ImGui UI menu
+		ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);                          
+		if(ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("Key Status: %s", textKeyStatus);
+			ImGui::Text("Key Description: %s", textKeyDescription);
+			ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x, camPosition.y, camPosition.z);
+		}
+		ImGui::End();
+
+		// Rendering
+		ImGui::Render();
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Setup MVP matrix
+		setupModelTransformationCube(shaderProgram);
+		camTrans(change);
+		setupViewTransformation(shaderProgram);
+		setupProjectionTransformation(shaderProgram);
+
+		glBindVertexArray(cube_VAO); 
+		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
+		glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+		glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+
+		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
+		glEnable(GL_CULL_FACE); // Enable BFC
+
+		glBindVertexArray(axis_VAO); 
+		setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
+		glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
+		glDrawArrays(GL_LINES, 0, 2);
+
+		setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
+		glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
+		glDrawArrays(GL_LINES, 0, 2);
+
+		setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
+		glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
+		glDrawArrays(GL_LINES, 0, 2);
+
+		glEnable(GL_DEPTH_TEST); // Enable depth test again
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		glfwSwapBuffers(window);
+	}
 
 	// Cleanup
 	cleanup(window);

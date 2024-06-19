@@ -16,8 +16,7 @@ void setVAO(unsigned int &VAO){
 }
 
 //Print error log
-void printLog(GLuint object)
-{
+void printLog(GLuint object) {
 	GLint log_length = 0;
 	if (glIsShader(object))
 		glGetShaderiv(object, GL_INFO_LOG_LENGTH, &log_length);
@@ -39,8 +38,7 @@ void printLog(GLuint object)
 	free(log);
 }
 
-GLuint createShader(const char* filename, GLenum type)
-{
+GLuint createShader(const char* filename, GLenum type) {
     const GLchar* source = getShaderCode(filename);
     if (source == NULL) {
         fprintf(stderr, "Error opening %s: ", filename); perror("");
@@ -65,27 +63,27 @@ GLuint createShader(const char* filename, GLenum type)
 }
 
 const char * setGLSLVersion(){
-    #if __APPLE__
+#if __APPLE__
     // GL 3.2 + GLSL 150
-        const char* glsl_version = "#version 150";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-    #else
-        // GL 3.0 + GLSL 130
-        const char* glsl_version = "#version 130";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-    #endif
+	const char* glsl_version = "#version 150";
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+	// GL 3.0 + GLSL 130
+	const char* glsl_version = "#version 130";
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
 
     return glsl_version;
 }
 
 int openGLInit(){
-    #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
     bool err = glewInit() != GLEW_OK;
@@ -102,11 +100,10 @@ int openGLInit(){
 #else
     bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
 #endif
-    if (err)
-    {
-        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
-        exit(1);
-    }
+    if (err) {
+		fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+		exit(1);
+	}
 
     //Enable depth buffer (for correct rendering of cube sides)
     glEnable(GL_DEPTH_TEST);
@@ -126,6 +123,7 @@ int openGLInit(){
     // Enable smooth point rendering
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	return -1;
 }
 
 unsigned int createProgram(const char *vshader_filename, const char* fshader_filename)
@@ -198,7 +196,7 @@ GLFWwindow* setupWindow(int width, int height)
 
     // Create window with graphics context
     glfwWindowHint(GLFW_SAMPLES, 4);
-    GLFWwindow* window = glfwCreateWindow(width, height, "Gl_Craft", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "minecppft", NULL, NULL);
     if (window == NULL)
         exit(0);
     glfwMakeContextCurrent(window);
