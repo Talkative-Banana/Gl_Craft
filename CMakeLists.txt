@@ -17,6 +17,8 @@ set(SOURCES
   "src/Renderer.cpp"
   "src/IndexBuffer.cpp"
   "src/VertexBuffer.cpp"
+  "src/VertexArray.cpp"
+  "src/VertexArray.cpp"
   "src/block.cpp"
   "src/chunk.cpp"
   

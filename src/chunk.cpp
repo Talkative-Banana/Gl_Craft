@@ -73,7 +73,7 @@ void chunk::Render(){
     for(int i = 0; i < 64; i++){
         for(int j = 0; j < 128; j++){
             for(int k = 0; k < 64; k++){
-                // filled[i][0][k] = 1;
+                // filled[0][0][0] = 1;
                 if(!filled[i][j][k]) continue;
                 glm::vec3 ofs = {i * side, j * side, k * side};
                 glm::vec3 pos = chunkpos + ofs;

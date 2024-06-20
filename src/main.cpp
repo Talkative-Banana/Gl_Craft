@@ -10,6 +10,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "Renderer.h"
+#include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "block.h"
@@ -28,7 +29,7 @@ char textKeyDescription[IMGUI_TEXT_CAPACITY];
 float speed = 1.0f;
 bool Perspective = false;
 
-void RenderChunk(unsigned int &, unsigned int &, unsigned int&);
+void RenderChunk(unsigned int &, VertexArray &, unsigned int&);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
@@ -58,9 +59,11 @@ int main(int, char**)
 	// setupModelTransformation(shaderProgram);
 	// Modelling transformation is setup in the display loop
 
-	unsigned int cube_VAO, axis_VAO;
+	unsigned int axis_VAO;
+	//Generate VAO object
+	VertexArray chunkva;
 	GLuint cntblocks = 0, Nokeypressed;
-	RenderChunk(shaderProgram, cube_VAO, cntblocks);
+	RenderChunk(shaderProgram, chunkva, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -178,6 +181,10 @@ int main(int, char**)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_CULL_FACE); // Enable OC
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
+
 
 		// Setup MVP matrix
 		setupModelTransformationCube(shaderProgram);
@@ -185,14 +192,14 @@ int main(int, char**)
 		setupViewTransformation(shaderProgram);
 		setupProjectionTransformation(shaderProgram);
 
-		glBindVertexArray(cube_VAO); 
+		// glBindVertexArray(cube_VAO); 
+		chunkva.Bind();
 		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
 		glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
 		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
 		glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
-		glEnable(GL_CULL_FACE); // Enable BFC
 
 		glBindVertexArray(axis_VAO); 
 		setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
@@ -292,7 +299,7 @@ void camTrans(glm::vec3& Change)
 	camPosition.z += newcampos.z;
 }
 
-void RenderChunk(unsigned int &program, unsigned int &cube_VAO, unsigned int& cntblocks)
+void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntblocks)
 {
 	glUseProgram(program);
 	//Bind shader variables
@@ -301,34 +308,32 @@ void RenderChunk(unsigned int &program, unsigned int &cube_VAO, unsigned int& cn
 		fprintf(stderr, "Could not bind location: vVertex\n");
 		exit(0);
 	}
-
 	// Chunk
 	glm::vec3 pos = {0.0, 0.0, 0.0};
 	chunk c = chunk(20, pos, true);
 	c.Render();
-	//Cube data
-	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count;
-
+	//Chunk data
+	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count; 
+	cntblocks = cnt;
+	// Allocate Heap memory for verticies and indices
 	float* cube_vertices = (float*)malloc(vcnt * sizeof(float));
 	GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
-	
+	// Assign the memory
 	for(int i = 0; i < vcnt; i++) cube_vertices[i] = c.rendervert[i];
 	for(int i = 0; i < icnt; i++) cube_indices[i] = c.indices[i];
-	
-	//Generate VAO object
-	glGenVertexArrays(1, &cube_VAO);
-	glBindVertexArray(cube_VAO);
-
 	//Create VBOs for the VAO
 	VertexBuffer vb(cube_vertices, cnt * 8 * 3 * sizeof(GLfloat));
+	// Create Layout for VAO
 	// Position information (data + format)
-	glEnableVertexAttribArray(vVertex_attrib);
-	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
-
+	VertexBufferLayout layout;
+	layout.Push(GL_FLOAT, 3);
+	// Add vb and layout to vao
+	chunkva.AddBuffer(vb, layout);
+	// Create IBOs for the VAO
 	IndexBuffer ib(cube_indices, icnt);
 	ib.Bind();
-	cntblocks = cnt;
-	// delete []expanded_vertices;
+	delete []cube_vertices;
+	delete []cube_indices;
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
 }
