@@ -2,7 +2,10 @@
 
 #define  GLM_FORCE_RADIANS
 #define  GLM_ENABLE_EXPERIMENTAL
-
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <../stb/stb_image.h>
+#include <../stb/stb_image_write.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -10,6 +13,8 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "Renderer.h"
+#include "Texture.h"
+#include "TextureCubeMap.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -36,7 +41,27 @@ void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
 void setupViewTransformation(unsigned int &);
 void setupProjectionTransformation(unsigned int &);
+GLuint LoadTexture(const std::string& path);
 void camTrans(glm::vec3 &);
+
+GLuint LoadTexture(const std::string& path){
+
+	int w, h, bits;
+	stbi_set_flip_vertically_on_load(1);
+	auto* pixels = stbi_load(path.c_str(), &w, &h, &bits, STBI_rgb);
+	GLuint textureID;
+	glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+	stbi_image_free(pixels);
+
+	return textureID;
+}
 
 int main(int, char**)
 {
@@ -48,11 +73,11 @@ int main(int, char**)
 
 	unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
 	// Get handle to color variable in shader
-	vColor_uniform = glGetUniformLocation(shaderProgram, "vColor");
-	if(vColor_uniform == -1){
-		fprintf(stderr, "Could not bind location: vColor\n");
-		exit(0);
-	}
+	// vColor_uniform = glGetUniformLocation(shaderProgram, "vColor");
+	// if(vColor_uniform == -1){
+	// 	fprintf(stderr, "Could not bind location: vColor\n");
+	// 	exit(0);
+	// }
 
 	glUseProgram(shaderProgram);
 
@@ -62,7 +87,15 @@ int main(int, char**)
 	unsigned int axis_VAO;
 	//Generate VAO object
 	VertexArray chunkva;
-	GLuint cntblocks = 0, Nokeypressed;
+	GLuint cntblocks = 0, Nokeypressed, wireframemode = 0;
+	std::string sidefaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_side_carried.png";
+	std::string topfaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_carried.png";
+	std::string bottomfaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/dirt.png";
+	std::string Tex[6] = {sidefaceloc, sidefaceloc, topfaceloc, bottomfaceloc, sidefaceloc, sidefaceloc};
+	TextureCubeMap tcm(Tex);
+	// Texture top_sidet("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
+	// GLuint grass_side = LoadTexture("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
+	// GLuint grass_side = LoadTexture("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
 	RenderChunk(shaderProgram, chunkva, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
@@ -151,6 +184,13 @@ int main(int, char**)
 			Nokeypressed = 0;
 		}
 
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
+			strcpy(textKeyStatus, "TAB");
+			strcpy(textKeyDescription, "Switching Mode");
+			wireframemode ^= 1;
+			Nokeypressed = 0;
+		}
+
 		if(Nokeypressed) { 
 			strcpy(textKeyStatus, "Listening for key events...");
 			strcpy(textKeyDescription, "Listening for key events...");
@@ -192,26 +232,32 @@ int main(int, char**)
 		setupViewTransformation(shaderProgram);
 		setupProjectionTransformation(shaderProgram);
 
-		// glBindVertexArray(cube_VAO); 
+		// glBindVertexArray(cube_VAO);
 		chunkva.Bind();
-		glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-		glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-		glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-		glDrawElements(GL_LINE_STRIP, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+		tcm.Bind();
+		if(wireframemode){
+			// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+			glDrawElements(GL_LINES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+		} else{
+			// glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
+			glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+			// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+			glDrawElements(GL_LINES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+		}
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
 
 		glBindVertexArray(axis_VAO); 
 		setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
-		glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
+		// glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X 
 		glDrawArrays(GL_LINES, 0, 2);
 
 		setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
-		glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
+		// glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
 		glDrawArrays(GL_LINES, 0, 2);
 
 		setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
-		glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
+		// glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
 		glDrawArrays(GL_LINES, 0, 2);
 
 		glEnable(GL_DEPTH_TEST); // Enable depth test again
@@ -322,11 +368,12 @@ void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntb
 	for(int i = 0; i < vcnt; i++) cube_vertices[i] = c.rendervert[i];
 	for(int i = 0; i < icnt; i++) cube_indices[i] = c.indices[i];
 	//Create VBOs for the VAO
-	VertexBuffer vb(cube_vertices, cnt * 8 * 3 * sizeof(GLfloat));
+	VertexBuffer vb(cube_vertices, cnt * 8 * 5 * sizeof(GLfloat));
 	// Create Layout for VAO
 	// Position information (data + format)
 	VertexBufferLayout layout;
 	layout.Push(GL_FLOAT, 3);
+	layout.Push(GL_FLOAT, 2);
 	// Add vb and layout to vao
 	chunkva.AddBuffer(vb, layout);
 	// Create IBOs for the VAO

@@ -3,5 +3,6 @@
 *.ini
 .user
 build/
+textures/
 GLCraft
 GLCraft.exe

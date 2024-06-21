@@ -19,6 +19,8 @@ set(SOURCES
   "src/VertexBuffer.cpp"
   "src/VertexArray.cpp"
   "src/VertexArray.cpp"
+  "src/Texture.cpp"
+  "src/TextureCubeMap.cpp"
   "src/block.cpp"
   "src/chunk.cpp"
   

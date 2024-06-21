@@ -17,7 +17,7 @@ public:
     GLuint side;
     glm::vec3 position;
     GLboolean is_solid;
-    std::vector<glm::vec3> verticies;
+    std::vector<std::vector<GLfloat>> verticies;
     std::vector<GLfloat> rendervert;
     std::vector<GLuint> indices;
     std::vector<std::vector<GLuint>> faceindices = {{2, 3, 0, 2, 0, 1}, // Back

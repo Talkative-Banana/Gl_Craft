@@ -1,8 +1,11 @@
 #version 330 core
 
-in vec4 fColor;
+in vec3 TexCoord;
 out vec4 outColor;
-void main(void) {
-        //outColor = vec4(fColor, 1.0);
-        outColor = fColor;
+
+uniform samplerCube cubemap;
+
+void main() {
+        //outColor = vec4(TexCoord, 1.0);
+        outColor = texture(cubemap, TexCoord);
 }
