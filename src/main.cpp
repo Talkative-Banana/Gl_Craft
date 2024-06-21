@@ -240,9 +240,10 @@ int main(int, char**)
 			glDrawElements(GL_LINES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
 		} else{
 			// glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-			glDrawElements(GL_TRIANGLES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+			// 12 * Total Number of attributes
+			glDrawElements(GL_TRIANGLES, cntblocks * 12 * 8, GL_UNSIGNED_INT, nullptr);
 			// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-			glDrawElements(GL_LINES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_LINES, cntblocks * 12 * 8, GL_UNSIGNED_INT, nullptr);
 		}
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
@@ -362,18 +363,19 @@ void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntb
 	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count; 
 	cntblocks = cnt;
 	// Allocate Heap memory for verticies and indices
-	float* cube_vertices = (float*)malloc(vcnt * sizeof(float));
+	GLfloat* cube_vertices = (GLfloat*)malloc(vcnt * sizeof(GLfloat));
 	GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
 	// Assign the memory
 	for(int i = 0; i < vcnt; i++) cube_vertices[i] = c.rendervert[i];
 	for(int i = 0; i < icnt; i++) cube_indices[i] = c.indices[i];
 	//Create VBOs for the VAO
-	VertexBuffer vb(cube_vertices, cnt * 8 * 5 * sizeof(GLfloat));
+	VertexBuffer vb(cube_vertices, cnt * 8 * 8 * sizeof(GLfloat));
 	// Create Layout for VAO
 	// Position information (data + format)
 	VertexBufferLayout layout;
 	layout.Push(GL_FLOAT, 3);
 	layout.Push(GL_FLOAT, 2);
+	layout.Push(GL_FLOAT, 3);
 	// Add vb and layout to vao
 	chunkva.AddBuffer(vb, layout);
 	// Create IBOs for the VAO

@@ -7,10 +7,10 @@ private:
     GLuint side;
     GLboolean displaychunk;
     glm::vec3 chunkpos;
-    block *blocks[64][64][64];
+    block *blocks[32][32][32];
 public:
     GLuint count;
-    GLuint filled[64][64][64];
+    GLuint filled[32][32][32];
     std::vector<GLuint>  indices;
     std::vector<GLfloat> rendervert;
 

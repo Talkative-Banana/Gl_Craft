@@ -14,15 +14,15 @@ void block::GenerateVerticies(){
     GLfloat x = position.x, y = position.y, z = position.z;
     // Vertex Position
     // Back Face
-    verticies.push_back({x - hside, y - hside, z - hside, 0.0, 0.0}); // 0 
-    verticies.push_back({x - hside, y + hside, z - hside, 0.0, 1.0}); // 1
-    verticies.push_back({x + hside, y + hside, z - hside, 1.0, 1.0}); // 2
-    verticies.push_back({x + hside, y - hside, z - hside, 1.0, 0.0}); // 3
+    verticies.push_back({x - hside, y - hside, z - hside, 0.0, 0.0, x, y, z}); // 0 
+    verticies.push_back({x - hside, y + hside, z - hside, 0.0, 1.0, x, y, z}); // 1
+    verticies.push_back({x + hside, y + hside, z - hside, 1.0, 1.0, x, y, z}); // 2
+    verticies.push_back({x + hside, y - hside, z - hside, 1.0, 0.0, x, y, z}); // 3
     // Front Face
-    verticies.push_back({x - hside, y - hside, z + hside, 0.0, 0.0}); // 4
-    verticies.push_back({x - hside, y + hside, z + hside, 0.0, 1.0}); // 5
-    verticies.push_back({x + hside, y + hside, z + hside, 1.0, 1.0}); // 6
-    verticies.push_back({x + hside, y - hside, z + hside, 1.0, 0.0}); // 7
+    verticies.push_back({x - hside, y - hside, z + hside, 0.0, 0.0, x, y, z}); // 4
+    verticies.push_back({x - hside, y + hside, z + hside, 0.0, 1.0, x, y, z}); // 5
+    verticies.push_back({x + hside, y + hside, z + hside, 1.0, 1.0, x, y, z}); // 6
+    verticies.push_back({x + hside, y - hside, z + hside, 1.0, 0.0, x, y, z}); // 7
 }
 
 void block::RenderFace(GLuint face){
@@ -58,6 +58,11 @@ void block::Render(GLuint mask){
         // TexCoord
         rendervert.push_back(verticies[i][3]);
         rendervert.push_back(verticies[i][4]);
+        // Center
+        rendervert.push_back(verticies[i][5]);
+        rendervert.push_back(verticies[i][6]);
+        rendervert.push_back(verticies[i][7]);
+
     }
 
     GLuint idx = 0;

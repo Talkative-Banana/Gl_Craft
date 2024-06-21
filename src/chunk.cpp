@@ -10,7 +10,7 @@ chunk::chunk(GLuint s, glm::vec3 position, GLboolean display){
 }
 
  GLboolean chunk::isSolid(std::vector<GLint> position){
-    if((position[0] >= 0) && (position[0] < 64) && (position[1] >= 0) && (position[1] < 64) && (position[2] >= 0) && (position[2] < 64)){
+    if((position[0] >= 0) && (position[0] < 32) && (position[1] >= 0) && (position[1] < 32) && (position[2] >= 0) && (position[2] < 32)){
         return filled[position[0]][position[1]][position[2]];
     }
     return false;
@@ -62,18 +62,18 @@ void chunk::Render(){
     if(!displaychunk) return;
     GLuint idx = 0;
 
-    for(int i = 0; i < 64; i++){
-        for(int j = 0; j < 64; j++){
-            for(int k = 0; k < 64; k++){
-                if(j < 1) filled[i][j][k] = 1;
+    for(int i = 0; i < 32; i++){
+        for(int j = 0; j < 32; j++){
+            for(int k = 0; k < 32; k++){
+                filled[i][j][k] = 1;
             }
         }
     }
 
-    for(int i = 0; i < 64; i++){
-        for(int j = 0; j < 64; j++){
-            for(int k = 0; k < 64; k++){
-                filled[0][0][0] = 1;
+    for(int i = 0; i < 32; i++){
+        for(int j = 0; j < 32; j++){
+            for(int k = 0; k < 32; k++){
+                // filled[0][0][0] = 1;
                 if(!filled[i][j][k]) continue;
                 glm::vec3 ofs = {i * side, j * side, k * side};
                 glm::vec3 pos = chunkpos + ofs;

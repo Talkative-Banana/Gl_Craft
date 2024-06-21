@@ -1,6 +1,8 @@
 #version 330 core
 
 layout(location = 0) in vec3 vVertex;
+layout(location = 1) in vec2 texcoord;
+layout(location = 2) in vec3 centercord;
 
 uniform mat4 vModel;
 uniform mat4 vView;
@@ -12,5 +14,5 @@ out vec3 TexCoord;
 
 void main() {
 	gl_Position = vProjection * vView * vModel * vec4(vVertex, 1.0);
-	TexCoord = vVertex; //Interpolate color
+	TexCoord = vec3(vVertex) - centercord; //Interpolate color
 }
