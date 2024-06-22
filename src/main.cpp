@@ -14,8 +14,10 @@
 
 #include "Renderer.h"
 #include "Texture.h"
+#include "OrthographicCamera.h"
 #include "TextureCubeMap.h"
 #include "VertexArray.h"
+#include "Material.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "block.h"
@@ -41,27 +43,7 @@ void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
 void setupViewTransformation(unsigned int &);
 void setupProjectionTransformation(unsigned int &);
-GLuint LoadTexture(const std::string& path);
 void camTrans(glm::vec3 &);
-
-GLuint LoadTexture(const std::string& path){
-
-	int w, h, bits;
-	stbi_set_flip_vertically_on_load(1);
-	auto* pixels = stbi_load(path.c_str(), &w, &h, &bits, STBI_rgb);
-	GLuint textureID;
-	glCreateTextures(GL_TEXTURE_2D, 1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-
-	stbi_image_free(pixels);
-
-	return textureID;
-}
 
 int main(int, char**)
 {
@@ -85,17 +67,14 @@ int main(int, char**)
 	// Modelling transformation is setup in the display loop
 
 	unsigned int axis_VAO;
+	OrthographicCamera oc(-1.0, 1.0, -1.0, 1.0);
+
 	//Generate VAO object
 	VertexArray chunkva;
 	GLuint cntblocks = 0, Nokeypressed, wireframemode = 0;
-	std::string sidefaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_side_carried.png";
-	std::string topfaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_carried.png";
-	std::string bottomfaceloc = "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/dirt.png";
-	std::string Tex[6] = {sidefaceloc, sidefaceloc, topfaceloc, bottomfaceloc, sidefaceloc, sidefaceloc};
-	TextureCubeMap tcm(Tex);
-	// Texture top_sidet("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
-	// GLuint grass_side = LoadTexture("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
-	// GLuint grass_side = LoadTexture("../textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks");
+	Material mat(2);
+	TextureCubeMap tcm(mat.GetString());
+
 	RenderChunk(shaderProgram, chunkva, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
@@ -470,7 +449,7 @@ void setupProjectionTransformation(unsigned int &program)
 		projectionT = glm::perspective(45.0f, (GLfloat)screen_width/(GLfloat)screen_height, 0.1f, 1000.0f);
 	} else{
 		//Window Size => l, r, b, u, n, f
-		projectionT = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -5000.0f, 5000.0f);
+		projectionT = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -1.0f, 5000.0f);
 	}
 
 	//Pass on the projection matrix to the vertex shader

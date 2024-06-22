@@ -18,11 +18,12 @@ set(SOURCES
   "src/IndexBuffer.cpp"
   "src/VertexBuffer.cpp"
   "src/VertexArray.cpp"
-  "src/VertexArray.cpp"
+  "src/OrthographicCamera.cpp"
   "src/Texture.cpp"
   "src/TextureCubeMap.cpp"
   "src/block.cpp"
   "src/chunk.cpp"
+  "src/Material.cpp"
   
   "depends/imgui/imgui_impl_glfw.cpp"
   "depends/imgui/imgui_impl_opengl3.cpp"

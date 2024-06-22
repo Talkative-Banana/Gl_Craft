@@ -3,6 +3,6 @@
 *.ini
 .user
 build/
-textures/bedrock-samples-1.21.0.3/
+textures/
 GLCraft
 GLCraft.exe
