@@ -14,7 +14,7 @@
 
 #include "Renderer.h"
 #include "Texture.h"
-#include "OrthographicCamera.h"
+#include "CameraController.h"
 #include "TextureCubeMap.h"
 #include "VertexArray.h"
 #include "Material.h"
@@ -22,6 +22,8 @@
 #include "IndexBuffer.h"
 #include "block.h"
 #include "chunk.h"
+#include "Input.h"
+#include "main.h"
 
 #define IMGUI_TEXT_CAPACITY 256
 
@@ -33,25 +35,24 @@ glm::mat4 modelT, viewT, projectionT; // The model, view and projection transfor
 glm::vec4 camPosition;
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
-float speed = 1.0f;
-bool Perspective = false;
 
 void RenderChunk(unsigned int &, VertexArray &, unsigned int&);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
-void setupViewTransformation(unsigned int &);
-void setupProjectionTransformation(unsigned int &);
+void setupViewTransformation(unsigned int &, CameraController&);
+void setupProjectionTransformation(unsigned int &, CameraController&);
 void camTrans(glm::vec3 &);
+Window* _window = nullptr;
 
 int main(int, char**)
 {
 	// Setup window
-	GLFWwindow *window = setupWindow(screen_width, screen_height);
+	_window = new Window(screen_width, screen_height);
+	GLFWwindow *window = _window->GetWindow();
 	ImGuiIO& io = ImGui::GetIO(); // Create IO 
 	ImVec4 clearColor = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
-	camPosition = glm::vec4(20.0, 40.0, 80.0, 1.0);
 
 	unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
 	// Get handle to color variable in shader
@@ -61,18 +62,19 @@ int main(int, char**)
 	// 	exit(0);
 	// }
 
+
 	glUseProgram(shaderProgram);
 
 	// setupModelTransformation(shaderProgram);
 	// Modelling transformation is setup in the display loop
 
 	unsigned int axis_VAO;
-	OrthographicCamera oc(-1.0, 1.0, -1.0, 1.0);
+	CameraController Camera(screen_height/screen_width);
 
 	//Generate VAO object
 	VertexArray chunkva;
 	GLuint cntblocks = 0, Nokeypressed, wireframemode = 0;
-	Material mat(2);
+	Material mat(0);
 	TextureCubeMap tcm(mat.GetString());
 
 	RenderChunk(shaderProgram, chunkva, cntblocks);
@@ -80,90 +82,9 @@ int main(int, char**)
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-
-		glm::vec3 change(0.0f, 0.0f, 0.0f);
-		Nokeypressed = 1;
-		// Key events
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
-			strcpy(textKeyStatus, "Left");
-			strcpy(textKeyDescription, "Rotate clockwise along X axis");
-			change.x += speed;
-			Nokeypressed = 0;
-		}
 		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
-			strcpy(textKeyStatus, "Right");
-			strcpy(textKeyDescription, "Rotate counter clockwise along X axis");
-			change.x -= speed;
-			Nokeypressed = 0;
-		}
-		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-			if (io.KeyShift){
-				strcpy(textKeyStatus, "Shift + Up");
-				strcpy(textKeyDescription, "Zoom in");
-				change.z -= speed;
-			} else { 
-				strcpy(textKeyStatus, "Up");
-				strcpy(textKeyDescription, "Rotate clockwise along Y axis");
-				change.y += speed;
-			}
-			Nokeypressed = 0;
-		} 
-		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
-			if (io.KeyShift){
-				strcpy(textKeyStatus, "Shift + Down");
-				strcpy(textKeyDescription, "Zoom out");
-				change.z += speed;
-			} else { 
-				strcpy(textKeyStatus, "Down");
-				strcpy(textKeyDescription, "Rotate counter clockwise along Y axis");
-				change.y -= speed;
-			}
-			Nokeypressed = 0;
-		} 
-		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Z))) {
-			if (io.KeyCtrl) {
-				strcpy(textKeyStatus, "Ctrl + Z");
-				strcpy(textKeyDescription, "Focus camera on Z axis");
-				// Move camera to [0, 0, 100] i.e. => along z axis
-				camPosition = {0.0f, 0.0f, 100.0f, 1.0f};
-			} else {
-				strcpy(textKeyStatus, "Z");
-				strcpy(textKeyDescription, "Clear perspective");
-				Perspective = false;
-			}
-			Nokeypressed = 0;
-		} 
-		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_X))) {
-			if (io.KeyCtrl) {
-				strcpy(textKeyStatus, "Ctrl + X");
-				strcpy(textKeyDescription, "Focus camera on X axis");
-				// Move camera to [100, 0, 0] i.e. => along x axis
-				camPosition = {100.0f, 0.0f, 0.0f, 1.0f};	
-			} else {
-				strcpy(textKeyStatus, "X");
-				strcpy(textKeyDescription, "Set perspective");
-				Perspective = true;
-			}
-			Nokeypressed = 0;
-		} 
-		
-		if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Y))) {
-			if (io.KeyCtrl) {
-				strcpy(textKeyStatus, "Ctrl + Y");
-				strcpy(textKeyDescription, "Focus camera on Y axis");
-				// Move camera to [0, 100, 0] i.e. => along y axis (due to camera rolling gaze direction shouldn't be parallel to y)
-				// So Moved with some offset
-				camPosition = {0.0f, 100.0f, 0.20f, 1.0f};
-			}
-			Nokeypressed = 0;
-		}
-
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab))) {
+		Camera.CameraInputs();
+		if (Input::IsKeyPressed(GLFW_KEY_TAB)) {
 			strcpy(textKeyStatus, "TAB");
 			strcpy(textKeyDescription, "Switching Mode");
 			wireframemode ^= 1;
@@ -175,7 +96,6 @@ int main(int, char**)
 			strcpy(textKeyDescription, "Listening for key events...");
 		}
 			
-
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -207,9 +127,8 @@ int main(int, char**)
 
 		// Setup MVP matrix
 		setupModelTransformationCube(shaderProgram);
-		camTrans(change);
-		setupViewTransformation(shaderProgram);
-		setupProjectionTransformation(shaderProgram);
+		setupViewTransformation(shaderProgram, Camera);
+		setupProjectionTransformation(shaderProgram, Camera);
 
 		// glBindVertexArray(cube_VAO);
 		chunkva.Bind();
@@ -251,78 +170,6 @@ int main(int, char**)
 	cleanup(window);
 
 	return 0;
-}
-
-void camTrans(glm::vec3& Change)
-{
-	// 1) Move from World Space to Camera Space
-	// 2) Perform Translation based on key values
-	// 3) Move back to World Space
-
-	// uvw of camera space
-	glm::vec3 t = {0.0f, 1.0f, 0.0f};
-	glm::vec3 w = {camPosition.x, camPosition.y, camPosition.z};
-	w = glm::normalize(w);
-	glm::vec3 u = glm::normalize(glm::cross(t, w));
-	glm::vec3 v = glm::normalize(glm::cross(w, u));
-
-	//Traslation Matrix
-	glm::mat4 matT = {1, 0, 0, 0, 
-					  0, 1, 0, 0,
-					  0, 0, 1, 0,
-					  Change.x, Change.y, Change.z, 1};
-
-	// XYZ wrt UVW
-	glm::mat3 temp = {u.x, v.x, w.x, 
-					  u.y, v.y, w.y,
-					  u.z, v.z, w.z};
-
-	// Solution of 3x3 XYZ matrix
-	glm::mat3 rev = glm::inverse(temp);
-
-	glm::vec3 X = glm::normalize(rev[0]);
-	glm::vec3 Y = glm::normalize(rev[1]);
-	glm::vec3 Z = glm::normalize(rev[2]);	
-
-
-	// World to Camera Matrix Rotation
-	glm::mat4 w2cr = {X.x, Y.x, Z.x, 0, 
-					  X.y, Y.y, Z.y, 0,
-					  X.z, Y.z, Z.z, 0,
-					  0, 0, 0, 1};
-
-	// World to Camera Matrix Transaltion
-	glm::mat4 w2ct = {1, 0, 0, 0, 
-					  0, 1, 0, 0,
-					  0, 0, 1, 0,
-					  -camPosition.x, -camPosition.y, -camPosition.z, 1};
-	
-	// World to Camera Matrix
-	glm::mat4 w2c = w2cr * w2ct;
-	
-	// New Adjusted vector involving key inputs
-	glm::vec4 adjustedvec = matT * w2c * camPosition;
-
-	// Camera to World Matrix Rotation
-	glm::mat4 c2wr = {u.x, u.y, u.z, 0, 
-					  v.x, v.y, v.z, 0,
-					  w.x, w.y, w.z, 0,
-					  0, 0, 0, 1};
-
-	// Camera to World Matrix Transalation
-	glm::mat4 c2wt = {1, 0, 0, 0, 
-					  0, 1, 0, 0,
-					  0, 0, 1, 0,
-					  adjustedvec.x, adjustedvec.y, adjustedvec.z, 1};
-
-	// Camera to World Matrix
-	glm::mat4 c2w = c2wr * c2wt;
-	// Change vector in camPosition
-	glm::vec4 newcampos = c2w * adjustedvec;
-
-	camPosition.x += newcampos.x;
-	camPosition.y += newcampos.y;
-	camPosition.z += newcampos.z;
 }
 
 void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntblocks)
@@ -427,10 +274,11 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::v
 }
 
 
-void setupViewTransformation(unsigned int &program)
+void setupViewTransformation(unsigned int &program, CameraController& occ)
 {
 	//Viewing transformations (World -> Camera coordinates
-	viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	// viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	viewT = occ.GetCamera()->GetViewMatrix();
 
 	//Pass-on the viewing matrix to the vertex shader
 	glUseProgram(program);
@@ -442,15 +290,10 @@ void setupViewTransformation(unsigned int &program)
 	glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program)
+void setupProjectionTransformation(unsigned int &program, CameraController &occ)
 {
 	//Projection transformation
-	if(Perspective){
-		projectionT = glm::perspective(45.0f, (GLfloat)screen_width/(GLfloat)screen_height, 0.1f, 1000.0f);
-	} else{
-		//Window Size => l, r, b, u, n, f
-		projectionT = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -1.0f, 5000.0f);
-	}
+	projectionT = occ.GetCamera()->GetProjectionMatrix();
 
 	//Pass on the projection matrix to the vertex shader
 	glUseProgram(program);
