@@ -22,6 +22,7 @@
 #include "IndexBuffer.h"
 #include "block.h"
 #include "chunk.h"
+#include "Biome.h"
 #include "Input.h"
 #include "main.h"
 
@@ -183,19 +184,26 @@ void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntb
 	}
 	// Chunk
 	glm::vec3 pos = {0.0, 0.0, 0.0};
-	chunk c = chunk(20, pos, true);
-	c.Render();
-	//Chunk data
-	GLuint vcnt = c.rendervert.size(), icnt = c.indices.size(), cnt = c.count; 
-	cntblocks = cnt;
+	
+	Biome b = Biome(1, 1, pos, true);
+	b.RenderBiome();
+	//Biome Data
+	GLuint vcnt = b.brendervert.size(), icnt = b.bindices.size(), cnt = b.count;
 	// Allocate Heap memory for verticies and indices
 	GLfloat* cube_vertices = (GLfloat*)malloc(vcnt * sizeof(GLfloat));
 	GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
 	// Assign the memory
-	for(int i = 0; i < vcnt; i++) cube_vertices[i] = c.rendervert[i];
-	for(int i = 0; i < icnt; i++) cube_indices[i] = c.indices[i];
+	for(int i = 0; i < vcnt; i++) cube_vertices[i] = b.brendervert[i];
+	for(int i = 0; i < icnt; i++) cube_indices[i] = b.bindices[i];
+
+	std::cout << "[Memory Usage: " << (1.0 * (vcnt * sizeof(GLfloat) + icnt * sizeof(GLuint))) / 1e6 << " mb]" << std::endl;
+
 	//Create VBOs for the VAO
-	VertexBuffer vb(cube_vertices, cnt * 8 * 8 * sizeof(GLfloat));
+	int numofbytespervertex = 8;
+	int numofvertexperblock = 8;
+	int numofblocksperchunk = 32*32*32;
+	cntblocks = numofblocksperchunk * cnt;
+	VertexBuffer vb(cube_vertices, cnt * numofbytespervertex * numofvertexperblock * numofblocksperchunk * sizeof(GLfloat));
 	// Create Layout for VAO
 	// Position information (data + format)
 	VertexBufferLayout layout;
@@ -246,7 +254,7 @@ void setupModelTransformationCube(unsigned int &program)
 {
 	//Modelling transformations (Model -> World coordinates)
 	modelT = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 2.0, 1.0));
-	modelT = glm::translate(modelT, glm::vec3(0.0f, 10.0f, 0.0f));
+	modelT = glm::translate(modelT, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	//Pass on the modelling matrix to the vertex shader
 	glUseProgram(program);

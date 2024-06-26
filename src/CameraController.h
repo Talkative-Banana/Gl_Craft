@@ -6,8 +6,8 @@
 class CameraController{
 private:
     float m_AspectRatio;
-    float m_speed = 2.5f;
-    float m_sensitivity = 2.5f;
+    float m_speed = 1.0f;
+    float m_sensitivity = 1.0f;
     Camera *m_Camera = nullptr;
     bool firstClick = true;
 public:

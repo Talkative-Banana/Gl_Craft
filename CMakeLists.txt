@@ -24,6 +24,7 @@ set(SOURCES
   "src/TextureCubeMap.cpp"
   "src/block.cpp"
   "src/chunk.cpp"
+  "src/Biome.cpp"
   "src/Window.cpp"
   "src/WindowsInput.cpp"
   "src/Material.cpp"

@@ -79,9 +79,9 @@ void chunk::Render(){
                 glm::vec3 pos = chunkpos + ofs;
                 std::vector<GLint> Idx = {i, j, k};
                 GLuint mask = chunk::RenderFace(Idx);
-                block b = block(side, pos, true); b.Render(mask);
-                std::vector<GLfloat> blockrendervert = b.rendervert;
-                std::vector<GLuint> blockindices = b.indices;
+                blocks[i][j][k] = new block(side, pos, true); blocks[i][j][k]->Render(mask);
+                std::vector<GLfloat> blockrendervert = blocks[i][j][k]->rendervert;
+                std::vector<GLuint> blockindices = blocks[i][j][k]->indices;
                 for(auto x : blockrendervert) rendervert.push_back(x);
                 for(auto x : blockindices) indices.push_back(idx + x);
                 idx += 8, count++;

@@ -55,8 +55,7 @@ void CameraController::CameraInputs(){
 
         // Ensure the sensitivity is consistent by normalizing the direction vectors
         glm::vec3 right = glm::normalize(glm::cross(m_Camera->GetUp(), m_Camera->GetOrientation()));
-        // std::cout << m_Camera->GetOrientation().x << " " << m_Camera->GetOrientation().y << " " << m_Camera->GetOrientation().z << std::endl;
-        // std::cout << right.x << " " << right.y << " " << right.z << std::endl;
+        
         glm::quat qx = glm::angleAxis(glm::radians(-rotx), right);
         glm::vec3 newOrientation = glm::normalize(qx * m_Camera->GetOrientation());
 
