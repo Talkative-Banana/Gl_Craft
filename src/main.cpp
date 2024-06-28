@@ -222,7 +222,7 @@ void RenderBiome(unsigned int &program, std::vector<VertexArray*> &chunkva, std:
 			chunkva[4*_chunkx+_chunky]->Bind();
 			//Chunk Data
 			chunk* tmp = b.chunks[_chunkx][_chunky];
-			GLuint vcnt = tmp->rendervert.size(), icnt = tmp->indices.size(), cnt = 1;
+			GLuint vcnt = tmp->rendervert.size(), icnt = tmp->indices.size(), cnt = tmp-> count;
 			// Allocate Heap memory for verticies and indices
 			GLuint* cube_vertices = (GLuint*)malloc(vcnt * sizeof(GLuint));
 			GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
@@ -235,11 +235,11 @@ void RenderBiome(unsigned int &program, std::vector<VertexArray*> &chunkva, std:
 			int numofbytespervertex = 1;
 			int numofvertexperblock = 8;
 			int numofblocksperchunk = 32*32*32;
-			cntblocks.push_back(numofblocksperchunk * cnt);
+			cntblocks.push_back(icnt);
 
 			VertexBufferLayout layout;
 			layout.Push(GL_UNSIGNED_INT, 1);
-			VertexBuffer vb(cube_vertices, cnt * numofbytespervertex * numofvertexperblock * numofblocksperchunk * sizeof(GLuint));
+			VertexBuffer vb(cube_vertices, cnt * numofbytespervertex * numofvertexperblock * sizeof(GLuint));
 			// Add vb and layout to vao
 			chunkva[4*_chunkx+_chunky]->AddBuffer(vb, layout);
 			// Create IBOs for the VAO

@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "chunk.h"
+#include <cstdlib>
 
 chunk::chunk(uint _id, glm::ivec3 position, GLboolean display){
     id = _id;
@@ -64,7 +65,7 @@ void chunk::Render(){
     for(int i = 0; i < 32; i++){
         for(int j = 0; j < 32; j++){
             for(int k = 0; k < 32; k++){
-                filled[i][j][k] = 1;
+                filled[i][j][k] = rand()&1;
             }
         }
     }
