@@ -1,6 +1,19 @@
 # Gl_Craft
 Minecraft clone in C++ with OpenGL.
 
+# Preview
+**Grass Chunk**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/GrassBlock.png)
+
+**Sand Chunk**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/SandBlock.png)
+
+**Dirt Chunk**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/DirtBlock.png)
+
 ## Quick Start
 Visit https://github.com/Mojang/bedrock-samples/releases and get the souce file for textures in a texture directory.
 
