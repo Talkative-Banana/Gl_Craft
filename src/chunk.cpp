@@ -1,8 +1,8 @@
 #include "Renderer.h"
 #include "chunk.h"
 
-chunk::chunk(GLuint s, glm::vec3 position, GLboolean display){
-    side = s;
+chunk::chunk(uint _id, glm::ivec3 position, GLboolean display){
+    id = _id;
     count = 0;
     chunkpos = position;
     displaychunk = display;
@@ -61,7 +61,6 @@ GLuint chunk::RenderFace(std::vector<GLint> position){
 void chunk::Render(){
     if(!displaychunk) return;
     GLuint idx = 0;
-
     for(int i = 0; i < 32; i++){
         for(int j = 0; j < 32; j++){
             for(int k = 0; k < 32; k++){
@@ -75,12 +74,12 @@ void chunk::Render(){
             for(int k = 0; k < 32; k++){
                 // filled[0][0][0] = 1;
                 if(!filled[i][j][k]) continue;
-                glm::vec3 ofs = {i * side, j * side, k * side};
-                glm::vec3 pos = chunkpos + ofs;
+                glm::ivec3 ofs = {i, j, k};
+                glm::ivec3 pos = chunkpos + ofs;
                 std::vector<GLint> Idx = {i, j, k};
                 GLuint mask = chunk::RenderFace(Idx);
-                blocks[i][j][k] = new block(side, pos, true); blocks[i][j][k]->Render(mask);
-                std::vector<GLfloat> blockrendervert = blocks[i][j][k]->rendervert;
+                blocks[i][j][k] = new block(pos, true); blocks[i][j][k]->Render(mask);
+                std::vector<GLuint> blockrendervert = blocks[i][j][k]->rendervert;
                 std::vector<GLuint> blockindices = blocks[i][j][k]->indices;
                 for(auto x : blockrendervert) rendervert.push_back(x);
                 for(auto x : blockindices) indices.push_back(idx + x);

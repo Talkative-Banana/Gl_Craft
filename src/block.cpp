@@ -1,28 +1,41 @@
 #include "Renderer.h"
 #include "block.h"
 
-block::block(GLuint s, glm::vec3 pos, GLboolean solid){
-    side = s;
+block::block(glm::ivec3 pos, GLboolean solid){
     position = pos;
     is_solid = solid;
 }
 
 block::~block(){}
 
+GLuint block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent){
+    GLuint mask = 0;
+    // ccczzzzzzyyyyyyxxxxxx 7 all add
+    mask |= X | (Y << 6) | (Z << 12) | (cent << 18);
+    return mask;   
+}
+
 void block::GenerateVerticies(){
-    GLfloat hside = side / 2.0;
-    GLfloat x = position.x, y = position.y, z = position.z;
+    GLuint x = position.x, y = position.y, z = position.z;
     // Vertex Position
     // Back Face
-    verticies.push_back({x - hside, y - hside, z - hside, 0.0, 0.0, x, y, z}); // 0 
-    verticies.push_back({x - hside, y + hside, z - hside, 0.0, 1.0, x, y, z}); // 1
-    verticies.push_back({x + hside, y + hside, z - hside, 1.0, 1.0, x, y, z}); // 2
-    verticies.push_back({x + hside, y - hside, z - hside, 1.0, 0.0, x, y, z}); // 3
+    verticies.push_back({Mask(x, y, z, 7)}); // 0
+    // verticies.push_back({x - hside, y - hside, z - hside, x, y, z}); // 0 
+    verticies.push_back({Mask(x, y + 1, z, 5)}); // 1
+    // verticies.push_back({x - hside, y + hside, z - hside, x, y, z}); // 1
+    verticies.push_back({Mask(x + 1, y + 1, z, 1)}); // 2
+    // verticies.push_back({x + hside, y + hside, z - hside, x, y, z}); // 2
+    verticies.push_back({Mask(x + 1, y, z, 3)}); // 3
+    // verticies.push_back({x + hside, y - hside, z - hside, x, y, z}); // 3
     // Front Face
-    verticies.push_back({x - hside, y - hside, z + hside, 0.0, 0.0, x, y, z}); // 4
-    verticies.push_back({x - hside, y + hside, z + hside, 0.0, 1.0, x, y, z}); // 5
-    verticies.push_back({x + hside, y + hside, z + hside, 1.0, 1.0, x, y, z}); // 6
-    verticies.push_back({x + hside, y - hside, z + hside, 1.0, 0.0, x, y, z}); // 7
+    verticies.push_back({Mask(x, y, z + 1, 6)}); // 4
+    // verticies.push_back({x - hside, y - hside, z + hside, x, y, z}); // 4
+    verticies.push_back({Mask(x, y + 1, z + 1, 4)}); // 5
+    // verticies.push_back({x - hside, y + hside, z + hside, x, y, z}); // 5
+    verticies.push_back({Mask(x + 1, y + 1, z + 1, 0)}); // 6
+    // verticies.push_back({x + hside, y + hside, z + hside, x, y, z}); // 6
+    verticies.push_back({Mask(x + 1, y, z + 1, 2)}); // 7
+    // verticies.push_back({x + hside, y - hside, z + hside, x, y, z}); // 7
 }
 
 void block::RenderFace(GLuint face){
@@ -51,18 +64,8 @@ void block::Render(GLuint mask){
     if(!is_solid) return;
     GenerateVerticies();
     for(int i = 0; i < 8; i++){
-        // Position
+        // Texture-Center-Position
         rendervert.push_back(verticies[i][0]);
-        rendervert.push_back(verticies[i][1]);
-        rendervert.push_back(verticies[i][2]);
-        // TexCoord
-        rendervert.push_back(verticies[i][3]);
-        rendervert.push_back(verticies[i][4]);
-        // Center
-        rendervert.push_back(verticies[i][5]);
-        rendervert.push_back(verticies[i][6]);
-        rendervert.push_back(verticies[i][7]);
-
     }
 
     GLuint idx = 0;

@@ -29,15 +29,16 @@
 #define IMGUI_TEXT_CAPACITY 256
 
 // Globals
+float side = 2;
+glm::vec3 worldpos;
 int screen_width = 640, screen_height = 640;
-GLint vModel_uniform, vView_uniform, vProjection_uniform;
-GLint vColor_uniform;
+GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform, vColor_uniform;
 glm::mat4 modelT, viewT, projectionT; // The model, view and projection transformations
 glm::vec4 camPosition;
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
 
-void RenderChunk(unsigned int &, VertexArray &, unsigned int&);
+void RenderBiome(unsigned int &, std::vector<VertexArray*> &, std::vector<unsigned int>&);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
@@ -56,29 +57,33 @@ int main(int, char**)
 	ImVec4 clearColor = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 
 	unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
-	// Get handle to color variable in shader
-	// vColor_uniform = glGetUniformLocation(shaderProgram, "vColor");
-	// if(vColor_uniform == -1){
-	// 	fprintf(stderr, "Could not bind location: vColor\n");
-	// 	exit(0);
-	// }
-
 
 	glUseProgram(shaderProgram);
-
-	// setupModelTransformation(shaderProgram);
-	// Modelling transformation is setup in the display loop
 
 	unsigned int axis_VAO;
 	CameraController Camera(screen_height/screen_width);
 
 	//Generate VAO object
-	VertexArray chunkva;
-	GLuint cntblocks = 0, Nokeypressed, wireframemode = 0;
+	std::vector<VertexArray*> chunkva;
+	std::vector<GLuint> cntblocks;
+
+    GLint maxVAOs = 16;
+    
+    for (int i = 0; i < maxVAOs; ++i) {
+		VertexArray *vao = new VertexArray(); vao->Bind();
+        if (glGetError() == GL_OUT_OF_MEMORY) {
+            std::cout << "Reached VAO limit at: " << i << std::endl;
+            break;
+        }
+        chunkva.push_back(vao);
+		glBindVertexArray(0);
+    }
+
+	GLuint Nokeypressed, wireframemode = 0;
 	Material mat(0);
 	TextureCubeMap tcm(mat.GetString());
 
-	RenderChunk(shaderProgram, chunkva, cntblocks);
+	RenderBiome(shaderProgram, chunkva, cntblocks);
 	createAxesLine(shaderProgram, axis_VAO);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -132,17 +137,30 @@ int main(int, char**)
 		setupProjectionTransformation(shaderProgram, Camera);
 
 		// glBindVertexArray(cube_VAO);
-		chunkva.Bind();
 		tcm.Bind();
-		if(wireframemode){
-			// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-			glDrawElements(GL_LINES, cntblocks * 6 * 2 * 3, GL_UNSIGNED_INT, nullptr);
-		} else{
-			// glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-			// 12 * Total Number of attributes
-			glDrawElements(GL_TRIANGLES, cntblocks * 12 * 8, GL_UNSIGNED_INT, nullptr);
-			// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-			glDrawElements(GL_LINES, cntblocks * 12 * 8, GL_UNSIGNED_INT, nullptr);
+		for(int _chunkx = 0; _chunkx < 4; _chunkx++){
+			for(int _chunky = 0; _chunky < 4; _chunky++){
+				chunkva[4*_chunkx + _chunky]->Bind();
+
+				worldpos_uniform = glGetUniformLocation(shaderProgram, "worldpos");
+				if(worldpos_uniform == -1){
+					fprintf(stderr, "Could not bind location: worldpos\n");
+					exit(0);
+				}
+				glUniform3f(worldpos_uniform, 32 * side * _chunkx, 0.0, 32 * side * _chunky);
+				if(wireframemode){
+					// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+					glDrawElements(GL_LINES, cntblocks[4*_chunkx + _chunky] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+				} else{
+					// glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
+					// 12 * Total Number of attributes
+					glDrawElements(GL_TRIANGLES, cntblocks[4*_chunkx + _chunky] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+					// glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+					glDrawElements(GL_LINES, cntblocks[4*_chunkx + _chunky] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+				}
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
+			}
 		}
 
 		glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want axes to be drawn on top of all
@@ -168,12 +186,13 @@ int main(int, char**)
 	}
 
 	// Cleanup
+	for(auto &x : chunkva) delete x;
 	cleanup(window);
 
 	return 0;
 }
 
-void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntblocks)
+void RenderBiome(unsigned int &program, std::vector<VertexArray*> &chunkva, std::vector<unsigned int>& cntblocks)
 {
 	glUseProgram(program);
 	//Bind shader variables
@@ -182,43 +201,56 @@ void RenderChunk(unsigned int &program, VertexArray &chunkva, unsigned int& cntb
 		fprintf(stderr, "Could not bind location: vVertex\n");
 		exit(0);
 	}
-	// Chunk
-	glm::vec3 pos = {0.0, 0.0, 0.0};
-	
-	Biome b = Biome(1, 1, pos, true);
+
+	side_uniform = glGetUniformLocation(program, "side");
+	if(side_uniform == -1){
+		fprintf(stderr, "Could not bind location: side\n");
+		exit(0);
+	}
+	glUniform1f(side_uniform, side);
+
+	// Intialize Biome
+	Biome b = Biome(1, glm::vec3(0, 0, 0), true);
 	b.RenderBiome();
-	//Biome Data
-	GLuint vcnt = b.brendervert.size(), icnt = b.bindices.size(), cnt = b.count;
-	// Allocate Heap memory for verticies and indices
-	GLfloat* cube_vertices = (GLfloat*)malloc(vcnt * sizeof(GLfloat));
-	GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
-	// Assign the memory
-	for(int i = 0; i < vcnt; i++) cube_vertices[i] = b.brendervert[i];
-	for(int i = 0; i < icnt; i++) cube_indices[i] = b.bindices[i];
 
-	std::cout << "[Memory Usage: " << (1.0 * (vcnt * sizeof(GLfloat) + icnt * sizeof(GLuint))) / 1e6 << " mb]" << std::endl;
-
-	//Create VBOs for the VAO
-	int numofbytespervertex = 8;
-	int numofvertexperblock = 8;
-	int numofblocksperchunk = 32*32*32;
-	cntblocks = numofblocksperchunk * cnt;
-	VertexBuffer vb(cube_vertices, cnt * numofbytespervertex * numofvertexperblock * numofblocksperchunk * sizeof(GLfloat));
 	// Create Layout for VAO
 	// Position information (data + format)
-	VertexBufferLayout layout;
-	layout.Push(GL_FLOAT, 3);
-	layout.Push(GL_FLOAT, 2);
-	layout.Push(GL_FLOAT, 3);
-	// Add vb and layout to vao
-	chunkva.AddBuffer(vb, layout);
-	// Create IBOs for the VAO
-	IndexBuffer ib(cube_indices, icnt);
-	ib.Bind();
-	delete []cube_vertices;
-	delete []cube_indices;
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
+
+	for(int _chunkx = 0; _chunkx < 4; _chunkx++){
+		for(int _chunky = 0; _chunky < 4; _chunky++){
+			// For Each Chunk Create and Bind Respective Vaos and Vbos and Ibos
+			chunkva[4*_chunkx+_chunky]->Bind();
+			//Chunk Data
+			chunk* tmp = b.chunks[_chunkx][_chunky];
+			GLuint vcnt = tmp->rendervert.size(), icnt = tmp->indices.size(), cnt = 1;
+			// Allocate Heap memory for verticies and indices
+			GLuint* cube_vertices = (GLuint*)malloc(vcnt * sizeof(GLuint));
+			GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
+			// Assign the memory
+			for(int i = 0; i < vcnt; i++) cube_vertices[i] = tmp->rendervert[i];
+			for(int i = 0; i < icnt; i++) cube_indices[i] = tmp->indices[i];
+			std::cout << "[Memory Usage per chunk: " << (1.0 * (vcnt * sizeof(GLuint) + icnt * sizeof(GLuint))) / 1e6 << " mb]" << std::endl;
+
+			//Create VBOs for the VAO
+			int numofbytespervertex = 1;
+			int numofvertexperblock = 8;
+			int numofblocksperchunk = 32*32*32;
+			cntblocks.push_back(numofblocksperchunk * cnt);
+
+			VertexBufferLayout layout;
+			layout.Push(GL_UNSIGNED_INT, 1);
+			VertexBuffer vb(cube_vertices, cnt * numofbytespervertex * numofvertexperblock * numofblocksperchunk * sizeof(GLuint));
+			// Add vb and layout to vao
+			chunkva[4*_chunkx+_chunky]->AddBuffer(vb, layout);
+			// Create IBOs for the VAO
+			IndexBuffer ib(cube_indices, icnt);
+			ib.Bind();
+			delete []cube_vertices;
+			delete []cube_indices;
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
+		}
+	}
 }
 
 void createAxesLine(unsigned int & program, unsigned int &axis_VAO)

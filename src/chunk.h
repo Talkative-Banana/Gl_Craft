@@ -4,17 +4,17 @@
 
 class chunk{
 private:
-    GLuint side;
     GLboolean displaychunk;
-    glm::vec3 chunkpos;
+    glm::ivec3 chunkpos;
     block *blocks[32][32][32];
 public:
+    GLuint id;
     GLuint count;
     GLuint filled[32][32][32];
     std::vector<GLuint>  indices;
-    std::vector<GLfloat> rendervert;
+    std::vector<GLuint> rendervert;
 
-    chunk(GLuint s, glm::vec3 position, GLboolean display);
+    chunk(uint _id, glm::ivec3 position, GLboolean display);
     ~chunk();
 
     void Render();

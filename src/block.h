@@ -14,11 +14,10 @@ class block {
 private:
     void GenerateVerticies();
 public:
-    GLuint side;
-    glm::vec3 position;
+    glm::ivec3 position;
     GLboolean is_solid;
-    std::vector<std::vector<GLfloat>> verticies;
-    std::vector<GLfloat> rendervert;
+    std::vector<std::vector<GLuint>> verticies;
+    std::vector<GLuint> rendervert;
     std::vector<GLuint> indices;
     std::vector<std::vector<GLuint>> faceindices = {{2, 3, 0, 2, 0, 1}, // Back
                                                     {7, 6, 5, 7, 5, 4}, // Front
@@ -28,9 +27,10 @@ public:
                                                     {3, 7, 4, 3, 4, 0}};// Bottom
 
 
-    block(GLuint s, glm::vec3 pos, GLboolean solid);
+    block(glm::ivec3 pos, GLboolean solid);
     ~block();
 
     void Render(GLuint mask);
     void RenderFace(GLuint face);
+    GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent);
 };
