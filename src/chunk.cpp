@@ -65,7 +65,7 @@ void chunk::Render(){
     for(int i = 0; i < 32; i++){
         for(int j = 0; j < 32; j++){
             for(int k = 0; k < 32; k++){
-                filled[i][j][k] = rand()&1;
+                filled[i][j][k] = 1;
             }
         }
     }
@@ -82,9 +82,9 @@ void chunk::Render(){
                 blocks[i][j][k] = new block(pos, true); blocks[i][j][k]->Render(mask);
                 std::vector<GLuint> blockrendervert = blocks[i][j][k]->rendervert;
                 std::vector<GLuint> blockindices = blocks[i][j][k]->indices;
-                for(auto x : blockrendervert) rendervert.push_back(x);
-                for(auto x : blockindices) indices.push_back(idx + x);
-                idx += 8, count++;
+                for(auto &ind : blockindices) ind += idx;
+                rendervert.push_back({blockrendervert, blockindices});
+                idx += 24, count++;
             }
         }
     }

@@ -43,10 +43,11 @@ void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
-void setupViewTransformation(unsigned int &, CameraController&);
-void setupProjectionTransformation(unsigned int &, CameraController&);
+void setupViewTransformation(unsigned int &, CameraController*);
+void setupProjectionTransformation(unsigned int &, CameraController*);
 void camTrans(glm::vec3 &);
 Window* _window = nullptr;
+CameraController *Camera;
 
 int main(int, char**)
 {
@@ -61,7 +62,7 @@ int main(int, char**)
 	glUseProgram(shaderProgram);
 
 	unsigned int axis_VAO;
-	CameraController Camera(screen_height/screen_width);
+	Camera = new CameraController(screen_height/screen_width);
 
 	//Generate VAO object
 	std::vector<VertexArray*> chunkva;
@@ -89,7 +90,7 @@ int main(int, char**)
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		
-		Camera.CameraInputs();
+		Camera->CameraInputs();
 		if (Input::IsKeyPressed(GLFW_KEY_TAB)) {
 			strcpy(textKeyStatus, "TAB");
 			strcpy(textKeyDescription, "Switching Mode");
@@ -187,8 +188,49 @@ int main(int, char**)
 
 	// Cleanup
 	for(auto &x : chunkva) delete x;
+	delete Camera;
 	cleanup(window);
+	return 0;
+}
 
+int FrustumCulling(GLuint vertex){
+	// return 0 if inside frustum
+
+	auto Center = [&](glm::ivec3 pos, uint centeroff){
+		glm::ivec3 center = pos;
+	
+		if((centeroff & 1u) == 1u){
+			center.z += side / 2;
+		} else{
+			center.z -= side / 2;
+		}
+	
+		if((centeroff & 2u) == 2u){
+			center.y += side / 2;
+		} else{
+			center.y -= side / 2;
+		}
+	
+		if((centeroff & 4u) == 4u){
+			center.x += side / 2;
+		} else{
+			center.x -= side / 2;
+		}
+		return center;
+	};
+
+	uint positionX = (vertex)        & 63u;
+	uint positionY = (vertex >> 6u)  & 63u;
+	uint positionZ = (vertex >> 12u) & 63u;
+	uint centeroff = (vertex >> 18u) & 7u;
+	
+	glm::ivec3 pos = glm::ivec3(side * positionX, side * positionY, side * positionZ);
+	// Center of block
+	glm::ivec3 centercord = Center(pos, centeroff);
+	for(int i = 0; i < 6; i++){
+		// for each of frusum face check if inside else return 1
+		// TODO:
+	}
 	return 0;
 }
 
@@ -222,18 +264,37 @@ void RenderBiome(unsigned int &program, std::vector<VertexArray*> &chunkva, std:
 			chunkva[4*_chunkx+_chunky]->Bind();
 			//Chunk Data
 			chunk* tmp = b.chunks[_chunkx][_chunky];
-			GLuint vcnt = tmp->rendervert.size(), icnt = tmp->indices.size(), cnt = tmp-> count;
+			GLuint vcnt = 0, icnt = 0, cnt = tmp-> count;
+			GLuint rsize = tmp -> rendervert.size();
+
+			std::vector<int> FrustumCull(rsize, 0);
+			// Get Vertexcnt and indexcnt from the chunk per block
+			for(int i = 0; i < rsize; i++){
+				auto &[_vert, _ind] = tmp -> rendervert[i];
+				vcnt += _vert.size(); 
+				if(FrustumCulling(_vert[0])){
+					FrustumCull[i] = 1; 
+					continue;
+				} 
+				icnt += _ind.size();
+			}
 			// Allocate Heap memory for verticies and indices
 			GLuint* cube_vertices = (GLuint*)malloc(vcnt * sizeof(GLuint));
 			GLuint* cube_indices = (GLuint*)malloc(icnt * sizeof(GLuint));
 			// Assign the memory
-			for(int i = 0; i < vcnt; i++) cube_vertices[i] = tmp->rendervert[i];
-			for(int i = 0; i < icnt; i++) cube_indices[i] = tmp->indices[i];
+			int u = 0, v = 0;
+			for(int i = 0; i < rsize; i++){
+				if(FrustumCull[i]) continue; // Drop the block if outside frustum
+				auto &[_vert, _ind] = tmp -> rendervert[i];
+				for(int i = 0; i < _vert.size(); i++) cube_vertices[u++] = _vert[i];
+				for(int i = 0; i < _ind.size(); i++) cube_indices[v++] = _ind[i];
+			}
+
 			std::cout << "[Memory Usage per chunk: " << (1.0 * (vcnt * sizeof(GLuint) + icnt * sizeof(GLuint))) / 1e6 << " mb]" << std::endl;
 
 			//Create VBOs for the VAO
 			int numofbytespervertex = 1;
-			int numofvertexperblock = 8;
+			int numofvertexperblock = 24;
 			int numofblocksperchunk = 32*32*32;
 			cntblocks.push_back(icnt);
 
@@ -314,11 +375,11 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::v
 }
 
 
-void setupViewTransformation(unsigned int &program, CameraController& occ)
+void setupViewTransformation(unsigned int &program, CameraController* occ)
 {
 	//Viewing transformations (World -> Camera coordinates
 	// viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-	viewT = occ.GetCamera()->GetViewMatrix();
+	viewT = occ->GetCamera()->GetViewMatrix();
 
 	//Pass-on the viewing matrix to the vertex shader
 	glUseProgram(program);
@@ -330,10 +391,10 @@ void setupViewTransformation(unsigned int &program, CameraController& occ)
 	glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program, CameraController &occ)
+void setupProjectionTransformation(unsigned int &program, CameraController* occ)
 {
 	//Projection transformation
-	projectionT = occ.GetCamera()->GetProjectionMatrix();
+	projectionT = occ->GetCamera()->GetProjectionMatrix();
 
 	//Pass on the projection matrix to the vertex shader
 	glUseProgram(program);

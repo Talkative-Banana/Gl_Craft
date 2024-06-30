@@ -11,8 +11,7 @@ public:
     GLuint id;
     GLuint count;
     GLuint filled[32][32][32];
-    std::vector<GLuint>  indices;
-    std::vector<GLuint> rendervert;
+    std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
     chunk(uint _id, glm::ivec3 position, GLboolean display);
     ~chunk();
