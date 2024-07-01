@@ -1,15 +1,6 @@
 #include "utils.h"
 #pragma once
 
-struct Normals {
-    glm::vec3 f = { 0.0,  1.0,  0.0};
-    glm::vec3 b = { 0.0, -1.0,  0.0};
-    glm::vec3 l = {-1.0,  0.0,  0.0};
-    glm::vec3 r = { 1.0,  0.0,  0.0};
-    glm::vec3 d = { 0.0,  0.0, -1.0};
-    glm::vec3 u = { 0.0,  0.0,  1.0};
-};
-
 class block {
 private:
     void GenerateVerticies();

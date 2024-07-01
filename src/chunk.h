@@ -1,5 +1,8 @@
 #include "utils.h"
 #include "block.h"
+#include <noise/noise.h>
+#include <noiseutils.h>
+
 #pragma once
 
 class chunk{
@@ -17,6 +20,7 @@ public:
     ~chunk();
 
     void Render();
+    void Setup_Landscape(GLint X, GLint Y);
     GLuint RenderFace(std::vector<GLint> position);
     GLboolean isSolid(std::vector<GLint> postion);
 };

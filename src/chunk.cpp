@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "chunk.h"
 #include <cstdlib>
+#include <string>
 
 chunk::chunk(uint _id, glm::ivec3 position, GLboolean display){
     id = _id;
@@ -59,27 +60,53 @@ GLuint chunk::RenderFace(std::vector<GLint> position){
     return mask;
 }
 
-void chunk::Render(){
-    if(!displaychunk) return;
-    GLuint idx = 0;
-    for(int i = 0; i < 32; i++){
-        for(int j = 0; j < 32; j++){
-            for(int k = 0; k < 32; k++){
-                filled[i][j][k] = 1;
+void chunk::Setup_Landscape(GLint X, GLint Z) {
+
+    // 4 5 6 7
+    // 0 1 2 3
+    noise::module::Perlin myModule;
+    noise::utils::NoiseMap heightMap;
+    noise::utils::NoiseMapBuilderPlane heightMapBuilder;
+    heightMapBuilder.SetSourceModule (myModule);
+    heightMapBuilder.SetDestNoiseMap (heightMap);
+    heightMapBuilder.SetDestSize (256, 256);
+    heightMapBuilder.SetBounds (4.0 * Z, 4.0 * (Z + 1), 4.0 * X, 4.0 * (X + 1));
+    heightMapBuilder.Build();
+
+    noise::utils::RendererImage renderer;
+    noise::utils::Image image;
+    renderer.SetSourceNoiseMap (heightMap);
+    renderer.SetDestImage (image);
+    renderer.Render();
+
+    for (int x = 0; x < 32; x++) {
+        for (int z = 0; z < 32; z++) { // Use the noise library to get the height value of x, z             
+            noise::utils::Color color = image.GetValue(x, z);
+            // Extract the height value from the color's red channel (assuming height is encoded in the red channel)
+            int height = std::max(1, static_cast<int>((color.blue / 255.0f) * 32.0f));
+            // Use the height map texture to get the height value of x, z  
+            for (int y = 0; y < height; y++) {
+                filled[z][y][x] = 1;
             }
         }
     }
+}
+
+void chunk::Render(){
+    if(!displaychunk) return;
+    GLuint idx = 0;
+    
+    Setup_Landscape(chunkpos.x, chunkpos.z);
 
     for(int i = 0; i < 32; i++){
-        for(int j = 0; j < 32; j++){
-            for(int k = 0; k < 32; k++){
+        for(int k = 0; k < 32; k++){
+            for(int j = 0; j < 32; j++){
                 // filled[0][0][0] = 1;
-                if(!filled[i][j][k]) continue;
+                if(!filled[i][j][k]) break;
                 glm::ivec3 ofs = {i, j, k};
-                glm::ivec3 pos = chunkpos + ofs;
                 std::vector<GLint> Idx = {i, j, k};
                 GLuint mask = chunk::RenderFace(Idx);
-                blocks[i][j][k] = new block(pos, true); blocks[i][j][k]->Render(mask);
+                blocks[i][j][k] = new block(ofs, true); blocks[i][j][k]->Render(mask);
                 std::vector<GLuint> blockrendervert = blocks[i][j][k]->rendervert;
                 std::vector<GLuint> blockindices = blocks[i][j][k]->indices;
                 for(auto &ind : blockindices) ind += idx;
