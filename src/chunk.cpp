@@ -64,10 +64,17 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
 
     // 4 5 6 7
     // 0 1 2 3
-    noise::module::Perlin myModule;
+    noise::module::RidgedMulti mountainTerrain;
+    noise::module::Billow baseFlatTerrain;
+    baseFlatTerrain.SetFrequency (2.0);
+
+    noise::module::ScaleBias flatTerrain;
+    flatTerrain.SetSourceModule (0, baseFlatTerrain);
+    flatTerrain.SetScale (0.085);
+
     noise::utils::NoiseMap heightMap;
     noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule (myModule);
+    heightMapBuilder.SetSourceModule (flatTerrain);
     heightMapBuilder.SetDestNoiseMap (heightMap);
     heightMapBuilder.SetDestSize (256, 256);
     heightMapBuilder.SetBounds (4.0 * Z, 4.0 * (Z + 1), 4.0 * X, 4.0 * (X + 1));
@@ -78,6 +85,11 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
     renderer.SetSourceNoiseMap (heightMap);
     renderer.SetDestImage (image);
     renderer.Render();
+
+    noise::utils::WriterBMP writer;
+    writer.SetSourceImage (image);
+    writer.SetDestFilename ("maps/tutorial" + std::to_string(4*X+Z) + ".bmp");
+    writer.WriteDestFile ();
 
     for (int x = 0; x < 32; x++) {
         for (int z = 0; z < 32; z++) { // Use the noise library to get the height value of x, z             
