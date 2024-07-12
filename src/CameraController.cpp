@@ -30,53 +30,29 @@ void CameraController::CameraInputs(){
     } 
 
     if (Input::IsKeyPressed(GLFW_KEY_X)) {
-        m_Camera->SetPosition(glm::vec3(-1000.0f, 0.0f, 0.0f));
+        m_Camera->SetPosition(glm::vec3(-80.0f, 0.0f, 0.0f));
+        m_Camera->SetOrientation(glm::vec3(1.0f, 0.0f, 0.0f));
     } 
 
     if (Input::IsKeyPressed(GLFW_KEY_Y)) {
-        m_Camera->SetPosition(glm::vec3(0.0f, -1000.0f, 0.0f));
+        m_Camera->SetPosition(glm::vec3(0.0f, -80.0f, 1.0f));
+        m_Camera->SetOrientation(glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     if (Input::IsKeyPressed(GLFW_KEY_Z)) {
-        m_Camera->SetPosition(glm::vec3(0.0f, 0.0f, -1000.0f));
+        m_Camera->SetPosition(glm::vec3(0.0f, 0.0f, -80.0f));
+        m_Camera->SetOrientation(glm::vec3(0.0f, 0.0f, 1.0f));
     }
+    
+    auto [x, y] = Input::GetMousePosition();
+    float rotx = m_sensitivity * (float)(y - MousePos.y);
+    float roty = m_sensitivity * (float)(x - MousePos.x);
+    MousePos = glm::vec2(x, y);
 
     if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-        // Prevents camera from jumping on the first click
-        if (firstClick) {
-            glfwSetCursorPos(_window->GetWindow(), _window->GetWidth() / 2, _window->GetHeight() / 2);
-            firstClick = false;
-        }
-
-        auto [x, y] = Input::GetMousePosition();
-
-        float rotx = m_sensitivity * (float)(y - (_window->GetHeight() / 2)) / _window->GetHeight();
-        float roty = m_sensitivity * (float)(x - (_window->GetWidth() / 2)) / _window->GetWidth();
-
-        // Ensure the sensitivity is consistent by normalizing the direction vectors
-        glm::vec3 right = glm::normalize(glm::cross(m_Camera->GetUp(), m_Camera->GetOrientation()));
+        glm::vec3 right = glm::normalize(glm::cross(m_Camera->GetOrientation(), m_Camera->GetUp()));
         
-        glm::quat qx = glm::angleAxis(glm::radians(-rotx), right);
-        glm::vec3 newOrientation = glm::normalize(qx * m_Camera->GetOrientation());
-
-        // Calculate the angle between the new orientation and the up vector
-        float angleUp = glm::degrees(acos(glm::dot(glm::normalize(newOrientation), glm::normalize(m_Camera->GetUp()))));
-        float angleDown = glm::degrees(acos(glm::dot(glm::normalize(newOrientation), glm::normalize(-m_Camera->GetUp()))));
-
-        if (!((angleUp <= 5.0f) || (angleDown <= 5.0f))) {
-            m_Camera->SetOrientation(newOrientation);
-        }
-
-        // Rotate around the up axis (world y-axis)
-        glm::quat qy = glm::angleAxis(glm::radians(-roty), glm::normalize(m_Camera->GetUp()));
-        m_Camera->SetOrientation(glm::normalize(qy * m_Camera->GetOrientation()));
-
-        // Reset cursor position to the center of the window
-        glfwSetCursorPos(_window->GetWindow(), _window->GetWidth() / 2, _window->GetHeight() / 2);
-    } else if (glfwGetMouseButton(_window->GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
-        // Unhide cursor since camera is not looking around anymore
-        glfwSetInputMode(_window->GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        // Make sure the next time the camera looks around it doesn't jump
-        firstClick = true;
-    }
+        glm::quat qx = glm::normalize(glm::cross(glm::angleAxis(-rotx, right), glm::angleAxis(roty, m_Camera->GetUp())));
+        m_Camera->SetOrientation(glm::normalize(qx * m_Camera->GetOrientation()));
+    } 
 }

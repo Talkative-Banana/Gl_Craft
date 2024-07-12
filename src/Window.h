@@ -8,6 +8,9 @@ private:
 public:
     Window(int sh, int sw);
     GLFWwindow* GetWindow() const;
+    void setup(int sw, int sh);
     const int GetWidth() const;
     const int GetHeight() const;
+    void SetWidth(int display_w);
+    void SetHeight(int display_h);
 };

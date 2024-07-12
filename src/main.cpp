@@ -34,7 +34,7 @@ glm::vec3 worldpos;
 int screen_width = 640, screen_height = 640;
 GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform, vColor_uniform;
 glm::mat4 modelT, viewT, projectionT; // The model, view and projection transformations
-glm::vec4 camPosition;
+glm::vec3 camPosition;
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
 
@@ -91,6 +91,7 @@ int main(int, char**)
 		glfwPollEvents();
 		
 		Camera->CameraInputs();
+		camPosition = Camera->GetCamera()->GetPosition();
 		if (Input::IsKeyPressed(GLFW_KEY_TAB)) {
 			strcpy(textKeyStatus, "TAB");
 			strcpy(textKeyDescription, "Switching Mode");
@@ -124,7 +125,9 @@ int main(int, char**)
 		ImGui::Render();
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
+		_window -> SetHeight(display_h); _window -> SetWidth(display_w);
 		glViewport(0, 0, display_w, display_h);
+
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE); // Enable OC
@@ -314,8 +317,7 @@ void RenderBiome(unsigned int &program, std::vector<VertexArray*> &chunkva, std:
 	}
 }
 
-void createAxesLine(unsigned int & program, unsigned int &axis_VAO)
-{
+void createAxesLine(unsigned int & program, unsigned int &axis_VAO) {
 	glUseProgram(program);
 
 	//Bind shader variables
@@ -343,8 +345,7 @@ void createAxesLine(unsigned int & program, unsigned int &axis_VAO)
 	glBindVertexArray(0); //Unbind the VAO to disable changes outside this function.
 }
 
-void setupModelTransformationCube(unsigned int &program)
-{
+void setupModelTransformationCube(unsigned int &program) {
 	//Modelling transformations (Model -> World coordinates)
 	modelT = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 2.0, 1.0));
 	modelT = glm::translate(modelT, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -359,8 +360,7 @@ void setupModelTransformationCube(unsigned int &program)
 	glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis)
-{
+void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis) {
 	//Modelling transformations (Model -> World coordinates)
 	modelT = glm::rotate(glm::mat4(1.0f), rot_angle, rot_axis);
 
@@ -375,8 +375,7 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::v
 }
 
 
-void setupViewTransformation(unsigned int &program, CameraController* occ)
-{
+void setupViewTransformation(unsigned int &program, CameraController* occ) {
 	//Viewing transformations (World -> Camera coordinates
 	// viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 	viewT = occ->GetCamera()->GetViewMatrix();
@@ -391,8 +390,7 @@ void setupViewTransformation(unsigned int &program, CameraController* occ)
 	glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program, CameraController* occ)
-{
+void setupProjectionTransformation(unsigned int &program, CameraController* occ) {
 	//Projection transformation
 	projectionT = occ->GetCamera()->GetProjectionMatrix();
 

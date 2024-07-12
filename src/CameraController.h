@@ -7,9 +7,9 @@ class CameraController{
 private:
     float m_AspectRatio;
     float m_speed = 1.0f;
-    float m_sensitivity = 1.0f;
+    float m_sensitivity = 0.002f;
     Camera *m_Camera = nullptr;
-    bool firstClick = true;
+    glm::vec2 MousePos = {0.0f, 0.0f};
 public:
     void CameraInputs();
     Camera *GetCamera();
