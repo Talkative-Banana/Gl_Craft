@@ -1,26 +1,29 @@
-#include "utils.h"
-#include "block.h"
 #include <noise/noise.h>
 #include <noiseutils.h>
 
+#include <memory>
+
+#include "block.h"
+#include "constants.hpp"
+#include "utils.h"
+
 #pragma once
 
-class chunk{
-private:
-    GLboolean displaychunk;
-    glm::ivec3 chunkpos;
-    block *blocks[32][32][32];
-public:
-    GLuint id;
-    GLuint count;
-    GLuint filled[32][32][32];
-    std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
+class chunk {
+ private:
+  GLboolean displaychunk;
+  glm::ivec3 chunkpos;
+  block blocks[CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT];
 
-    chunk(uint _id, glm::ivec3 position, GLboolean display);
-    ~chunk();
+ public:
+  GLuint id;
+  GLuint count;
+  std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
-    void Render();
-    void Setup_Landscape(GLint X, GLint Y);
-    GLuint RenderFace(std::vector<GLint> position);
-    GLboolean isSolid(std::vector<GLint> postion);
+  chunk(uint _id, glm::ivec3 position, GLboolean display);
+
+  void Render();
+  void Setup_Landscape(GLint X, GLint Y);
+  GLuint RenderFace(std::vector<GLint> &&position);
+  inline GLboolean isSolid(const std::vector<GLint> &postion);
 };
