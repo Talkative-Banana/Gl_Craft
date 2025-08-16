@@ -92,7 +92,7 @@ int main(int, char **) {
   }
 
   GLuint Nokeypressed, wireframemode = 0;
-  Material mat(COBBOLESTONE_BLOCK);
+  Material mat(GRASS_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
   RenderBiome(shaderProgram, chunkva, cntblocks);
