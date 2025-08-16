@@ -65,7 +65,7 @@ int main(int, char **) {
   _window = new Window(screen_width, screen_height);
   GLFWwindow *window = _window->GetWindow();
   ImGuiIO &io = ImGui::GetIO();  // Create IO
-  ImVec4 clearColor = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+  ImVec4 clearColor = ImVec4(0.471f, 0.786f, .784f, 1.00f);
 
   unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
 
