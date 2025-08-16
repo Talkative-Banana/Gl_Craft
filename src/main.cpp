@@ -92,7 +92,7 @@ int main(int, char **) {
   }
 
   GLuint Nokeypressed, wireframemode = 0;
-  Material mat(0);
+  Material mat(COBBOLESTONE_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
   RenderBiome(shaderProgram, chunkva, cntblocks);
@@ -282,6 +282,7 @@ void RenderBiome(
   glUniform1f(side_uniform, side);
 
   // Ideally, Biome should be passed in, not recreated here every frame
+  // Cant go much beyond due to the way blocks store cords
   Biome b(1, glm::vec3(0, 0, 0), true);
   b.RenderBiome();
 

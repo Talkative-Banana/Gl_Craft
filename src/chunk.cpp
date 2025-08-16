@@ -5,9 +5,10 @@
 
 #include "Renderer.h"
 
-chunk::chunk(uint _id, glm::ivec3 position, GLboolean display) {
+chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean display) {
   id = _id;
   count = 0;
+  biomepos = _biomepos;
   chunkpos = position;
   displaychunk = display;
 }
@@ -124,7 +125,7 @@ void chunk::Render() {
         if (!blocks[i][j][k].is_solid) break;
         glm::ivec3 ofs = {i, j, k};
         GLuint mask = chunk::RenderFace({i, j, k});
-        blocks[i][j][k] = block(ofs, true);
+        blocks[i][j][k] = block(biomepos + ofs, true);
         std::vector<GLuint> indices;
         std::vector<GLuint> blockrendervert;
         blocks[i][j][k].Render(mask, indices, blockrendervert);

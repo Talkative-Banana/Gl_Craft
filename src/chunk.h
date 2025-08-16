@@ -12,6 +12,7 @@
 class chunk {
  private:
   GLboolean displaychunk;
+  glm::ivec3 biomepos;
   glm::ivec3 chunkpos;
   block blocks[CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT];
 
@@ -20,7 +21,7 @@ class chunk {
   GLuint count;
   std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
-  chunk(uint _id, glm::ivec3 position, GLboolean display);
+  chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
   void Render();
   void Setup_Landscape(GLint X, GLint Y);
