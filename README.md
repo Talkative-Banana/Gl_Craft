@@ -2,6 +2,11 @@
 Minecraft clone in C++ with OpenGL.
 
 # Preview
+
+Added perlin noise for terrain generation
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/image.png)
+
 **Grass Chunk**
 
 ![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/GrassBlock.png)
