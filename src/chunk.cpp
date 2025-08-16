@@ -97,8 +97,8 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
   writer.WriteDestFile();
 
   for (int x = 0; x < CHUNK_BLOCK_COUNT; x++) {
-    for (int z = 0; z < CHUNK_BLOCK_COUNT;
-         z++) {  // Use the noise library to get the height value of x, z
+    for (int z = 0; z < CHUNK_BLOCK_COUNT; z++) {
+      // Use the noise library to get the height value of x, z
       noise::utils::Color color = image.GetValue(x, z);
       // Extract the height value from the color's red channel (assuming height is encoded in the
       // red channel)

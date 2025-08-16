@@ -42,16 +42,19 @@ glm::vec3 camPosition;
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
 
-void RenderBiome(unsigned int &, std::vector<VertexArray *> &, std::vector<unsigned int> &);
+void RenderBiome(
+    unsigned int &,
+    std::vector<std::unique_ptr<VertexArray>> &,
+    std::vector<unsigned int> &);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
 void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
-void setupViewTransformation(unsigned int &, CameraController *);
-void setupProjectionTransformation(unsigned int &, CameraController *);
+void setupViewTransformation(unsigned int &, std::unique_ptr<CameraController> &);
+void setupProjectionTransformation(unsigned int &, std::unique_ptr<CameraController> &);
 void camTrans(glm::vec3 &);
 Window *_window = nullptr;
-CameraController *Camera;
+std::unique_ptr<CameraController> Camera;
 
 int main(int, char **) {
   // Size of Structs
@@ -69,22 +72,22 @@ int main(int, char **) {
   glUseProgram(shaderProgram);
 
   unsigned int axis_VAO;
-  Camera = new CameraController(screen_height / screen_width);
+  Camera = std::make_unique<CameraController>(screen_height / screen_width);
 
   // Generate VAO object
-  std::vector<VertexArray *> chunkva;
+  std::vector<std::unique_ptr<VertexArray>> chunkva;
   std::vector<GLuint> cntblocks;
 
   GLint maxVAOs = CHUNK_COUNTX * CHUNK_COUNTY;
 
   for (int i = 0; i < maxVAOs; ++i) {
-    VertexArray *vao = new VertexArray();
+    std::unique_ptr<VertexArray> vao = std::make_unique<VertexArray>();
     vao->Bind();
     if (glGetError() == GL_OUT_OF_MEMORY) {
       std::cout << "Reached VAO limit at: " << i << std::endl;
       break;
     }
-    chunkva.push_back(vao);
+    chunkva.push_back(std::move(vao));
     glBindVertexArray(0);
   }
 
@@ -94,6 +97,13 @@ int main(int, char **) {
 
   RenderBiome(shaderProgram, chunkva, cntblocks);
   createAxesLine(shaderProgram, axis_VAO);
+
+  // Moved outside of loop
+  worldpos_uniform = glGetUniformLocation(shaderProgram, "worldpos");
+  if (worldpos_uniform == -1) {
+    fprintf(stderr, "Could not bind location: worldpos\n");
+    exit(0);
+  }
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -117,7 +127,6 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    glUseProgram(shaderProgram);
 
     // ImGui UI menu
     ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);
@@ -158,11 +167,6 @@ int main(int, char **) {
         int idx = CHUNK_COUNTY * _chunkx + _chunky;
         chunkva[idx]->Bind();
 
-        worldpos_uniform = glGetUniformLocation(shaderProgram, "worldpos");
-        if (worldpos_uniform == -1) {
-          fprintf(stderr, "Could not bind location: worldpos\n");
-          exit(0);
-        }
         glUniform3f(
             worldpos_uniform,
             CHUNK_BLOCK_COUNT * side * _chunkx,
@@ -178,8 +182,6 @@ int main(int, char **) {
           // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
           glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
         }
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);  // Unbind the VAO to disable changes outside this function.
       }
     }
 
@@ -207,8 +209,6 @@ int main(int, char **) {
   }
 
   // Cleanup
-  for (auto &x : chunkva) delete x;
-  delete Camera;
   cleanup(window);
   return 0;
 }
@@ -256,7 +256,7 @@ int FrustumCulling(GLuint vertex) {
 
 void RenderBiome(
     unsigned int &program,
-    std::vector<VertexArray *> &chunkva,
+    std::vector<std::unique_ptr<VertexArray>> &chunkva,
     std::vector<unsigned int> &cntblocks) {
   glUseProgram(program);
 
@@ -341,7 +341,6 @@ void RenderBiome(
       chunkva[idx]->AddBuffer(vb, layout);
 
       IndexBuffer ib(cube_indices.data(), cube_indices.size());
-      ib.Bind();
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
@@ -406,7 +405,7 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::v
   glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupViewTransformation(unsigned int &program, CameraController *occ) {
+void setupViewTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
   // Viewing transformations (World -> Camera coordinates
   //  viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0,
   //  0.0));
@@ -422,7 +421,7 @@ void setupViewTransformation(unsigned int &program, CameraController *occ) {
   glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program, CameraController *occ) {
+void setupProjectionTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
   // Projection transformation
   projectionT = occ->GetCamera()->GetProjectionMatrix();
 
