@@ -31,6 +31,8 @@ set(SOURCES
   "src/Window.cpp"
   "src/WindowsInput.cpp"
   "src/Material.cpp"
+  "src/Ray.cpp"
+  "src/World.cpp"
 
 
   "depends/libnoise/noiseutils.cpp"

@@ -10,13 +10,15 @@
 #pragma once
 
 class chunk {
- private:
+private:
   GLboolean displaychunk;
   glm::ivec3 biomepos;
   glm::ivec3 chunkpos;
+
+public:
   block blocks[CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT];
 
- public:
+public:
   GLuint id;
   GLuint count;
   std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;

@@ -14,18 +14,17 @@
 #include <glm/gtx/transform.hpp>
 #include <memory>
 
-#include "Biome.h"
 #include "CameraController.h"
 #include "IndexBuffer.h"
 #include "Input.h"
 #include "Material.h"
+#include "Ray.h"
 #include "Renderer.h"
 #include "Texture.h"
 #include "TextureCubeMap.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
-#include "block.h"
-#include "chunk.h"
+#include "World.h"
 #include "constants.hpp"
 #include "main.h"
 
@@ -35,23 +34,23 @@
 float side = 2;
 glm::vec3 worldpos;
 int screen_width = 640, screen_height = 640;
-GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform,
-    vColor_uniform;
-glm::mat4 modelT, viewT, projectionT;  // The model, view and projection transformations
+GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform,
+    worldpos_uniform, vColor_uniform;
+glm::mat4 modelT, viewT,
+    projectionT; // The model, view and projection transformations
 glm::vec3 camPosition;
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
 
-void RenderBiome(
-    unsigned int &,
-    std::vector<std::unique_ptr<VertexArray>> &,
-    std::vector<unsigned int> &);
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
-void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
-void setupViewTransformation(unsigned int &, std::unique_ptr<CameraController> &);
-void setupProjectionTransformation(unsigned int &, std::unique_ptr<CameraController> &);
+void setupModelTransformationAxis(unsigned int &program, float rot_angle,
+                                  glm::vec3 rot_axis);
+void setupViewTransformation(unsigned int &,
+                             std::unique_ptr<CameraController> &);
+void setupProjectionTransformation(unsigned int &,
+                                   std::unique_ptr<CameraController> &);
 void camTrans(glm::vec3 &);
 Window *_window = nullptr;
 std::unique_ptr<CameraController> Camera;
@@ -64,10 +63,11 @@ int main(int, char **) {
   // Setup window
   _window = new Window(screen_width, screen_height);
   GLFWwindow *window = _window->GetWindow();
-  ImGuiIO &io = ImGui::GetIO();  // Create IO
+  ImGuiIO &io = ImGui::GetIO(); // Create IO
   ImVec4 clearColor = ImVec4(0.471f, 0.786f, .784f, 1.00f);
 
-  unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
+  unsigned int shaderProgram =
+      createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
 
   glUseProgram(shaderProgram);
 
@@ -95,7 +95,28 @@ int main(int, char **) {
   Material mat(GRASS_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
-  RenderBiome(shaderProgram, chunkva, cntblocks);
+  glm::ivec3 _wps = {0, 0, 0};
+  static int vVertex_attrib = -1;
+  static int side_uniform = -1;
+  if (vVertex_attrib == -1) {
+    vVertex_attrib = glGetAttribLocation(shaderProgram, "vVertex");
+    if (vVertex_attrib == -1) {
+      fprintf(stderr, "Could not bind location: vVertex\n");
+      exit(0);
+    }
+  }
+  if (side_uniform == -1) {
+    side_uniform = glGetUniformLocation(shaderProgram, "side");
+    if (side_uniform == -1) {
+      fprintf(stderr, "Could not bind location: side\n");
+      exit(0);
+    }
+  }
+  glUniform1f(side_uniform, side);
+  std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
+  world->SetupWorld();
+  world->RenderWorld(chunkva, cntblocks);
+
   createAxesLine(shaderProgram, axis_VAO);
 
   // Moved outside of loop
@@ -117,6 +138,25 @@ int main(int, char **) {
       Nokeypressed = 0;
     }
 
+    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+      strcpy(textKeyStatus, "Right click");
+      strcpy(textKeyDescription, "Casting ray");
+
+      double mouseX, mouseY;
+      glfwGetCursorPos(window, &mouseX, &mouseY);
+
+      Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+      if (ray.did_hit(world)) {
+        std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " "
+                  << ray.m_hitcords.y << " " << ray.m_hitcords.z << std::endl;
+        auto block = world->get_block_by_center(ray.m_hitcords);
+        // block->is_solid = false;
+      } else {
+        std::cout << "Ray didn't hit any block\n";
+      }
+    }
+
     if (Nokeypressed) {
       strcpy(textKeyStatus, "Listening for key events...");
       strcpy(textKeyDescription, "Listening for key events...");
@@ -127,16 +167,16 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
     // ImGui UI menu
     ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-    if (ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Text(
-          "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    if (ImGui::CollapsingHeader("Information",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImGui::Text("%.3f ms/frame (%.1f FPS)",
+                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       ImGui::Text("Key Status: %s", textKeyStatus);
       ImGui::Text("Key Description: %s", textKeyDescription);
-      ImGui::Text(
-          "Camera position: (%.2f, %.2f, %.2f)", camPosition.x, camPosition.y, camPosition.z);
+      ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x,
+                  camPosition.y, camPosition.z);
     }
     ImGui::End();
 
@@ -150,10 +190,9 @@ int main(int, char **) {
 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);  // Enable OC
+    glEnable(GL_CULL_FACE); // Enable OC
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-
 
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);
@@ -167,41 +206,43 @@ int main(int, char **) {
         int idx = CHUNK_COUNTY * _chunkx + _chunky;
         chunkva[idx]->Bind();
 
-        glUniform3f(
-            worldpos_uniform,
-            CHUNK_BLOCK_COUNT * side * _chunkx,
-            0.0,
-            CHUNK_BLOCK_COUNT * side * _chunky);
+        glUniform3f(worldpos_uniform, CHUNK_BLOCK_COUNT * side * _chunkx, 0.0,
+                    CHUNK_BLOCK_COUNT * side * _chunky);
         if (wireframemode) {
           // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
+                         nullptr);
         } else {
           // glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
           // 12 * Total Number of attributes
-          glDrawElements(GL_TRIANGLES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+          glDrawElements(GL_TRIANGLES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
+                         nullptr);
           // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
+          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
+                         nullptr);
         }
       }
     }
 
-    glDisable(GL_DEPTH_TEST);  // Disable depth test for drawing axes. We want axes to be drawn on
-                               // top of all
+    glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want
+                              // axes to be drawn on top of all
 
     glBindVertexArray(axis_VAO);
     setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
     // glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X
     glDrawArrays(GL_LINES, 0, 2);
 
-    setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
+    setupModelTransformationAxis(shaderProgram, glm::radians(90.0),
+                                 glm::vec3(0, 0, 1));
     // glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
     glDrawArrays(GL_LINES, 0, 2);
 
-    setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
+    setupModelTransformationAxis(shaderProgram, -glm::radians(90.0),
+                                 glm::vec3(0, 1, 0));
     // glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
     glDrawArrays(GL_LINES, 0, 2);
 
-    glEnable(GL_DEPTH_TEST);  // Enable depth test again
+    glEnable(GL_DEPTH_TEST); // Enable depth test again
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -244,7 +285,8 @@ int FrustumCulling(GLuint vertex) {
   uint positionZ = (vertex >> 12u) & 63u;
   uint centeroff = (vertex >> 18u) & 7u;
 
-  glm::ivec3 pos = glm::ivec3(side * positionX, side * positionY, side * positionZ);
+  glm::ivec3 pos =
+      glm::ivec3(side * positionX, side * positionY, side * positionZ);
   // Center of block
   glm::ivec3 centercord = Center(pos, centeroff);
   for (int i = 0; i < 6; i++) {
@@ -252,101 +294,6 @@ int FrustumCulling(GLuint vertex) {
     // TODO:
   }
   return 0;
-}
-
-void RenderBiome(
-    unsigned int &program,
-    std::vector<std::unique_ptr<VertexArray>> &chunkva,
-    std::vector<unsigned int> &cntblocks) {
-  glUseProgram(program);
-
-  static int vVertex_attrib = -1;
-  static int side_uniform = -1;
-
-  if (vVertex_attrib == -1) {
-    vVertex_attrib = glGetAttribLocation(program, "vVertex");
-    if (vVertex_attrib == -1) {
-      fprintf(stderr, "Could not bind location: vVertex\n");
-      exit(0);
-    }
-  }
-
-  if (side_uniform == -1) {
-    side_uniform = glGetUniformLocation(program, "side");
-    if (side_uniform == -1) {
-      fprintf(stderr, "Could not bind location: side\n");
-      exit(0);
-    }
-  }
-
-  glUniform1f(side_uniform, side);
-
-  // Ideally, Biome should be passed in, not recreated here every frame
-  // Cant go much beyond due to the way blocks store cords
-  Biome b(1, glm::vec3(0, 0, 0), true);
-  b.RenderBiome();
-
-  for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; ++_chunkx) {
-    for (int _chunky = 0; _chunky < CHUNK_COUNTY; ++_chunky) {
-      int idx = CHUNK_COUNTY * _chunkx + _chunky;
-      chunkva[idx]->Bind();
-
-      auto &tmp = b.chunks[_chunkx][_chunky];
-      const GLuint cnt = tmp->count;
-      const GLuint rsize = static_cast<GLuint>(tmp->rendervert.size());
-
-      // std::vector<int> FrustumCull(rsize, 0);
-      GLuint vcnt = 0, icnt = 0;
-
-      for (GLuint i = 0; i < rsize; ++i) {
-        auto &vert_ind = tmp->rendervert[i];
-        const auto &verts = vert_ind.first;
-        const auto &inds = vert_ind.second;
-
-        vcnt += static_cast<GLuint>(verts.size());
-        // Diabled for now //  TODO:
-        // if (FrustumCulling(verts[0])) {
-        //  FrustumCull[i] = 1;
-        //  std::cout << "Frustum Culled!\n";
-        //  continue;
-        // }
-        icnt += static_cast<GLuint>(inds.size());
-      }
-
-      std::vector<GLuint> cube_vertices;
-      cube_vertices.reserve(vcnt);
-
-      std::vector<GLuint> cube_indices;
-      cube_indices.reserve(icnt);
-
-      for (GLuint i = 0; i < rsize; ++i) {
-        // if (FrustumCull[i]) continue;
-        auto &vert_ind = tmp->rendervert[i];
-        const auto &verts = vert_ind.first;
-        const auto &inds = vert_ind.second;
-
-        cube_vertices.insert(cube_vertices.end(), verts.begin(), verts.end());
-        cube_indices.insert(cube_indices.end(), inds.begin(), inds.end());
-      }
-
-      std::cout << "[Memory Usage per chunk: "
-                << ((cube_vertices.size() + cube_indices.size()) * sizeof(GLuint)) / 1e6 << " MB]"
-                << std::endl;
-
-      cntblocks.push_back(icnt);
-
-      VertexBufferLayout layout;
-      layout.Push(GL_UNSIGNED_INT, 1);
-
-      VertexBuffer vb(cube_vertices.data(), cube_vertices.size() * sizeof(GLuint));
-      chunkva[idx]->AddBuffer(vb, layout);
-
-      IndexBuffer ib(cube_indices.data(), cube_indices.size());
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
-    }
-  }
 }
 
 void createAxesLine(unsigned int &program, unsigned int &axis_VAO) {
@@ -360,21 +307,23 @@ void createAxesLine(unsigned int &program, unsigned int &axis_VAO) {
   }
 
   // Axes data
-  GLfloat axis_vertices[] = {0, 0, 0, 20, 0, 0};  // X-axis
+  GLfloat axis_vertices[] = {0, 0, 0, 20, 0, 0}; // X-axis
   glGenVertexArrays(1, &axis_VAO);
   glBindVertexArray(axis_VAO);
 
   // Create VBO for the VAO
-  int nVertices = 2;  // 2 vertices
+  int nVertices = 2; // 2 vertices
   GLuint vertex_VBO;
   glGenBuffers(1, &vertex_VBO);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_VBO);
-  glBufferData(GL_ARRAY_BUFFER, nVertices * 3 * sizeof(GLfloat), axis_vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, nVertices * 3 * sizeof(GLfloat), axis_vertices,
+               GL_STATIC_DRAW);
   glEnableVertexAttribArray(vVertex_attrib_position);
   glVertexAttribPointer(vVertex_attrib_position, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);  // Unbind the VAO to disable changes outside this function.
+  glBindVertexArray(
+      0); // Unbind the VAO to disable changes outside this function.
 }
 
 void setupModelTransformationCube(unsigned int &program) {
@@ -392,7 +341,8 @@ void setupModelTransformationCube(unsigned int &program) {
   glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis) {
+void setupModelTransformationAxis(unsigned int &program, float rot_angle,
+                                  glm::vec3 rot_axis) {
   // Modelling transformations (Model -> World coordinates)
   modelT = glm::rotate(glm::mat4(1.0f), rot_angle, rot_axis);
 
@@ -406,10 +356,11 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::v
   glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupViewTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
+void setupViewTransformation(unsigned int &program,
+                             std::unique_ptr<CameraController> &occ) {
   // Viewing transformations (World -> Camera coordinates
-  //  viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0,
-  //  0.0));
+  //  viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0),
+  //  glm::vec3(0.0, 1.0, 0.0));
   viewT = occ->GetCamera()->GetViewMatrix();
 
   // Pass-on the viewing matrix to the vertex shader
@@ -422,7 +373,8 @@ void setupViewTransformation(unsigned int &program, std::unique_ptr<CameraContro
   glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
+void setupProjectionTransformation(unsigned int &program,
+                                   std::unique_ptr<CameraController> &occ) {
   // Projection transformation
   projectionT = occ->GetCamera()->GetProjectionMatrix();
 
@@ -433,5 +385,6 @@ void setupProjectionTransformation(unsigned int &program, std::unique_ptr<Camera
     fprintf(stderr, "Could not bind location: vProjection\n");
     exit(0);
   }
-  glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE, glm::value_ptr(projectionT));
+  glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE,
+                     glm::value_ptr(projectionT));
 }
