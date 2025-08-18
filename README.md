@@ -39,6 +39,16 @@ Extract the .zip or .tar file
 ### GNU/Linux
 ``` bash
 chmod +x build.sh clean.sh
+sudo apt update && sudo apt install -y \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    libx11-dev \
+    xorg-dev \
+    libglfw3-dev \
+    libglm-dev \
+    libglew-dev
+
 ./build.sh
 ```
 ### Windows
