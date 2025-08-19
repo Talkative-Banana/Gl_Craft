@@ -18,6 +18,7 @@
 #include "IndexBuffer.h"
 #include "Input.h"
 #include "Material.h"
+#include "Player.h"
 #include "Ray.h"
 #include "Renderer.h"
 #include "Texture.h"
@@ -27,33 +28,25 @@
 #include "World.h"
 #include "constants.hpp"
 #include "main.h"
-
 #define IMGUI_TEXT_CAPACITY 256
 
 // Globals
-float side = 2;
 glm::vec3 worldpos;
-int screen_width = 640, screen_height = 640;
-GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform,
-    worldpos_uniform, vColor_uniform;
+GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform,
+    vColor_uniform;
 glm::mat4 modelT, viewT,
-    projectionT; // The model, view and projection transformations
-glm::vec3 camPosition;
+    projectionT;  // The model, view and projection transformations
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
 
 void createAxesLine(unsigned int &, unsigned int &);
 
 void setupModelTransformationCube(unsigned int &);
-void setupModelTransformationAxis(unsigned int &program, float rot_angle,
-                                  glm::vec3 rot_axis);
-void setupViewTransformation(unsigned int &,
-                             std::unique_ptr<CameraController> &);
-void setupProjectionTransformation(unsigned int &,
-                                   std::unique_ptr<CameraController> &);
+void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis);
+void setupViewTransformation(unsigned int &, std::unique_ptr<CameraController> &);
+void setupProjectionTransformation(unsigned int &, std::unique_ptr<CameraController> &);
 void camTrans(glm::vec3 &);
 Window *_window = nullptr;
-std::unique_ptr<CameraController> Camera;
 
 int main(int, char **) {
   // Size of Structs
@@ -61,41 +54,25 @@ int main(int, char **) {
   std::cout << "Size of chunk is: " << sizeof(chunk) << std::endl;
   std::cout << "Size of biome is: " << sizeof(Biome) << std::endl;
   // Setup window
-  _window = new Window(screen_width, screen_height);
+  _window = new Window(SCREEN_WIDTH, SCREEN_HEIGHT);
   GLFWwindow *window = _window->GetWindow();
-  ImGuiIO &io = ImGui::GetIO(); // Create IO
+  ImGuiIO &io = ImGui::GetIO();  // Create IO
   ImVec4 clearColor = ImVec4(0.471f, 0.786f, .784f, 1.00f);
 
-  unsigned int shaderProgram =
-      createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
+  unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
 
   glUseProgram(shaderProgram);
 
   unsigned int axis_VAO;
-  Camera = std::make_unique<CameraController>(screen_height / screen_width);
 
   // Generate VAO object
   std::vector<std::unique_ptr<VertexArray>> chunkva;
   std::vector<GLuint> cntblocks;
 
-  GLint maxVAOs = CHUNK_COUNTX * CHUNK_COUNTY;
-
-  for (int i = 0; i < maxVAOs; ++i) {
-    std::unique_ptr<VertexArray> vao = std::make_unique<VertexArray>();
-    vao->Bind();
-    if (glGetError() == GL_OUT_OF_MEMORY) {
-      std::cout << "Reached VAO limit at: " << i << std::endl;
-      break;
-    }
-    chunkva.push_back(std::move(vao));
-    glBindVertexArray(0);
-  }
-
   GLuint Nokeypressed, wireframemode = 0;
   Material mat(GRASS_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
-  glm::ivec3 _wps = {0, 0, 0};
   static int vVertex_attrib = -1;
   static int side_uniform = -1;
   if (vVertex_attrib == -1) {
@@ -112,7 +89,8 @@ int main(int, char **) {
       exit(0);
     }
   }
-  glUniform1f(side_uniform, side);
+  glUniform1f(side_uniform, BLOCK_SIZE);
+  glm::ivec3 _wps = {0, 0, 0};
   std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
   world->SetupWorld();
   world->RenderWorld(chunkva, cntblocks);
@@ -126,11 +104,13 @@ int main(int, char **) {
     exit(0);
   }
 
+  std::unique_ptr<Player> player1 = std::make_unique<Player>();
+
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
-    Camera->CameraInputs();
-    camPosition = Camera->GetCamera()->GetPosition();
+    // handle player input
+    player1->handle_input();
     if (Input::IsKeyPressed(GLFW_KEY_TAB)) {
       strcpy(textKeyStatus, "TAB");
       strcpy(textKeyDescription, "Switching Mode");
@@ -148,10 +128,14 @@ int main(int, char **) {
       Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
 
       if (ray.did_hit(world)) {
-        std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " "
-                  << ray.m_hitcords.y << " " << ray.m_hitcords.z << std::endl;
+        std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
+                  << " " << ray.m_hitcords.z << std::endl;
         auto block = world->get_block_by_center(ray.m_hitcords);
-        // block->is_solid = false;
+        block->is_solid = false;
+        chunkva.clear();
+        cntblocks.clear();
+
+        world->RenderWorld(chunkva, cntblocks);
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
@@ -169,14 +153,16 @@ int main(int, char **) {
 
     // ImGui UI menu
     ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-    if (ImGui::CollapsingHeader("Information",
-                                ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Text("%.3f ms/frame (%.1f FPS)",
-                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    if (ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImGui::Text(
+          "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       ImGui::Text("Key Status: %s", textKeyStatus);
       ImGui::Text("Key Description: %s", textKeyDescription);
-      ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", camPosition.x,
-                  camPosition.y, camPosition.z);
+      ImGui::Text(
+          "Camera position: (%.2f, %.2f, %.2f)",
+          player1->m_cameracontroller->GetCamera()->GetPosition().x,
+          player1->m_cameracontroller->GetCamera()->GetPosition().y,
+          player1->m_cameracontroller->GetCamera()->GetPosition().z);
     }
     ImGui::End();
 
@@ -190,14 +176,14 @@ int main(int, char **) {
 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE); // Enable OC
+    glEnable(GL_CULL_FACE);  // Enable OC
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);
-    setupViewTransformation(shaderProgram, Camera);
-    setupProjectionTransformation(shaderProgram, Camera);
+    setupViewTransformation(shaderProgram, player1->m_cameracontroller);
+    setupProjectionTransformation(shaderProgram, player1->m_cameracontroller);
 
     // glBindVertexArray(cube_VAO);
     tcm.Bind();
@@ -206,43 +192,41 @@ int main(int, char **) {
         int idx = CHUNK_COUNTY * _chunkx + _chunky;
         chunkva[idx]->Bind();
 
-        glUniform3f(worldpos_uniform, CHUNK_BLOCK_COUNT * side * _chunkx, 0.0,
-                    CHUNK_BLOCK_COUNT * side * _chunky);
+        glUniform3f(
+            worldpos_uniform,
+            CHUNK_BLOCK_COUNT * BLOCK_SIZE * _chunkx,
+            0.0,
+            CHUNK_BLOCK_COUNT * BLOCK_SIZE * _chunky);
         if (wireframemode) {
           // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
-                         nullptr);
+          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
         } else {
           // glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
           // 12 * Total Number of attributes
-          glDrawElements(GL_TRIANGLES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
-                         nullptr);
+          glDrawElements(GL_TRIANGLES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
           // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT,
-                         nullptr);
+          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
         }
       }
     }
 
-    glDisable(GL_DEPTH_TEST); // Disable depth test for drawing axes. We want
-                              // axes to be drawn on top of all
+    glDisable(GL_DEPTH_TEST);  // Disable depth test for drawing axes. We want
+                               // axes to be drawn on top of all
 
     glBindVertexArray(axis_VAO);
     setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
     // glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X
     glDrawArrays(GL_LINES, 0, 2);
 
-    setupModelTransformationAxis(shaderProgram, glm::radians(90.0),
-                                 glm::vec3(0, 0, 1));
+    setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
     // glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
     glDrawArrays(GL_LINES, 0, 2);
 
-    setupModelTransformationAxis(shaderProgram, -glm::radians(90.0),
-                                 glm::vec3(0, 1, 0));
+    setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
     // glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
     glDrawArrays(GL_LINES, 0, 2);
 
-    glEnable(GL_DEPTH_TEST); // Enable depth test again
+    glEnable(GL_DEPTH_TEST);  // Enable depth test again
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -261,21 +245,21 @@ int FrustumCulling(GLuint vertex) {
     glm::ivec3 center = pos;
 
     if ((centeroff & 1u) == 1u) {
-      center.z += side / 2;
+      center.z += BLOCK_SIZE / 2;
     } else {
-      center.z -= side / 2;
+      center.z -= BLOCK_SIZE / 2;
     }
 
     if ((centeroff & 2u) == 2u) {
-      center.y += side / 2;
+      center.y += BLOCK_SIZE / 2;
     } else {
-      center.y -= side / 2;
+      center.y -= BLOCK_SIZE / 2;
     }
 
     if ((centeroff & 4u) == 4u) {
-      center.x += side / 2;
+      center.x += BLOCK_SIZE / 2;
     } else {
-      center.x -= side / 2;
+      center.x -= BLOCK_SIZE / 2;
     }
     return center;
   };
@@ -286,7 +270,7 @@ int FrustumCulling(GLuint vertex) {
   uint centeroff = (vertex >> 18u) & 7u;
 
   glm::ivec3 pos =
-      glm::ivec3(side * positionX, side * positionY, side * positionZ);
+      glm::ivec3(BLOCK_SIZE * positionX, BLOCK_SIZE * positionY, BLOCK_SIZE * positionZ);
   // Center of block
   glm::ivec3 centercord = Center(pos, centeroff);
   for (int i = 0; i < 6; i++) {
@@ -307,23 +291,21 @@ void createAxesLine(unsigned int &program, unsigned int &axis_VAO) {
   }
 
   // Axes data
-  GLfloat axis_vertices[] = {0, 0, 0, 20, 0, 0}; // X-axis
+  GLfloat axis_vertices[] = {0, 0, 0, 20, 0, 0};  // X-axis
   glGenVertexArrays(1, &axis_VAO);
   glBindVertexArray(axis_VAO);
 
   // Create VBO for the VAO
-  int nVertices = 2; // 2 vertices
+  int nVertices = 2;  // 2 vertices
   GLuint vertex_VBO;
   glGenBuffers(1, &vertex_VBO);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_VBO);
-  glBufferData(GL_ARRAY_BUFFER, nVertices * 3 * sizeof(GLfloat), axis_vertices,
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, nVertices * 3 * sizeof(GLfloat), axis_vertices, GL_STATIC_DRAW);
   glEnableVertexAttribArray(vVertex_attrib_position);
   glVertexAttribPointer(vVertex_attrib_position, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(
-      0); // Unbind the VAO to disable changes outside this function.
+  glBindVertexArray(0);  // Unbind the VAO to disable changes outside this function.
 }
 
 void setupModelTransformationCube(unsigned int &program) {
@@ -341,8 +323,7 @@ void setupModelTransformationCube(unsigned int &program) {
   glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupModelTransformationAxis(unsigned int &program, float rot_angle,
-                                  glm::vec3 rot_axis) {
+void setupModelTransformationAxis(unsigned int &program, float rot_angle, glm::vec3 rot_axis) {
   // Modelling transformations (Model -> World coordinates)
   modelT = glm::rotate(glm::mat4(1.0f), rot_angle, rot_axis);
 
@@ -356,8 +337,7 @@ void setupModelTransformationAxis(unsigned int &program, float rot_angle,
   glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
 }
 
-void setupViewTransformation(unsigned int &program,
-                             std::unique_ptr<CameraController> &occ) {
+void setupViewTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
   // Viewing transformations (World -> Camera coordinates
   //  viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0),
   //  glm::vec3(0.0, 1.0, 0.0));
@@ -373,8 +353,7 @@ void setupViewTransformation(unsigned int &program,
   glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
 }
 
-void setupProjectionTransformation(unsigned int &program,
-                                   std::unique_ptr<CameraController> &occ) {
+void setupProjectionTransformation(unsigned int &program, std::unique_ptr<CameraController> &occ) {
   // Projection transformation
   projectionT = occ->GetCamera()->GetProjectionMatrix();
 
@@ -385,6 +364,5 @@ void setupProjectionTransformation(unsigned int &program,
     fprintf(stderr, "Could not bind location: vProjection\n");
     exit(0);
   }
-  glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE,
-                     glm::value_ptr(projectionT));
+  glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE, glm::value_ptr(projectionT));
 }

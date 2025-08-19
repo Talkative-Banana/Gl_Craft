@@ -33,7 +33,7 @@ set(SOURCES
   "src/Material.cpp"
   "src/Ray.cpp"
   "src/World.cpp"
-
+  "src/Player.cpp"
 
   "depends/libnoise/noiseutils.cpp"
   "depends/imgui/imgui_impl_glfw.cpp"

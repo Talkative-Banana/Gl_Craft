@@ -2,6 +2,8 @@
 
 #include <glm/gtx/transform.hpp>
 
+#include "constants.hpp"
+
 class Camera {
  private:
   glm::mat4 m_ProjectionMatrix;

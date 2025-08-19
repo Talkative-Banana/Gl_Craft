@@ -1,12 +1,12 @@
 #include "chunk.h"
 
 #include <cstdlib>
+#include <random>
 #include <string>
 
 #include "Renderer.h"
 
-chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position,
-             GLboolean display) {
+chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean display) {
   id = _id;
   count = 0;
   biomepos = _biomepos;
@@ -16,9 +16,9 @@ chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position,
 }
 
 inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
-  if ((position[0] >= 0) && (position[0] < CHUNK_BLOCK_COUNT) &&
-      (position[1] >= 0) && (position[1] < CHUNK_BLOCK_COUNT) &&
-      (position[2] >= 0) && (position[2] < CHUNK_BLOCK_COUNT)) {
+  if ((position[0] >= 0) && (position[0] < CHUNK_BLOCK_COUNT) && (position[1] >= 0) &&
+      (position[1] < CHUNK_BLOCK_COUNT) && (position[2] >= 0) &&
+      (position[2] < CHUNK_BLOCK_COUNT)) {
     return blocks[position[0]][position[1]][position[2]].is_solid;
   }
   return false;
@@ -36,38 +36,32 @@ GLuint chunk::RenderFace(std::vector<GLint> &&position) {
     if (face == 1) {
       // No Need to draw back face if block behind is solid
       tmp[2] -= 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[2] += 1;
     } else if (face == 2) {
       // No Need to draw front face if block in front is solid
       tmp[2] += 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[2] -= 1;
     } else if (face == 3) {
       // No Need to draw left face if block in left is solid
       tmp[0] -= 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[0] += 1;
     } else if (face == 4) {
       // No Need to draw right face if block in right is solid
       tmp[0] += 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[0] -= 1;
     } else if (face == 5) {
       // No Need to draw top face if block on top is solid
       tmp[1] += 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[1] -= 1;
     } else if (face == 6) {
       // No Need to draw bottom face if block on bottom is solid
       tmp[1] -= 1;
-      if (!isSolid(tmp))
-        mask |= (1 << (face - 1));
+      if (!isSolid(tmp)) mask |= (1 << (face - 1));
       tmp[1] += 1;
     }
   }
@@ -75,12 +69,19 @@ GLuint chunk::RenderFace(std::vector<GLint> &&position) {
 }
 
 void chunk::Setup_Landscape(GLint X, GLint Z) {
+  // Generate a random seed
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<int> dist(0, 1000000);
+  int randomSeed = dist(gen);
 
   // 4 5 6 7
   // 0 1 2 3
   noise::module::RidgedMulti mountainTerrain;
+  mountainTerrain.SetSeed(randomSeed);  // Set random seed for mountains
   noise::module::Billow baseFlatTerrain;
   baseFlatTerrain.SetFrequency(2.0);
+  baseFlatTerrain.SetSeed(randomSeed);  // Set random seed for flat terrain
 
   noise::module::ScaleBias flatTerrain;
   flatTerrain.SetSourceModule(0, baseFlatTerrain);
@@ -114,31 +115,33 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
       int height = std::max(1, static_cast<int>((color.blue / 255.0f) * 32.0f));
       // Use the height map texture to get the height value of x, z
       for (int y = 0; y < height; y++) {
-        blocks[z][y][x].is_solid = 1;
+        glm::ivec3 ofs = {z, y, x};
+        blocks[z][y][x] = block(biomepos + ofs, true);
       }
     }
   }
 }
 
 void chunk::Render() {
-  if (!displaychunk)
-    return;
-  GLuint idx = 0;
+  // Rerendering
+  rendervert.clear();
+  count = 0;
+  if (!displaychunk) return;
+  GLuint idx = 0, cnt = 0;
 
   for (int i = 0; i < CHUNK_BLOCK_COUNT; i++) {
     for (int k = 0; k < CHUNK_BLOCK_COUNT; k++) {
       for (int j = 0; j < CHUNK_BLOCK_COUNT; j++) {
         // filled[0][0][0] = 1;
-        if (!blocks[i][j][k].is_solid)
+        if (!blocks[i][j][k].is_solid) {
+          cnt++;
           break;
-        glm::ivec3 ofs = {i, j, k};
+        }
         GLuint mask = chunk::RenderFace({i, j, k});
-        blocks[i][j][k] = block(biomepos + ofs, true);
         std::vector<GLuint> indices;
         std::vector<GLuint> blockrendervert;
         blocks[i][j][k].Render(mask, indices, blockrendervert);
-        for (auto &ind : indices)
-          ind += idx;
+        for (auto &ind : indices) ind += idx;
         rendervert.push_back({blockrendervert, indices});
         idx += 24, count++;
       }

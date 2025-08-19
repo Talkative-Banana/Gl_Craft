@@ -6,7 +6,7 @@ Camera::Camera(float left, float right, float bottom, float top)
     : m_ProjectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 5000.0f)), m_ViewMatrix(1.0f) {
 
   // Perspective Addition
-  m_ProjectionMatrix = glm::perspective(45.0f, 1.0f, 1.0f, 1000.0f);
+  m_ProjectionMatrix = glm::perspective(45.0f, 1.0f, NEAR_PLANE, FAR_PLANE);
   m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 }
 

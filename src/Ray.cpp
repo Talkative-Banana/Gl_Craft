@@ -20,8 +20,12 @@ bool Ray::did_hit(std::unique_ptr<World> &world) {
   return m_hit = false;
 }
 
-Ray screenPosToWorldRay(GLFWwindow *window, double mouseX, double mouseY,
-                        const glm::mat4 &view, const glm::mat4 &projection) {
+Ray screenPosToWorldRay(
+    GLFWwindow *window,
+    double mouseX,
+    double mouseY,
+    const glm::mat4 &view,
+    const glm::mat4 &projection) {
   int width, height;
   glfwGetWindowSize(window, &width, &height);
 
@@ -29,8 +33,8 @@ Ray screenPosToWorldRay(GLFWwindow *window, double mouseX, double mouseY,
 
   // OpenGL expects Y flipped (0 is bottom)
   glm::vec3 screenNear(mouseX, height - mouseY,
-                       0.0f);                         // depth = 0 -> near plane
-  glm::vec3 screenFar(mouseX, height - mouseY, 1.0f); // depth = 1 -> far plane
+                       0.0f);                          // depth = 0 -> near plane
+  glm::vec3 screenFar(mouseX, height - mouseY, 1.0f);  // depth = 1 -> far plane
 
   glm::vec3 worldNear = glm::unProject(screenNear, view, projection, viewport);
   glm::vec3 worldFar = glm::unProject(screenFar, view, projection, viewport);
