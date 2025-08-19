@@ -1,7 +1,7 @@
 #pragma once
 constexpr static float BLOCK_SIZE = 2.0;
 constexpr static float NEAR_PLANE = 1.0f;
-constexpr static float FAR_PLANE = 100.0f;
+constexpr static float FAR_PLANE = 1000.0f;
 constexpr static int TOTAL_STEPS = 32;
 constexpr static float STEP_SIZE = 1.0;
 constexpr static int CHUNK_COUNTX = 4;

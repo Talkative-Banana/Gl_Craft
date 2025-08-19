@@ -5,7 +5,7 @@
 
 class block {
  private:
-  std::vector<std::vector<GLuint>> GenerateVerticies();
+  std::vector<GLuint> GenerateVerticies();
 
  public:
   glm::ivec3 position;
