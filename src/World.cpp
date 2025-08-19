@@ -23,7 +23,6 @@ void World::RenderWorld(
 
       for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; ++_chunkx) {
         for (int _chunky = 0; _chunky < CHUNK_COUNTY; ++_chunky) {
-          int idx = CHUNK_COUNTY * _chunkx + _chunky;
           chunkva.push_back(std::make_unique<VertexArray>());
           chunkva.back()->Bind();
 
