@@ -1,7 +1,7 @@
 #include "Ray.h"
 
 glm::vec3 toBlockCenter(const glm::vec3 &p) {
-  return glm::floor(p / 2.0f) * 2.0f + glm::vec3(1.0f);
+  return glm::floor(p / 4.0f) * 4.0f + glm::vec3(2.0f);
 }
 
 bool Ray::did_hit(std::unique_ptr<World> &world) {

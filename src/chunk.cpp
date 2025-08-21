@@ -19,7 +19,9 @@ inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
   if ((position[0] >= 0) && (position[0] < CHUNK_BLOCK_COUNT) && (position[1] >= 0) &&
       (position[1] < CHUNK_BLOCK_COUNT) && (position[2] >= 0) &&
       (position[2] < CHUNK_BLOCK_COUNT)) {
-    return blocks[position[0]][position[1]][position[2]].is_solid;
+
+    // Check if neibhourung block is solid
+    return ((blocks[position[0]][position[1]][position[2]].blmask & 1));
   }
   return false;
 }
@@ -116,7 +118,7 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
       // Use the height map texture to get the height value of x, z
       for (int y = 0; y < height; y++) {
         glm::ivec3 ofs = {z, y, x};
-        blocks[z][y][x] = block(biomepos + ofs, true);
+        blocks[z][y][x] = block(biomepos + ofs, true);  // mark them solid
       }
     }
   }
@@ -127,15 +129,14 @@ void chunk::Render() {
   rendervert.clear();
   count = 0;
   if (!displaychunk) return;
-  GLuint idx = 0, cnt = 0;
+  GLuint idx = 0;
 
   for (int i = 0; i < CHUNK_BLOCK_COUNT; i++) {
     for (int k = 0; k < CHUNK_BLOCK_COUNT; k++) {
       for (int j = 0; j < CHUNK_BLOCK_COUNT; j++) {
         // filled[0][0][0] = 1;
-        if (!blocks[i][j][k].is_solid) {
-          cnt++;
-          break;
+        if (!blocks[i][j][k].blmask) {
+          break;  // unsolid blocks
         }
         GLuint mask = chunk::RenderFace({i, j, k});
         std::vector<GLuint> indices;

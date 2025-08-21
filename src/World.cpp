@@ -89,7 +89,7 @@ void World::RenderWorld(
 block *World::get_block_by_center(const glm::ivec3 &pos) {
   // get the biome
   // get x and y cords
-  int x = pos.x / BLOCK_SIZE, y = pos.y / BLOCK_SIZE, z = pos.z / BLOCK_SIZE;
+  int x = pos.x / (2 * BLOCK_SIZE), y = pos.y / (2 * BLOCK_SIZE), z = pos.z / (2 * BLOCK_SIZE);
 
   if (pos.x < 0 || pos.y < 0 || pos.z < 0) return nullptr;
 
@@ -113,5 +113,10 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
 
 bool World::isSolid(const glm::ivec3 &pos) {
   block *b = get_block_by_center(pos);
-  return (b && b->is_solid);
+  return (b && ((b->blmask) & 1));
+}
+
+bool World::isVisible(const glm::ivec3 &pos) {
+  block *b = get_block_by_center(pos);
+  return (b && (((b->blmask) & 2) == 2));
 }
