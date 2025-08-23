@@ -21,7 +21,7 @@ inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
       (position[2] < CHUNK_BLOCK_COUNT)) {
 
     // Check if neibhourung block is solid
-    return ((blocks[position[0]][position[1]][position[2]].blmask & 1));
+    return ((blocks[position[0]][position[1]][position[2]].blmask >> 15 & 1));
   }
   return false;
 }
@@ -135,7 +135,7 @@ void chunk::Render() {
     for (int k = 0; k < CHUNK_BLOCK_COUNT; k++) {
       for (int j = 0; j < CHUNK_BLOCK_COUNT; j++) {
         // filled[0][0][0] = 1;
-        if (!blocks[i][j][k].blmask) {
+        if (!((blocks[i][j][k].blmask >> 15) & 1)) {
           break;  // unsolid blocks
         }
         GLuint mask = chunk::RenderFace({i, j, k});

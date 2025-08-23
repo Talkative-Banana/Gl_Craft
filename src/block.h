@@ -8,13 +8,12 @@ class block {
   std::vector<GLuint> GenerateVerticies();
 
  public:
-  glm::ivec3 position;
   // visible solid
-  // 00000000
-  //       ^^
-  //       ||
-  //       vs
-  int blmask;
+  // 00000000_00000000_00000000_00000000
+  //                 ^ ^^^^^^^^ ^^^^^^^^
+  //                 | |||||||| ||||||||
+  //                 v sxxxxxyy yyyzzzzz
+  uint32_t blmask;
   static constexpr std::array<std::array<unsigned int, 6>, 6> faceindices = {
       {{{2, 3, 0, 2, 0, 1}},          // Back
        {{7, 6, 5, 7, 5, 4}},          // Front

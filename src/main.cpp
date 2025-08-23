@@ -51,6 +51,23 @@ void camTrans(glm::vec3 &);
 Window *_window = nullptr;
 bool enable_gravity;
 
+void draw_axis(unsigned int axis_VAO, unsigned int shaderProgram) {
+  glBindVertexArray(axis_VAO);
+  setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
+  // glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X
+  glDrawArrays(GL_LINES, 0, 2);
+
+  setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
+  // glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
+  glDrawArrays(GL_LINES, 0, 2);
+
+  setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
+  // glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
+  glDrawArrays(GL_LINES, 0, 2);
+
+  glEnable(GL_DEPTH_TEST);  // Enable depth test again
+}
+
 int main(int, char **) {
   // Size of Structs
   std::cout << "Size of block is: " << sizeof(block) << std::endl;
@@ -214,21 +231,7 @@ int main(int, char **) {
     glDisable(GL_DEPTH_TEST);  // Disable depth test for drawing axes. We want
                                // axes to be drawn on top of all
 
-    glBindVertexArray(axis_VAO);
-    setupModelTransformationAxis(shaderProgram, 0.0, glm::vec3(0, 0, 1));
-    // glUniform4f(vColor_uniform, 1.0, 0.0, 0.0, 1.0); //Red -> X
-    glDrawArrays(GL_LINES, 0, 2);
-
-    setupModelTransformationAxis(shaderProgram, glm::radians(90.0), glm::vec3(0, 0, 1));
-    // glUniform4f(vColor_uniform, 0.0, 1.0, 0.0, 1.0); //Green -> Y
-    glDrawArrays(GL_LINES, 0, 2);
-
-    setupModelTransformationAxis(shaderProgram, -glm::radians(90.0), glm::vec3(0, 1, 0));
-    // glUniform4f(vColor_uniform, 0.0, 0.0, 1.0, 1.0); //Blue -> Z
-    glDrawArrays(GL_LINES, 0, 2);
-
-    glEnable(GL_DEPTH_TEST);  // Enable depth test again
-
+    draw_axis(axis_VAO, shaderProgram);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);

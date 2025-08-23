@@ -3,11 +3,11 @@
 #include "Renderer.h"
 
 block::block(const glm::ivec3& pos, GLboolean solid) {
-  position = pos;
-  blmask |= solid;
+  blmask = (pos.x << 10) | (pos.y << 5) | (pos.z);
+  if (solid) blmask |= (1 << 15);
 }
 
-block::block() : position(0), blmask(false) {
+block::block() : blmask(0) {
 }
 
 GLuint block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal) {
@@ -18,7 +18,7 @@ GLuint block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal) {
 }
 
 std::vector<GLuint> block::GenerateVerticies() {
-  GLuint x = position.x, y = position.y, z = position.z;
+  GLuint x = (blmask >> 10) & 31, y = (blmask >> 5) & 31, z = (blmask) & 31;
   // Vertex Position
   // 24 verticies per block
 
@@ -88,12 +88,12 @@ std::vector<GLuint> block::GenerateVerticies() {
 }
 
 void block::Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert) {
-  if (!(blmask & 1)) return;  // not visible
+  if (((blmask >> 15) & 1) == 0) return;  // not solid
   rendervert = GenerateVerticies();
 
   GLuint idx = 0;
   while (mask != 0) {
-    blmask |= 2;  // mark them visible if any side is visble
+    blmask |= (1 << 16);  // mark them visible if any side is visble
     if (mask & 1) {
       for (int i = 0; i < 6; i++) indices.push_back(faceindices[idx][i]);
     }

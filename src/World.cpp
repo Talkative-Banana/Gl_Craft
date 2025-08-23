@@ -113,10 +113,10 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
 
 bool World::isSolid(const glm::ivec3 &pos) {
   block *b = get_block_by_center(pos);
-  return (b && ((b->blmask) & 1));
+  return (b && (((b->blmask) >> 15) & 1) == 1);
 }
 
 bool World::isVisible(const glm::ivec3 &pos) {
   block *b = get_block_by_center(pos);
-  return (b && (((b->blmask) & 2) == 2));
+  return (b && (((b->blmask) >> 16) & 1) == 1);
 }
