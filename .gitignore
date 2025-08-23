@@ -6,5 +6,8 @@ build/
 textures/
 GLCraft
 GLCraft.exemaps/
-maps/
+maps/*
 perf*
+
+
+!maps/.gitkeep
