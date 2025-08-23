@@ -11,10 +11,29 @@ Player::Player() {
 }
 
 void Player::handle_input() {
+  // Gravity
+  if (enable_gravity) {
+    glm::vec3 v = glm::floor(m_position / 4.0f) * 4.0f + glm::vec3(2.0f);
+    bool adjusted = false;
+    while (world && (!(world->isSolid(v))) && (v.y > 0.0f)) {
+      v.y -= 0.1f;
+      adjusted = true;
+    }
+
+    float height = v.y + BLOCK_SIZE + OFFSET;
+    // Case 2: If we're inside a block -> snap up
+    while (world && world->isSolid(v) && (v.y < height)) {
+      v.y += 0.1f;  // step up until clear
+      adjusted = true;
+    }
+    if (adjusted) m_position.y = v.y;
+  }
+
+  glm::vec3 planarvec = glm::vec3(m_forward.x, 0.0, m_forward.z);
   if (Input::IsKeyPressed(GLFW_KEY_W)) {
-    m_position = m_position + m_forward * m_speed;
+    m_position = m_position + planarvec * m_speed;
   } else if (Input::IsKeyPressed(GLFW_KEY_S)) {
-    m_position = m_position - m_forward * m_speed;
+    m_position = m_position - planarvec * m_speed;
   }
 
   if (Input::IsKeyPressed(GLFW_KEY_A)) {
@@ -44,6 +63,14 @@ void Player::handle_input() {
     m_forward = glm::vec3(0.0f, 0.0f, 1.0f);
   }
 
+  if (Input::IsKeyPressed(GLFW_KEY_E)) {
+    enable_gravity = false;
+  }
+
+  if (Input::IsKeyPressed(GLFW_KEY_R)) {
+    enable_gravity = true;
+  }
+
   auto [x, y] = Input::GetMousePosition();
   float rotx = m_sensitivity * (float)(y - MousePos.y);
   float roty = m_sensitivity * (float)(x - MousePos.x);
@@ -60,7 +87,6 @@ void Player::handle_input() {
     glm::quat qy = glm::angleAxis(-roty, m_up);
     glm::quat rotation = glm::normalize(qy * qx);
     m_forward = glm::normalize(rotation * m_forward);
-    m_up = glm::normalize(rotation * m_up);
   }
 
 

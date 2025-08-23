@@ -9,7 +9,12 @@ class block {
 
  public:
   glm::ivec3 position;
-  bool is_solid;
+  // visible solid
+  // 00000000
+  //       ^^
+  //       ||
+  //       vs
+  int blmask;
   static constexpr std::array<std::array<unsigned int, 6>, 6> faceindices = {
       {{{2, 3, 0, 2, 0, 1}},          // Back
        {{7, 6, 5, 7, 5, 4}},          // Front

@@ -31,6 +31,8 @@
 #define IMGUI_TEXT_CAPACITY 256
 
 // Globals
+glm::ivec3 _wps = {0, 0, 0};
+std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
 glm::vec3 worldpos;
 GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform,
     vColor_uniform;
@@ -47,6 +49,7 @@ void setupViewTransformation(unsigned int &, std::unique_ptr<CameraController> &
 void setupProjectionTransformation(unsigned int &, std::unique_ptr<CameraController> &);
 void camTrans(glm::vec3 &);
 Window *_window = nullptr;
+bool enable_gravity;
 
 int main(int, char **) {
   // Size of Structs
@@ -90,8 +93,6 @@ int main(int, char **) {
     }
   }
   glUniform1f(side_uniform, BLOCK_SIZE);
-  glm::ivec3 _wps = {0, 0, 0};
-  std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
   world->SetupWorld();
   world->RenderWorld(chunkva, cntblocks);
 
@@ -131,7 +132,7 @@ int main(int, char **) {
         std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
                   << " " << ray.m_hitcords.z << std::endl;
         auto block = world->get_block_by_center(ray.m_hitcords);
-        block->is_solid = false;
+        block->blmask = 0;
         chunkva.clear();
         cntblocks.clear();
 
