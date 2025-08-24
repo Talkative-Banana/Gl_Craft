@@ -274,21 +274,21 @@ int FrustumCulling(GLuint vertex) {
     glm::ivec3 center = pos;
 
     if ((centeroff & 1u) == 1u) {
-      center.z += BLOCK_SIZE / 2;
+      center.z += HALF_BLOCK_SIZE;
     } else {
-      center.z -= BLOCK_SIZE / 2;
+      center.z -= HALF_BLOCK_SIZE;
     }
 
     if ((centeroff & 2u) == 2u) {
-      center.y += BLOCK_SIZE / 2;
+      center.y += HALF_BLOCK_SIZE;
     } else {
-      center.y -= BLOCK_SIZE / 2;
+      center.y -= HALF_BLOCK_SIZE;
     }
 
     if ((centeroff & 4u) == 4u) {
-      center.x += BLOCK_SIZE / 2;
+      center.x += HALF_BLOCK_SIZE;
     } else {
-      center.x -= BLOCK_SIZE / 2;
+      center.x -= HALF_BLOCK_SIZE;
     }
     return center;
   };
