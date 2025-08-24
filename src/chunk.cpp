@@ -138,7 +138,8 @@ void chunk::Render(
       for (int j = 0; j < CHUNK_BLOCK_COUNT; j++) {
         // filled[0][0][0] = 1;
         if (!((blocks[i][j][k].blmask >> 15) & 1)) {
-          break;  // unsolid blocks
+          // break;  // unsolid blocks
+          continue;
         }
         GLuint mask = chunk::RenderFace({i, j, k});
         std::vector<GLuint> indices;
