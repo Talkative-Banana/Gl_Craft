@@ -116,9 +116,9 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
       // is encoded in the red channel)
       int height = std::max(1, static_cast<int>((color.blue / 255.0f) * 32.0f));
       // Use the height map texture to get the height value of x, z
-      for (int y = 0; y < height; y++) {
+      for (int y = 0; y < CHUNK_BLOCK_COUNT; y++) {
         glm::ivec3 ofs = {z, y, x};
-        blocks[z][y][x] = block(biomepos + ofs, true);  // mark them solid
+        blocks[z][y][x] = block(biomepos + ofs, y < height);  // mark them solid
       }
     }
   }

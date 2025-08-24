@@ -12,7 +12,7 @@ block::block() : blmask(0) {
 
 GLuint block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal) {
   GLuint mask = 0;
-  // tttttttnnnccczzzzzzyyyyyyxxxxxx 7 all add
+  // tttttttnnnccczzzzzzyyyyyyxxxxxx 7 all add [block can have their final point at 32]
   mask |= X | (Y << 6) | (Z << 12) | (cent << 18) | (normal << 21);
   return mask;
 }
@@ -99,4 +99,13 @@ void block::Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint
     }
     mask >>= 1, idx++;
   }
+}
+
+void block::remove() {
+  blmask &= ~(1 << 15);  // clear solid bit
+  blmask &= ~(1 << 16);  // clear visible bit
+}
+
+void block::add(glm::ivec3& pos) {
+  blmask |= (3 << 15);  // add solid and visble bit
 }

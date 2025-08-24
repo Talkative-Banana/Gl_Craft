@@ -14,6 +14,7 @@ constexpr static int GRASS_BLOCK = 0;
 constexpr static int DIRT_BLOCK = 1;
 constexpr static int SAND_BLOCK = 2;
 constexpr static int COBBOLESTONE_BLOCK = 3;
+constexpr static int SNOW_BLOCK = 4;
 constexpr static float OFFSET = 0.01f;
 constexpr static float PLAYER_HEIGHT = 2 * BLOCK_SIZE;
 constexpr static float GRAVITY = 0.98f;

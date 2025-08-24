@@ -14,7 +14,7 @@ class Material {
 
  private:
   const std::string* data;
-  std::string texturedata[4][6] = {
+  std::string texturedata[5][6] = {
       // Grass Block
       {"./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_side_carried.png",
        "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/grass_side_carried.png",
@@ -42,7 +42,12 @@ class Material {
        "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/cobblestone.png",
        "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/cobblestone.png",
        "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/cobblestone.png",
-       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/cobblestone.png"}
-
-  };
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/cobblestone.png"},
+      // Snow Block
+      {"./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png",
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png",
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png",
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png",
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png",
+       "./textures/bedrock-samples-1.21.0.3/resource_pack/textures/blocks/snow.png"}};
 };

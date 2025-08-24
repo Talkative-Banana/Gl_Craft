@@ -13,6 +13,7 @@ class Ray {
   glm::vec3 m_pos;
   glm::vec3 m_dir;
   glm::ivec3 m_hitcords;
+  glm::ivec3 m_hitnormal;
   bool m_hit;
 
   Ray(const glm::vec3 &pos, const glm::vec3 &dir) : m_pos(pos), m_dir(dir), m_hit(false) {};

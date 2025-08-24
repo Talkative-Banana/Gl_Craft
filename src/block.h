@@ -1,5 +1,6 @@
 #include <array>
 
+#include "constants.hpp"
 #include "utils.h"
 #pragma once
 
@@ -28,4 +29,6 @@ class block {
 
   void Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert);
   GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal);
+  void add(glm::ivec3& pos);
+  void remove();
 };

@@ -8,13 +8,17 @@ bool Ray::did_hit(std::unique_ptr<World> &world) {
   // step size of 1 is fine as block are of 2 size
   // will cast for 32 steps
   glm::vec3 point = m_pos;
+  glm::ivec3 prevCenter = toBlockCenter(point);
   for (size_t step = 0; step <= TOTAL_STEPS; step++) {
     // check if its inside a solid block
     glm::ivec3 center = toBlockCenter(point);
     if (world->isSolid(center)) {
       m_hitcords = center;
+      glm::ivec3 diff = center - prevCenter;
+      m_hitnormal = -glm::sign(diff);
       return m_hit = true;
     }
+    prevCenter = center;
     point += STEP_SIZE * m_dir;
   }
   return m_hit = false;

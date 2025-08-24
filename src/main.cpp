@@ -90,7 +90,7 @@ int main(int, char **) {
   std::vector<GLuint> cntblocks;
 
   GLuint Nokeypressed, wireframemode = 0;
-  Material mat(GRASS_BLOCK);
+  Material mat(SNOW_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
   static int vVertex_attrib = -1;
@@ -145,11 +145,12 @@ int main(int, char **) {
 
       Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
 
-      if (ray.did_hit(world)) {
+      if (ray.did_hit(world)) {  // Remove a block
         std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
                   << " " << ray.m_hitcords.z << std::endl;
         auto block = world->get_block_by_center(ray.m_hitcords);
-        block->blmask = 0;
+
+        block->remove();
         auto chunk = world->get_chunk_by_center(ray.m_hitcords);
         chunk->Render(chunkva, cntblocks);
 
@@ -157,7 +158,30 @@ int main(int, char **) {
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
+    } else if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
+      strcpy(textKeyStatus, "Middle click");
+      strcpy(textKeyDescription, "Casting ray");
+
+      double mouseX, mouseY;
+      glfwGetCursorPos(window, &mouseX, &mouseY);
+
+      Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+      if (ray.did_hit(world)) {
+        std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
+                  << " " << ray.m_hitcords.z << std::endl;
+        glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
+        auto block = world->get_block_by_center(prev_blk);
+        block->add(ray.m_hitcords);
+        auto chunk = world->get_chunk_by_center(prev_blk);
+        if (chunk) chunk->Render(chunkva, cntblocks);
+
+        // world->RenderWorld(chunkva, cntblocks);
+      } else {
+        std::cout << "Ray didn't hit any block\n";
+      }
     }
+
 
     if (Nokeypressed) {
       strcpy(textKeyStatus, "Listening for key events...");
