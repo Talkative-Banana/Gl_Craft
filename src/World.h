@@ -16,7 +16,7 @@ class World {
   glm::ivec3 m_worldpos;
 
  public:
-  std::unique_ptr<Biome> biomes[BIOME_COUNTX][BIOME_COUNTY];
+  std::unique_ptr<Biome> biomes[BIOME_COUNTX][BIOME_COUNTZ];
   World(int seed, const glm::ivec3 &pos);
   void SetupWorld();
   bool isSolid(const glm::ivec3 &pos);

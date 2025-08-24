@@ -11,7 +11,7 @@ class Biome {
   GLboolean displaybiome;
 
  public:
-  std::unique_ptr<chunk> chunks[CHUNK_COUNTX][CHUNK_COUNTY];
+  std::unique_ptr<chunk> chunks[CHUNK_COUNTX][CHUNK_COUNTZ];
   Biome(int t, glm::ivec3 pos, GLboolean display);
   void RenderBiome();
 };

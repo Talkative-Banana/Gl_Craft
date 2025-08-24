@@ -10,9 +10,9 @@ class block {
  public:
   // visible solid
   // 00000000_00000000_00000000_00000000
-  //                 ^ ^^^^^^^^ ^^^^^^^^
-  //                 | |||||||| ||||||||
-  //                 v sxxxxxyy yyyzzzzz
+  //                ^^ ^^^^^^^^ ^^^^^^^^
+  //                || |||||||| ||||||||
+  //                tv sxxxxxyy yyyzzzzz
   uint32_t blmask;
   static constexpr std::array<std::array<unsigned int, 6>, 6> faceindices = {
       {{{2, 3, 0, 2, 0, 1}},          // Back

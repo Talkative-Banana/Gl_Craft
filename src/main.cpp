@@ -206,8 +206,8 @@ int main(int, char **) {
     // glBindVertexArray(cube_VAO);
     tcm.Bind();
     for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; _chunkx++) {
-      for (int _chunky = 0; _chunky < CHUNK_COUNTY; _chunky++) {
-        int idx = CHUNK_COUNTY * _chunkx + _chunky;
+      for (int _chunky = 0; _chunky < CHUNK_COUNTZ; _chunky++) {
+        int idx = CHUNK_COUNTZ * _chunkx + _chunky;
         chunkva[idx]->Bind();
 
         glUniform3f(
@@ -314,7 +314,7 @@ void createAxesLine(unsigned int &program, unsigned int &axis_VAO) {
 
 void setupModelTransformationCube(unsigned int &program) {
   // Modelling transformations (Model -> World coordinates)
-  modelT = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 2.0, 1.0));
+  modelT = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 1.0, 1.0));
   modelT = glm::translate(modelT, glm::vec3(0.0f, 0.0f, 0.0f));
 
   // Pass on the modelling matrix to the vertex shader

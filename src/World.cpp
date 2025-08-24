@@ -5,7 +5,7 @@ void World::SetupWorld() {
 
   GLuint idx = 0;
   for (int i = 0; i < BIOME_COUNTX; i++) {
-    for (int j = 0; j < BIOME_COUNTY; j++) {
+    for (int j = 0; j < BIOME_COUNTZ; j++) {
       int idx = 1 * i + j;
       biomes[i][j] = std::make_unique<Biome>(idx, m_worldpos, true);
     }
@@ -17,16 +17,16 @@ void World::RenderWorld(
     std::vector<unsigned int> &cntblocks) {
   // Cant go much beyond due to the way blocks store cords
   for (int bi = 0; bi < BIOME_COUNTX; bi++) {
-    for (int bj = 0; bj < BIOME_COUNTY; bj++) {
+    for (int bj = 0; bj < BIOME_COUNTZ; bj++) {
       auto &b = biomes[bi][bj];
       b->RenderBiome();
 
       for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; ++_chunkx) {
-        for (int _chunky = 0; _chunky < CHUNK_COUNTY; ++_chunky) {
+        for (int _chunkz = 0; _chunkz < CHUNK_COUNTZ; ++_chunkz) {
           chunkva.push_back(std::make_unique<VertexArray>());
           chunkva.back()->Bind();
 
-          auto &tmp = b->chunks[_chunkx][_chunky];
+          auto &tmp = b->chunks[_chunkx][_chunkz];
           const GLuint cnt = tmp->count;
           const GLuint rsize = static_cast<GLuint>(tmp->rendervert.size());
 
@@ -88,31 +88,37 @@ void World::RenderWorld(
 
 block *World::get_block_by_center(const glm::ivec3 &pos) {
   // get the biome
-  // get x and y cords
-  int x = pos.x / (2 * BLOCK_SIZE), y = pos.y / (2 * BLOCK_SIZE), z = pos.z / (2 * BLOCK_SIZE);
+  // get x and z cords
+  glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
+  int x = pos_cpy.x / (BLOCK_SIZE), y = pos_cpy.y / (BLOCK_SIZE), z = pos_cpy.z / (BLOCK_SIZE);
 
-  if (pos.x < 0 || pos.y < 0 || pos.z < 0) return nullptr;
+  if (pos_cpy.x < 0 || pos_cpy.y < 0 || pos_cpy.z < 0) return nullptr;
 
   // get the biome
   int biomex = x / (CHUNK_BLOCK_COUNT * CHUNK_COUNTX),
-      biomey = y / (CHUNK_BLOCK_COUNT * CHUNK_COUNTY);
+      biomez = z / (CHUNK_BLOCK_COUNT * CHUNK_COUNTZ);
 
-  if (biomex >= BIOME_COUNTX || biomey >= BIOME_COUNTY) return nullptr;
+  if (biomex >= BIOME_COUNTX || biomez >= BIOME_COUNTZ) return nullptr;
 
-  auto &biome = biomes[biomex][biomey];
+  auto &biome = biomes[biomex][biomez];
   if (!biome) return nullptr;
   // get the chunk
-  auto &chunk =
-      biome->chunks[(x / CHUNK_BLOCK_COUNT) % CHUNK_COUNTX][(y / CHUNK_BLOCK_COUNT) % CHUNK_COUNTY];
+
+  // get the chunk
+  int chunkx = (x / CHUNK_BLOCK_COUNT), chunkz = (z / CHUNK_BLOCK_COUNT);
+
+  auto &chunk = biome->chunks[chunkx][chunkz];
 
   if (!chunk) return nullptr;
   // get the block
-  auto &block = chunk->blocks[x % CHUNK_BLOCK_COUNT][y % CHUNK_BLOCK_COUNT][z % CHUNK_BLOCK_COUNT];
+  if (y >= CHUNK_BLOCK_COUNT) return nullptr;
+  auto &block = chunk->blocks[x % CHUNK_BLOCK_COUNT][y][z % CHUNK_BLOCK_COUNT];
   return &block;
 }
 
 bool World::isSolid(const glm::ivec3 &pos) {
   block *b = get_block_by_center(pos);
+  if (!b) return false;
   return (b && (((b->blmask) >> 15) & 1) == 1);
 }
 

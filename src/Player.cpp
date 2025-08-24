@@ -13,19 +13,20 @@ Player::Player() {
 void Player::handle_input() {
   // Gravity
   if (enable_gravity) {
-    glm::vec3 v = glm::floor(m_position / 4.0f) * 4.0f + glm::vec3(2.0f);
+    glm::vec3 v = glm::floor(m_position / BLOCK_SIZE) * BLOCK_SIZE + glm::vec3(HALF_BLOCK_SIZE);
     bool adjusted = false;
-    while (world && (!(world->isSolid(v))) && (v.y > 0.0f)) {
-      v.y -= 0.1f;
+    if (world && (!(world->isSolid(v - glm::vec3(0, PLAYER_HEIGHT, 0)))) && (v.y > 0.0f)) {
+      v.y -= BLOCK_SIZE;
       adjusted = true;
     }
 
-    float height = v.y + BLOCK_SIZE + OFFSET;
+    float height = v.y + BLOCK_SIZE - OFFSET;
     // Case 2: If we're inside a block -> snap up
-    while (world && world->isSolid(v) && (v.y < height)) {
-      v.y += 0.1f;  // step up until clear
+    if (world && world->isSolid(v - glm::vec3(0, PLAYER_HEIGHT, 0)) && (v.y < height)) {
+      v.y += BLOCK_SIZE;  // step up until clear
       adjusted = true;
     }
+
     if (adjusted) m_position.y = v.y;
   }
 
