@@ -58,4 +58,6 @@ class Camera {
   const glm::mat4& GetProjectionViewMatrix() const {
     return m_ViewProjectionMatrix;
   }
+
+  void SetAspectRatio(float aspectratio);
 };

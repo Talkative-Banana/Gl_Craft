@@ -150,10 +150,10 @@ int main(int, char **) {
                   << " " << ray.m_hitcords.z << std::endl;
         auto block = world->get_block_by_center(ray.m_hitcords);
         block->blmask = 0;
-        chunkva.clear();
-        cntblocks.clear();
+        auto chunk = world->get_chunk_by_center(ray.m_hitcords);
+        chunk->Render(chunkva, cntblocks);
 
-        world->RenderWorld(chunkva, cntblocks);
+        // world->RenderWorld(chunkva, cntblocks);
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
@@ -190,6 +190,7 @@ int main(int, char **) {
     glfwGetFramebufferSize(window, &display_w, &display_h);
     _window->SetHeight(display_h);
     _window->SetWidth(display_w);
+    player1->m_cameracontroller->SetAspectRatio((float)display_w / (float)display_h);
     glViewport(0, 0, display_w, display_h);
 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);

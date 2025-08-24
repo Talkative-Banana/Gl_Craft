@@ -12,4 +12,5 @@ class CameraController {
   void UpdateCamera(glm::vec3 pos, glm::vec3 dir);
   Camera *GetCamera();
   CameraController(float aspectratio);
+  void SetAspectRatio(float aspectratio);
 };

@@ -1,5 +1,4 @@
 #pragma once
-// #include <GLFW/glfw3.h>
 
 #include <memory>
 
@@ -22,6 +21,7 @@ class World {
   bool isSolid(const glm::ivec3 &pos);
   bool isVisible(const glm::ivec3 &pos);
   block *get_block_by_center(const glm::ivec3 &pos);
+  chunk *get_chunk_by_center(const glm::ivec3 &pos);
   void RenderWorld(
       std::vector<std::unique_ptr<VertexArray>> &chunkva,
       std::vector<unsigned int> &cntblocks);

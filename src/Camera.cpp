@@ -15,3 +15,7 @@ void Camera::RecalculateViewMatrix() {
   m_ViewMatrix = glm::lookAt(m_Position, m_Position + glm::normalize(m_Orientation), m_Up);
   m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 }
+
+void Camera::SetAspectRatio(float aspectratio) {
+  m_ProjectionMatrix = glm::perspective(45.0f, aspectratio, NEAR_PLANE, FAR_PLANE);
+}

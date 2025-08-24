@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "IndexBuffer.h"
+#include "VertexArray.h"
 #include "block.h"
 #include "constants.hpp"
 #include "utils.h"
@@ -25,7 +27,9 @@ class chunk {
 
   chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
-  void Render();
+  void Render(
+      std::vector<std::unique_ptr<VertexArray>> &chunkva,
+      std::vector<unsigned int> &cntblocks);
   void Setup_Landscape(GLint X, GLint Y);
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);

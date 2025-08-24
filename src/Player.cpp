@@ -15,7 +15,7 @@ void Player::handle_input() {
   if (enable_gravity) {
     glm::vec3 v = glm::floor(m_position / BLOCK_SIZE) * BLOCK_SIZE + glm::vec3(HALF_BLOCK_SIZE);
     bool adjusted = false;
-    if (world && (!(world->isSolid(v - glm::vec3(0, PLAYER_HEIGHT, 0)))) && (v.y > 0.0f)) {
+    if (world && (!(world->isSolid(v - glm::vec3(0, PLAYER_HEIGHT, 0)))) && (v.y > 1.0f)) {
       v.y -= BLOCK_SIZE;
       adjusted = true;
     }

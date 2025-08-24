@@ -124,7 +124,9 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
   }
 }
 
-void chunk::Render() {
+void chunk::Render(
+    std::vector<std::unique_ptr<VertexArray>> &chunkva,
+    std::vector<unsigned int> &cntblocks) {
   // Rerendering
   rendervert.clear();
   count = 0;
@@ -148,4 +150,56 @@ void chunk::Render() {
       }
     }
   }
+
+  chunkva[id]->Bind();
+
+  const GLuint cnt = count;
+  const GLuint rsize = static_cast<GLuint>(rendervert.size());
+
+  // std::vector<int> FrustumCull(rsize, 0);
+  GLuint vcnt = 0, icnt = 0;
+
+  for (GLuint i = 0; i < rsize; ++i) {
+    auto &vert_ind = rendervert[i];
+    const auto &verts = vert_ind.first;
+    const auto &inds = vert_ind.second;
+
+    vcnt += static_cast<GLuint>(verts.size());
+    // Diabled for now //  TODO:
+    // if (FrustumCulling(verts[0])) {
+    //  FrustumCull[i] = 1;
+    //  std::cout << "Frustum Culled!\n";
+    //  continue;
+    // }
+    icnt += static_cast<GLuint>(inds.size());
+  }
+
+  std::vector<GLuint> cube_vertices;
+  cube_vertices.reserve(vcnt);
+
+  std::vector<GLuint> cube_indices;
+  cube_indices.reserve(icnt);
+
+  for (GLuint i = 0; i < rsize; ++i) {
+    // if (FrustumCull[i]) continue;
+    auto &vert_ind = rendervert[i];
+    const auto &verts = vert_ind.first;
+    const auto &inds = vert_ind.second;
+
+    cube_vertices.insert(cube_vertices.end(), verts.begin(), verts.end());
+    cube_indices.insert(cube_indices.end(), inds.begin(), inds.end());
+  }
+
+  cntblocks[id] = icnt;
+
+  VertexBufferLayout layout;
+  layout.Push(GL_UNSIGNED_INT, 1);
+
+  VertexBuffer vb(cube_vertices.data(), cube_vertices.size() * sizeof(GLuint));
+  chunkva[id]->AddBuffer(vb, layout);
+
+  IndexBuffer ib(cube_indices.data(), cube_indices.size());
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
