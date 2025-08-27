@@ -129,14 +129,14 @@ int main(int, char **) {
 
     // handle player input
     player1->handle_input();
-    if (Input::IsKeyPressed(GLFW_KEY_TAB)) {
+    if (Input::WasKeyPressed(GLFW_KEY_TAB)) {
       strcpy(textKeyStatus, "TAB");
       strcpy(textKeyDescription, "Switching Mode");
       wireframemode ^= 1;
       Nokeypressed = 0;
     }
 
-    if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+    if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
       strcpy(textKeyStatus, "Right click");
       strcpy(textKeyDescription, "Casting ray");
 
@@ -158,7 +158,7 @@ int main(int, char **) {
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
-    } else if (Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
+    } else if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
       strcpy(textKeyStatus, "Middle click");
       strcpy(textKeyDescription, "Casting ray");
 
