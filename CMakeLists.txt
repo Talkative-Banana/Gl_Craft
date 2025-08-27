@@ -34,6 +34,8 @@ set(SOURCES
   "src/Ray.cpp"
   "src/World.cpp"
   "src/Player.cpp"
+  "src/AssetManager.cpp"
+  "src/Mesh.cpp"
 
   "depends/libnoise/noiseutils.cpp"
   "depends/imgui/imgui_impl_glfw.cpp"

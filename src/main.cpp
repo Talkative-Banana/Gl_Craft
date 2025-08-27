@@ -14,6 +14,7 @@
 #include <glm/gtx/transform.hpp>
 #include <memory>
 
+#include "AssetManager.h"
 #include "CameraController.h"
 #include "IndexBuffer.h"
 #include "Input.h"
@@ -80,6 +81,7 @@ int main(int, char **) {
   ImVec4 clearColor = ImVec4(0.471f, 0.786f, .784f, 1.00f);
 
   unsigned int shaderProgram = createProgram("./shaders/vshader.vs", "./shaders/fshader.fs");
+  unsigned int shaderProgram2 = createProgram("./shaders/vshader2.vs", "./shaders/fshader2.fs");
 
   glUseProgram(shaderProgram);
 
@@ -123,6 +125,13 @@ int main(int, char **) {
   }
 
   std::unique_ptr<Player> player1 = std::make_unique<Player>();
+
+  std::unique_ptr<AssetManager> asset_manager = std::make_unique<AssetManager>();
+
+  uint64_t handle = asset_manager->loadMeshObject("assets/bunny.obj");
+
+  auto mesh = asset_manager->get_mesh(handle);
+  mesh->setup();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -223,6 +232,15 @@ int main(int, char **) {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    glUseProgram(shaderProgram2);
+    // Setup MVP matrix
+    setupModelTransformationCube(shaderProgram2);
+    setupViewTransformation(shaderProgram2, player1->m_cameracontroller);
+    setupProjectionTransformation(shaderProgram2, player1->m_cameracontroller);
+
+    mesh->render();
+
+    glUseProgram(shaderProgram);
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);
     setupViewTransformation(shaderProgram, player1->m_cameracontroller);
