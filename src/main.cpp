@@ -97,6 +97,9 @@ int main(int, char **) {
 
   static int vVertex_attrib = -1;
   static int side_uniform = -1;
+  static int vNormal_attrib = -1;
+  static int cameraPos_uniform = -1;
+  static int lightpos_uniform = -1;
   if (vVertex_attrib == -1) {
     vVertex_attrib = glGetAttribLocation(shaderProgram, "vVertex");
     if (vVertex_attrib == -1) {
@@ -104,6 +107,28 @@ int main(int, char **) {
       exit(0);
     }
   }
+
+  if (vNormal_attrib == -1) {
+    vNormal_attrib = glGetAttribLocation(shaderProgram2, "vNormal");
+    if (vNormal_attrib == -1) {
+      std::cout << "Could not bind location: vNormal\n";
+      exit(0);
+    }
+  }
+
+  // Get handle to eye normal variable in shader
+  cameraPos_uniform = glGetUniformLocation(shaderProgram2, "cameraPos");
+  if (cameraPos_uniform == -1) {
+    fprintf(stderr, "Could not bind location: cameraPos. Specular Lighting Switched Off.\n");
+  }
+
+  // Moved outside of loop
+  lightpos_uniform = glGetUniformLocation(shaderProgram2, "lightpos");
+  if (lightpos_uniform == -1) {
+    fprintf(stderr, "Could not bind location: lightpos\n");
+    exit(0);
+  }
+
   if (side_uniform == -1) {
     side_uniform = glGetUniformLocation(shaderProgram, "side");
     if (side_uniform == -1) {
@@ -198,16 +223,15 @@ int main(int, char **) {
       }
     }
 
-    if (Input::IsKeyPressed(GLFW_KEY_P)) {
-      asset_height -= 1.0;
+    if (Input::WasKeyPressed(GLFW_KEY_P)) {
+      asset_height -= BLOCK_SIZE;
       mesh1->pos.y = asset_height;
       mesh2->pos.y = asset_height;
-    } else if (Input::IsKeyPressed(GLFW_KEY_O)) {
-      asset_height += 1.0;
+    } else if (Input::WasKeyPressed(GLFW_KEY_O)) {
+      asset_height += BLOCK_SIZE;
       mesh1->pos.y = asset_height;
       mesh2->pos.y = asset_height;
     }
-
 
     if (Nokeypressed) {
       strcpy(textKeyStatus, "Listening for key events...");
@@ -249,8 +273,23 @@ int main(int, char **) {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+
     mesh1->render(player1->m_cameracontroller);
     mesh2->render(player1->m_cameracontroller);
+
+    glUniform3f(
+        lightpos_uniform,
+        player1->m_cameracontroller->GetCamera()->GetPosition().x,
+        player1->m_cameracontroller->GetCamera()->GetPosition().y,
+        player1->m_cameracontroller->GetCamera()->GetPosition().z);
+
+    glUniform3f(
+        cameraPos_uniform,
+        player1->m_cameracontroller->GetCamera()->GetPosition().x,
+        player1->m_cameracontroller->GetCamera()->GetPosition().y,
+        player1->m_cameracontroller->GetCamera()->GetPosition().z);
+
+
     glUseProgram(shaderProgram);
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);

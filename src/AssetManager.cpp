@@ -107,24 +107,53 @@ uint64_t AssetManager::loadMeshObject(
   }
   fclose(file);
 
-  std::vector<float> vertices(vertex_indices.size() * 3);
+  std::vector<float> shape_vertices(vertex_indices.size() * 3),
+      vertex_normals(normal_indices.size() * 3), uv_normals(uv_indices.size() * 3);
 
   // vertex_indices => consecutive three triangle coords
   for (size_t i = 0; i < vertex_indices.size(); i++) {
     int vertex_index = vertex_indices[i];
-    vertices[i * 3] = temp_vertices[vertex_index - 1][0];
-    vertices[i * 3 + 1] = temp_vertices[vertex_index - 1][1];
-    vertices[i * 3 + 2] = temp_vertices[vertex_index - 1][2];
+    shape_vertices[i * 3] = temp_vertices[vertex_index - 1][0];
+    shape_vertices[i * 3 + 1] = temp_vertices[vertex_index - 1][1];
+    shape_vertices[i * 3 + 2] = temp_vertices[vertex_index - 1][2];
+  }
+
+
+  // generated normals for the triangle mesh
+  for (int i = 0; i < vertex_indices.size(); i += 3) {
+    glm::vec3 v1 = glm::vec3(
+        shape_vertices[(i + 1) * 3] - shape_vertices[i * 3],
+        shape_vertices[(i + 1) * 3 + 1] - shape_vertices[i * 3 + 1],
+        shape_vertices[(i + 1) * 3 + 2] - shape_vertices[i * 3 + 2]);
+    glm::vec3 v2 = glm::vec3(
+        shape_vertices[(i + 2) * 3] - shape_vertices[(i + 1) * 3],
+        shape_vertices[(i + 2) * 3 + 1] - shape_vertices[(i + 1) * 3 + 1],
+        shape_vertices[(i + 2) * 3 + 2] - shape_vertices[(i + 1) * 3 + 2]);
+
+    glm::vec3 n = cross(v1, v2);
+
+    vertex_normals[i * 3] = n.x;
+    vertex_normals[(i + 1) * 3] = n.x;
+    vertex_normals[(i + 2) * 3] = n.x;
+    vertex_normals[i * 3 + 1] = n.y;
+    vertex_normals[(i + 1) * 3 + 1] = n.y;
+    vertex_normals[(i + 2) * 3 + 1] = n.y;
+    vertex_normals[i * 3 + 2] = n.z;
+    vertex_normals[(i + 1) * 3 + 2] = n.z;
+    vertex_normals[(i + 2) * 3 + 2] = n.z;
+  }
+
+  std::vector<AssetVertex> vertices;
+
+  for (int i = 0; i < vertex_indices.size(); i++) {
+    vertices.push_back(
+        {{shape_vertices[i * 3], shape_vertices[i * 3 + 1], shape_vertices[i * 3 + 2]},
+         {vertex_normals[i * 3], vertex_normals[i * 3 + 1], vertex_normals[i * 3 + 2]}});
   }
 
   static glm::uint64 handle = 1;
-  std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(
-      std::move(vertices),
-      std::move(uv_indices),
-      std::move(normal_indices),
-      shaderProgram,
-      scale,
-      pos);
+  std::shared_ptr<Mesh> mesh =
+      std::make_shared<Mesh>(std::move(vertices), shaderProgram, scale, pos);
   m_assets.emplace(++handle, mesh);
 
   return handle;

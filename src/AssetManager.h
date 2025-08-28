@@ -2,6 +2,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "AssetVertex.h"
 #include "Mesh.h"
 #include "string.h"
 #include "utils.h"
