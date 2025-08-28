@@ -9,7 +9,7 @@ out vec4 outColor;
 // Light components
 vec3 Ls = vec3(1.0, 1.0, 1.0);  // specular light
 vec3 Ld = vec3(0.7, 0.7, 0.7);  // diffuse light
-vec3 La = vec3(0.6, 0.3, 0.4);  // ambient light
+vec3 La = vec3(0.0, 0.1, 1.0);  // ambient light
 
 // Material components
 vec3 ks = vec3(1.0, 1.0, 1.0);  // specular reflectivity
