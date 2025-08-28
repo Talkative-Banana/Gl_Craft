@@ -2,7 +2,7 @@
 
 out vec4 outColor;
 
-vec3 fColor = vec3(1.0, 1.0, 1.0);
+vec3 fColor = vec3(0.0, 0.0, 0.0);
 
 void main() {
         // outColor = vec4(NormalDir, 1.0);

@@ -128,10 +128,17 @@ int main(int, char **) {
 
   std::unique_ptr<AssetManager> asset_manager = std::make_unique<AssetManager>();
 
-  uint64_t handle = asset_manager->loadMeshObject("assets/bunny.obj");
+  float asset_height = 70.0;
 
-  auto mesh = asset_manager->get_mesh(handle);
-  mesh->setup();
+  uint64_t handle1 = asset_manager->loadMeshObject(
+      "assets/bunny.obj", shaderProgram2, 0.025, glm::vec3(70.0, asset_height, 70.0));
+  uint64_t handle2 = asset_manager->loadMeshObject(
+      "assets/buddha.obj", shaderProgram2, 0.025, glm::vec3(70, asset_height, 100.0));
+
+  auto mesh1 = asset_manager->get_mesh(handle1);
+  auto mesh2 = asset_manager->get_mesh(handle2);
+  mesh1->setup();
+  mesh2->setup();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -191,6 +198,16 @@ int main(int, char **) {
       }
     }
 
+    if (Input::IsKeyPressed(GLFW_KEY_P)) {
+      asset_height -= 1.0;
+      mesh1->pos.y = asset_height;
+      mesh2->pos.y = asset_height;
+    } else if (Input::IsKeyPressed(GLFW_KEY_O)) {
+      asset_height += 1.0;
+      mesh1->pos.y = asset_height;
+      mesh2->pos.y = asset_height;
+    }
+
 
     if (Nokeypressed) {
       strcpy(textKeyStatus, "Listening for key events...");
@@ -232,14 +249,8 @@ int main(int, char **) {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    glUseProgram(shaderProgram2);
-    // Setup MVP matrix
-    setupModelTransformationCube(shaderProgram2);
-    setupViewTransformation(shaderProgram2, player1->m_cameracontroller);
-    setupProjectionTransformation(shaderProgram2, player1->m_cameracontroller);
-
-    mesh->render();
-
+    mesh1->render(player1->m_cameracontroller);
+    mesh2->render(player1->m_cameracontroller);
     glUseProgram(shaderProgram);
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);
