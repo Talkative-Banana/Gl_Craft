@@ -156,9 +156,19 @@ int main(int, char **) {
   float asset_height = 70.0;
 
   uint64_t handle1 = asset_manager->loadMeshObject(
-      "assets/bunny.obj", shaderProgram2, 0.025, glm::vec3(70.0, asset_height, 70.0));
+      "assets/bunny.obj",
+      shaderProgram2,
+      0.025,
+      0.0,
+      glm::vec3(70.0, asset_height, 70.0),
+      glm::vec3(1.0, 0.0, 0.0));
   uint64_t handle2 = asset_manager->loadMeshObject(
-      "assets/buddha.obj", shaderProgram2, 0.025, glm::vec3(70, asset_height, 100.0));
+      "assets/buddha.obj",
+      shaderProgram2,
+      0.025,
+      180.0,
+      glm::vec3(70, asset_height, 100.0),
+      glm::normalize(glm::vec3(0.0, 1.0, 1.0)));
 
   auto mesh1 = asset_manager->get_mesh(handle1);
   auto mesh2 = asset_manager->get_mesh(handle2);

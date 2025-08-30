@@ -10,8 +10,13 @@
 class AssetManager {
  public:
   AssetManager() = default;
-  [[nodiscard]] uint64_t
-  loadMeshObject(const char* modelpath, unsigned int shaderProgram, float scale, glm::vec3 pos);
+  [[nodiscard]] uint64_t loadMeshObject(
+      const char* modelpath,
+      unsigned int shaderProgram,
+      float scale,
+      float angle,
+      glm::vec3 pos,
+      glm::vec3 axis);
 
   std::shared_ptr<Mesh> get_mesh(uint64_t handle) {
     auto it = m_assets.find(handle);

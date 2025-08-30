@@ -18,8 +18,8 @@ void Mesh::setupModelTransformationCube() {
   modelT = glm::mat4(1.0f);
   modelT = glm::translate(modelT, pos);
   modelT = glm::scale(modelT, glm::vec3(scale, scale, scale));
-  // Rotate along y axis
-  // modelT = glm::rotate(modelT, glm::radians(angleDegrees), glm::vec3(0.0f, 1.0f, 0.0f));
+  // Rotate along axis of rot
+  modelT = glm::rotate(modelT, glm::radians(angle_of_rot), glm::normalize(axis_of_rot));
 
   // Pass on the modelling matrix to the vertex shader
   vModel_uniform = glGetUniformLocation(shaderProgram, "vModel");

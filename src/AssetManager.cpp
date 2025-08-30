@@ -9,7 +9,9 @@ uint64_t AssetManager::loadMeshObject(
     const char *modelpath,
     unsigned int shaderProgram,
     float scale,
-    glm::vec3 pos) {
+    float angle,
+    glm::vec3 pos,
+    glm::vec3 axis) {
   std::vector<int> vertex_indices, uv_indices, normal_indices;
   std::vector<glm::vec3> temp_vertices;
   std::vector<glm::vec2> temp_uvs;
@@ -153,7 +155,7 @@ uint64_t AssetManager::loadMeshObject(
 
   static glm::uint64 handle = 1;
   std::shared_ptr<Mesh> mesh =
-      std::make_shared<Mesh>(std::move(vertices), shaderProgram, scale, pos);
+      std::make_shared<Mesh>(std::move(vertices), shaderProgram, scale, angle, pos, axis);
   m_assets.emplace(++handle, mesh);
 
   return handle;
