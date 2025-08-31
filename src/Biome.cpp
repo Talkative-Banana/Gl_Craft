@@ -17,7 +17,7 @@ static void render_p(
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
     int idx = CHUNK_COUNTZ * i + j;
     auto &chunk = chunks[i][j];
-    chunk->Render(chunkva, cntblocks);
+    chunk->Render(chunkva, cntblocks, 1);
   }
 }
 

@@ -126,9 +126,12 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
 
 void chunk::Render(
     std::vector<std::unique_ptr<VertexArray>> &chunkva,
-    std::vector<unsigned int> &cntblocks) {
+    std::vector<unsigned int> &cntblocks,
+    int setup) {
   // Rerendering
   rendervert.clear();
+  cube_vertices.clear();
+  cube_indices.clear();
   count = 0;
   if (!displaychunk) return;
   GLuint idx = 0;
@@ -151,6 +154,7 @@ void chunk::Render(
       }
     }
   }
+
 
   const GLuint cnt = count;
   const GLuint rsize = static_cast<GLuint>(rendervert.size());
@@ -185,5 +189,16 @@ void chunk::Render(
 
     cube_vertices.insert(cube_vertices.end(), verts.begin(), verts.end());
     cube_indices.insert(cube_indices.end(), inds.begin(), inds.end());
+  }
+
+  if (!setup) {
+    chunkva[id]->Bind();
+    VertexBufferLayout layout;
+    layout.Push(GL_UNSIGNED_INT, 1);
+    VertexBuffer vb(cube_vertices.data(), cube_vertices.size() * sizeof(GLuint));
+    chunkva[id]->AddBuffer(vb, layout);
+    IndexBuffer ib(cube_indices.data(), cube_indices.size());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
   }
 }

@@ -31,7 +31,8 @@ class chunk {
 
   void Render(
       std::vector<std::unique_ptr<VertexArray>> &chunkva,
-      std::vector<unsigned int> &cntblocks);
+      std::vector<unsigned int> &cntblocks,
+      int setup);
   void Setup_Landscape(GLint X, GLint Y);
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);

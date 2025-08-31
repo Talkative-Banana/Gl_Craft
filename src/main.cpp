@@ -203,7 +203,7 @@ int main(int, char **) {
 
         block->remove();
         auto chunk = world->get_chunk_by_center(ray.m_hitcords);
-        chunk->Render(chunkva, cntblocks);
+        chunk->Render(chunkva, cntblocks, 0);
 
         // world->RenderWorld(chunkva, cntblocks);
       } else {
@@ -225,7 +225,7 @@ int main(int, char **) {
         auto block = world->get_block_by_center(prev_blk);
         block->add(ray.m_hitcords);
         auto chunk = world->get_chunk_by_center(prev_blk);
-        if (chunk) chunk->Render(chunkva, cntblocks);
+        if (chunk) chunk->Render(chunkva, cntblocks, 0);
 
         // world->RenderWorld(chunkva, cntblocks);
       } else {
