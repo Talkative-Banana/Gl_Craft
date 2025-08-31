@@ -15,12 +15,11 @@ extern GLint chunkpos_uniform;
 extern GLuint wireframemode;
 
 class chunk {
- private:
-  GLboolean displaychunk;
+ public:
   glm::ivec3 biomepos;
   glm::ivec3 chunkpos;
 
- public:
+  GLboolean displaychunk;
   std::array<std::array<std::array<block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
       blocks;
   std::vector<GLuint> cube_vertices;

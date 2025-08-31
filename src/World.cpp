@@ -1,29 +1,8 @@
 #include "World.h"
-World::World(int seed, const glm::ivec3 &pos) : m_seed(seed), m_worldpos(pos) {};
 
-void World::SetupWorld() {
-
-  for (int i = 0; i < BIOME_COUNTX; i++) {
-    for (int j = 0; j < BIOME_COUNTZ; j++) {
-      int idx = BIOME_COUNTX * i + j;
-      glm::ivec3 biome_pos = glm::ivec3(
-          CHUNK_COUNTX * CHUNK_BLOCK_COUNT * BLOCK_SIZE * i,
-          0,
-          CHUNK_COUNTZ * CHUNK_BLOCK_COUNT * BLOCK_SIZE * j);
-      biomes[i][j] = std::make_unique<Biome>(idx, m_worldpos + biome_pos, true);
-    }
-  }
-}
-
-void World::RenderWorld() {
-  // Cant go much beyond due to the way blocks store cords
-  for (int bi = 0; bi < BIOME_COUNTX; bi++) {
-    for (int bj = 0; bj < BIOME_COUNTZ; bj++) {
-      auto &b = biomes[bi][bj];
-      b->RenderBiome();
-    }
-  }
-}
+World::World(int seed, const glm::ivec3 &pos) : m_seed(seed), m_worldpos(pos) {
+  worker = std::thread(&World::workerLoop, this);
+};
 
 block *World::get_block_by_center(const glm::ivec3 &pos) {
   // get the biome
@@ -121,10 +100,77 @@ bool World::isVisible(const glm::ivec3 &pos) {
   return (b && (((b->blmask) >> 16) & 1) == 1);
 }
 
-void World::Draw() {
-  for (auto &arr_biomes : biomes) {
-    for (auto &biome : arr_biomes) {
-      biome->Draw();
+void World::workerLoop() {
+  while (running) {
+    std::unique_lock<std::mutex> lock(setup_mutex);
+    setup_cv.wait(lock, [this] { return !job_queue.empty() || !running; });
+
+    if (!running) break;
+
+    auto [i, j, pos] = job_queue.front();
+    job_queue.pop();
+    lock.unlock();
+
+    // heavy work outside lock
+    int idx = BIOME_COUNTX * i + j;
+    auto biome = std::make_shared<Biome>(idx, pos, true);
+
+    {
+      std::lock_guard<std::mutex> g(setup_mutex);
+      biomes[i][j] = biome;
+      setup_queue.push(biome);
     }
   }
+}
+
+void World::SetupWorld(glm::vec3 playerpos) {
+  // Do not set up for all the biomes
+  std::thread thread;
+  for (int i = 0; i < BIOME_COUNTX; i++) {
+    for (int j = 0; j < BIOME_COUNTZ; j++) {
+      int idx = BIOME_COUNTX * i + j;
+      float common = CHUNK_COUNTX * CHUNK_BLOCK_COUNT * BLOCK_SIZE;
+      glm::ivec3 biome_pos = glm::ivec3(common * i, 0, common * j);
+      int X = biome_pos.x - playerpos.x, Z = biome_pos.z - playerpos.z;
+      auto &biome = biomes[i][j];
+      if ((((X * X) + (Z * Z)) <= (RENDER_DISTANCE * RENDER_DISTANCE)) &&
+          (job_scheduled.find(idx) == job_scheduled.end())) {
+        // Costly move it to a seprate thread
+        {
+          std::lock_guard<std::mutex> lock(setup_mutex);
+          job_queue.emplace(i, j, m_worldpos + biome_pos);
+          job_scheduled.insert(idx);
+        }
+        setup_cv.notify_one();
+      } else if (Z > RENDER_DISTANCE) {
+        break;
+      } else if (X > RENDER_DISTANCE) {
+        i = BIOME_COUNTX;
+        break;
+      }
+    }
+  }
+
+  RenderWorld();
+}
+
+void World::RenderWorld() {
+  std::lock_guard<std::mutex> lock(setup_mutex);
+  while (!setup_queue.empty()) {
+    auto b = setup_queue.front();
+    setup_queue.pop();
+    b->RenderBiome();
+    if (render_queue.find(b) == render_queue.end()) render_queue.insert(b);
+  }
+}
+
+void World::Draw() {
+  // Do not render all the chunks just what biome wants to using its render_queue
+  for (auto &biome : render_queue) {
+    biome->Draw();
+  }
+}
+
+void World::Update_queue(glm::vec3 playerpos) {
+  for (auto &biome : render_queue) biome->Update_queue(playerpos);
 }

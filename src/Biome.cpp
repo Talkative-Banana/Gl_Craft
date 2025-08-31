@@ -5,7 +5,7 @@
 static void load_p(decltype(Biome::chunks) &chunks, glm::ivec3 &Biomepos, int i, bool display) {
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
     int idx = CHUNK_COUNTZ * i + j;
-    chunks[i][j] = std::make_unique<chunk>(idx, Biomepos, glm::ivec3(i, 0, j), true);
+    chunks[i][j] = std::make_shared<chunk>(idx, Biomepos, glm::ivec3(i, 0, j), true);
   }
 }
 
@@ -54,14 +54,39 @@ void Biome::RenderBiome() {
       IndexBuffer ib(chunk->cube_indices.data(), chunk->cube_indices.size());
       //  glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
+      render_queue.insert(chunk);
     }
   }
 }
 
 void Biome::Draw() {
-  for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; _chunkx++) {
-    for (int _chunky = 0; _chunky < CHUNK_COUNTZ; _chunky++) {
-      chunks[_chunkx][_chunky]->Draw();
+  for (auto &chunk : render_queue) {
+    chunk->Draw();
+  }
+}
+
+void Biome::Update_queue(glm::vec3 playerpos) {
+  for (int i = 0; i < CHUNK_COUNTX; i++) {
+    for (int j = 0; j < CHUNK_COUNTZ; j++) {
+      auto &chunk = chunks[i][j];
+      glm::vec3 cpos = chunk->chunkpos;
+
+      // If not displaying currently
+      if (render_queue.find(chunk) == render_queue.end()) {
+        int X = playerpos.x - cpos.x, Z = playerpos.z - cpos.z;
+        if (((X * X) + (Z * Z)) <= RENDER_DISTANCE * RENDER_DISTANCE) {
+          chunk->displaychunk = 1;
+        } else {
+          chunk->displaychunk = 0;  // Do not display farther than RENDER_DISTANCE
+        }
+      } else {  // If diplaying currently
+        int X = playerpos.x - cpos.x, Z = playerpos.z - cpos.z;
+        if (((X * X) + (Z * Z)) > RENDER_DISTANCE * RENDER_DISTANCE) {
+          chunk->displaychunk = 0;
+        } else {
+          chunk->displaychunk = 1;  // Keep displaying near than RENDER_DISTANCE
+        }
+      }
     }
   }
 }

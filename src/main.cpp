@@ -133,8 +133,7 @@ int main(int, char **) {
     }
   }
   glUniform1f(side_uniform, BLOCK_SIZE);
-  world->SetupWorld();
-  world->RenderWorld();
+
 
   createAxesLine(shaderProgram, axis_VAO);
 
@@ -176,6 +175,9 @@ int main(int, char **) {
 
     // handle player input
     player1->handle_input();
+    // World Calculations
+    world->SetupWorld(player1->m_cameracontroller->GetCamera()->GetPosition());
+    world->Update_queue(player1->m_cameracontroller->GetCamera()->GetPosition());
     if (Input::WasKeyPressed(GLFW_KEY_TAB)) {
       strcpy(textKeyStatus, "TAB");
       strcpy(textKeyDescription, "Switching Mode");

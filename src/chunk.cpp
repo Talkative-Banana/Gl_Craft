@@ -10,9 +10,13 @@ chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean disp
   id = _id;
   count = 0;
   biomepos = _biomepos;
-  chunkpos = position;
   displaychunk = display;
-  Setup_Landscape(chunkpos.x, chunkpos.z);
+  chunkpos = glm::vec3(
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX) + biomepos.x,
+      0.0,
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ) + biomepos.z);
+
+  Setup_Landscape(position.x, position.z);
 }
 
 inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
@@ -126,11 +130,11 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
 
 void chunk::Render(int setup) {
   // Rerendering
+  if (!displaychunk) return;
   rendervert.clear();
   cube_vertices.clear();
   cube_indices.clear();
   count = 0;
-  if (!displaychunk) return;
   GLuint idx = 0;
 
   for (int i = 0; i < CHUNK_BLOCK_COUNT; i++) {
@@ -201,12 +205,9 @@ void chunk::Render(int setup) {
 }
 
 void chunk::Draw() {
+  if (!displaychunk) return;
   chunkva->Bind();
-  glUniform3f(
-      chunkpos_uniform,
-      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX) + biomepos.x,
-      0.0,
-      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ) + biomepos.z);
+  glUniform3f(chunkpos_uniform, chunkpos.x, chunkpos.y, chunkpos.z);
   if (wireframemode) {
     // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
     glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
