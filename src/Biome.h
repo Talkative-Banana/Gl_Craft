@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <thread>
 
 #include "IndexBuffer.h"
 #include "VertexArray.h"
@@ -13,7 +14,7 @@ class Biome {
   GLboolean displaybiome;
 
  public:
-  std::unique_ptr<chunk> chunks[CHUNK_COUNTX][CHUNK_COUNTZ];
+  std::array<std::array<std::unique_ptr<chunk>, CHUNK_COUNTZ>, CHUNK_COUNTX> chunks;
   Biome(int t, glm::ivec3 pos, GLboolean display);
   void RenderBiome(
       std::vector<std::unique_ptr<VertexArray>> &chunkva,

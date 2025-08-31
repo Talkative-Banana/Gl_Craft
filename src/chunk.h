@@ -19,6 +19,8 @@ class chunk {
 
  public:
   block blocks[CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT];
+  std::vector<GLuint> cube_vertices;
+  std::vector<GLuint> cube_indices;
 
  public:
   GLuint id;

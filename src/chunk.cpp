@@ -152,8 +152,6 @@ void chunk::Render(
     }
   }
 
-  chunkva[id]->Bind();
-
   const GLuint cnt = count;
   const GLuint rsize = static_cast<GLuint>(rendervert.size());
 
@@ -175,10 +173,8 @@ void chunk::Render(
     icnt += static_cast<GLuint>(inds.size());
   }
 
-  std::vector<GLuint> cube_vertices;
+  cntblocks[id] = icnt;
   cube_vertices.reserve(vcnt);
-
-  std::vector<GLuint> cube_indices;
   cube_indices.reserve(icnt);
 
   for (GLuint i = 0; i < rsize; ++i) {
@@ -190,17 +186,4 @@ void chunk::Render(
     cube_vertices.insert(cube_vertices.end(), verts.begin(), verts.end());
     cube_indices.insert(cube_indices.end(), inds.begin(), inds.end());
   }
-
-  cntblocks[id] = icnt;
-
-  VertexBufferLayout layout;
-  layout.Push(GL_UNSIGNED_INT, 1);
-
-  VertexBuffer vb(cube_vertices.data(), cube_vertices.size() * sizeof(GLuint));
-  chunkva[id]->AddBuffer(vb, layout);
-
-  IndexBuffer ib(cube_indices.data(), cube_indices.size());
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
 }
