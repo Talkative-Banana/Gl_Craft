@@ -12,17 +12,12 @@ void World::SetupWorld() {
   }
 }
 
-void World::RenderWorld(
-    std::vector<std::unique_ptr<VertexArray>> &chunkva,
-    std::vector<unsigned int> &cntblocks) {
+void World::RenderWorld() {
   // Cant go much beyond due to the way blocks store cords
-  chunkva.resize(BIOME_COUNTX * BIOME_COUNTZ * CHUNK_COUNTX * CHUNK_COUNTZ);
-  cntblocks.resize(BIOME_COUNTX * BIOME_COUNTZ * CHUNK_COUNTX * CHUNK_COUNTZ);
-  for (auto &ptr : chunkva) ptr = std::make_unique<VertexArray>();
   for (int bi = 0; bi < BIOME_COUNTX; bi++) {
     for (int bj = 0; bj < BIOME_COUNTZ; bj++) {
       auto &b = biomes[bi][bj];
-      b->RenderBiome(chunkva, cntblocks);
+      b->RenderBiome();
     }
   }
 }
@@ -93,4 +88,12 @@ bool World::isSolid(const glm::ivec3 &pos) {
 bool World::isVisible(const glm::ivec3 &pos) {
   block *b = get_block_by_center(pos);
   return (b && (((b->blmask) >> 16) & 1) == 1);
+}
+
+void World::Draw() {
+  for (auto &arr_biomes : biomes) {
+    for (auto &biome : arr_biomes) {
+      biome->Draw();
+    }
+  }
 }

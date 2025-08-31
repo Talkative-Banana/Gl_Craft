@@ -41,6 +41,7 @@ glm::mat4 modelT, viewT,
     projectionT;  // The model, view and projection transformations
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
+GLuint Nokeypressed, wireframemode = 0;
 
 void createAxesLine(unsigned int &, unsigned int &);
 
@@ -87,11 +88,6 @@ int main(int, char **) {
 
   unsigned int axis_VAO;
 
-  // Generate VAO object
-  std::vector<std::unique_ptr<VertexArray>> chunkva;
-  std::vector<GLuint> cntblocks;
-
-  GLuint Nokeypressed, wireframemode = 0;
   Material mat(SNOW_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
@@ -138,7 +134,7 @@ int main(int, char **) {
   }
   glUniform1f(side_uniform, BLOCK_SIZE);
   world->SetupWorld();
-  world->RenderWorld(chunkva, cntblocks);
+  world->RenderWorld();
 
   createAxesLine(shaderProgram, axis_VAO);
 
@@ -203,9 +199,9 @@ int main(int, char **) {
 
         block->remove();
         auto chunk = world->get_chunk_by_center(ray.m_hitcords);
-        chunk->Render(chunkva, cntblocks, 0);
+        chunk->Render(0);
 
-        // world->RenderWorld(chunkva, cntblocks);
+        // world->RenderWorld();
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
@@ -225,9 +221,9 @@ int main(int, char **) {
         auto block = world->get_block_by_center(prev_blk);
         block->add(ray.m_hitcords);
         auto chunk = world->get_chunk_by_center(prev_blk);
-        if (chunk) chunk->Render(chunkva, cntblocks, 0);
+        if (chunk) chunk->Render(0);
 
-        // world->RenderWorld(chunkva, cntblocks);
+        // world->RenderWorld();
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
@@ -308,29 +304,7 @@ int main(int, char **) {
 
     // glBindVertexArray(cube_VAO);
     tcm.Bind();
-    for (int _chunkx = 0; _chunkx < CHUNK_COUNTX; _chunkx++) {
-      for (int _chunky = 0; _chunky < CHUNK_COUNTZ; _chunky++) {
-        int idx = CHUNK_COUNTZ * _chunkx + _chunky;
-        chunkva[idx]->Bind();
-
-        glUniform3f(
-            worldpos_uniform,
-            CHUNK_BLOCK_COUNT * BLOCK_SIZE * _chunkx,
-            0.0,
-            CHUNK_BLOCK_COUNT * BLOCK_SIZE * _chunky);
-        if (wireframemode) {
-          // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
-        } else {
-          // glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
-          // 12 * Total Number of attributes
-          glDrawElements(GL_TRIANGLES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
-          // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-          glDrawElements(GL_LINES, cntblocks[idx] * 12 * 1, GL_UNSIGNED_INT, nullptr);
-        }
-      }
-    }
-
+    world->Draw();
     glDisable(GL_DEPTH_TEST);  // Disable depth test for drawing axes. We want
                                // axes to be drawn on top of all
 

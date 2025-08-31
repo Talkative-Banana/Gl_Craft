@@ -124,10 +124,7 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
   }
 }
 
-void chunk::Render(
-    std::vector<std::unique_ptr<VertexArray>> &chunkva,
-    std::vector<unsigned int> &cntblocks,
-    int setup) {
+void chunk::Render(int setup) {
   // Rerendering
   rendervert.clear();
   cube_vertices.clear();
@@ -177,7 +174,7 @@ void chunk::Render(
     icnt += static_cast<GLuint>(inds.size());
   }
 
-  cntblocks[id] = icnt;
+  cntblocks = icnt;
   cube_vertices.reserve(vcnt);
   cube_indices.reserve(icnt);
 
@@ -192,13 +189,32 @@ void chunk::Render(
   }
 
   if (!setup) {
-    chunkva[id]->Bind();
+    chunkva->Bind();
     VertexBufferLayout layout;
     layout.Push(GL_UNSIGNED_INT, 1);
     VertexBuffer vb(cube_vertices.data(), cube_vertices.size() * sizeof(GLuint));
-    chunkva[id]->AddBuffer(vb, layout);
+    chunkva->AddBuffer(vb, layout);
     IndexBuffer ib(cube_indices.data(), cube_indices.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+  }
+}
+
+void chunk::Draw() {
+  chunkva->Bind();
+  glUniform3f(
+      worldpos_uniform,
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX),
+      0.0,
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ));
+  if (wireframemode) {
+    // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+    glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
+  } else {
+    // glUniform4f(vColor_uniform, 0.5, 0.5, 0.5, 1.0);
+    // 12 * Total Number of attributes
+    glDrawElements(GL_TRIANGLES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
+    // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
+    glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
   }
 }

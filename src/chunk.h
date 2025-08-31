@@ -11,6 +11,9 @@
 
 #pragma once
 
+extern GLint worldpos_uniform;
+extern GLuint wireframemode;
+
 class chunk {
  private:
   GLboolean displaychunk;
@@ -18,9 +21,13 @@ class chunk {
   glm::ivec3 chunkpos;
 
  public:
-  block blocks[CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT][CHUNK_BLOCK_COUNT];
+  std::array<std::array<std::array<block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
+      blocks;
   std::vector<GLuint> cube_vertices;
   std::vector<GLuint> cube_indices;
+  std::unique_ptr<VertexArray> chunkva;
+  GLuint cntblocks;
+
 
  public:
   GLuint id;
@@ -29,11 +36,9 @@ class chunk {
 
   chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
-  void Render(
-      std::vector<std::unique_ptr<VertexArray>> &chunkva,
-      std::vector<unsigned int> &cntblocks,
-      int setup);
+  void Render(int setup);
   void Setup_Landscape(GLint X, GLint Y);
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);
+  void Draw();
 };
