@@ -3,7 +3,7 @@
 layout(location = 0) in uint vVertex;
 
 uniform float side;
-uniform vec3 worldpos;
+uniform vec3 chunkpos;
 uniform mat4 vModel;
 uniform mat4 vView;
 uniform mat4 vProjection;
@@ -74,7 +74,7 @@ void main() {
 	
 	vec3 pos = vec3(side * positionX, side * positionY, side * positionZ);
 	vec3 centercord = Center(pos, centeroff);
-	gl_Position = vProjection * vView * vModel * vec4(pos + worldpos, 1.0);
+	gl_Position = vProjection * vView * vModel * vec4(pos + chunkpos, 1.0);
 
 	TexCoord = pos - centercord; //Interpolate color
 	ivec3 _NormalDir = Normal(normaldir);

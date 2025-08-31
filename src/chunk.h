@@ -11,7 +11,7 @@
 
 #pragma once
 
-extern GLint worldpos_uniform;
+extern GLint chunkpos_uniform;
 extern GLuint wireframemode;
 
 class chunk {

@@ -34,8 +34,8 @@
 // Globals
 glm::ivec3 _wps = {0, 0, 0};
 std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
-glm::vec3 worldpos;
-GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform,
+glm::vec3 chunkpos;
+GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, chunkpos_uniform,
     vColor_uniform;
 glm::mat4 modelT, viewT,
     projectionT;  // The model, view and projection transformations
@@ -139,9 +139,9 @@ int main(int, char **) {
   createAxesLine(shaderProgram, axis_VAO);
 
   // Moved outside of loop
-  worldpos_uniform = glGetUniformLocation(shaderProgram, "worldpos");
-  if (worldpos_uniform == -1) {
-    fprintf(stderr, "Could not bind location: worldpos\n");
+  chunkpos_uniform = glGetUniformLocation(shaderProgram, "chunkpos");
+  if (chunkpos_uniform == -1) {
+    fprintf(stderr, "Could not bind location: chunkpos\n");
     exit(0);
   }
 

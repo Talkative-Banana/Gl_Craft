@@ -3,11 +3,14 @@ World::World(int seed, const glm::ivec3 &pos) : m_seed(seed), m_worldpos(pos) {}
 
 void World::SetupWorld() {
 
-  GLuint idx = 0;
   for (int i = 0; i < BIOME_COUNTX; i++) {
     for (int j = 0; j < BIOME_COUNTZ; j++) {
-      int idx = 1 * i + j;
-      biomes[i][j] = std::make_unique<Biome>(idx, m_worldpos, true);
+      int idx = BIOME_COUNTX * i + j;
+      glm::ivec3 biome_pos = glm::ivec3(
+          CHUNK_COUNTX * CHUNK_BLOCK_COUNT * BLOCK_SIZE * i,
+          0,
+          CHUNK_COUNTZ * CHUNK_BLOCK_COUNT * BLOCK_SIZE * j);
+      biomes[i][j] = std::make_unique<Biome>(idx, m_worldpos + biome_pos, true);
     }
   }
 }
@@ -30,6 +33,8 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
 
   if (pos_cpy.x < 0 || pos_cpy.y < 0 || pos_cpy.z < 0) return nullptr;
 
+  if (y < 0 || y >= CHUNK_BLOCK_COUNT) return nullptr;
+
   // get the biome
   int biomex = x / (CHUNK_BLOCK_COUNT * CHUNK_COUNTX),
       biomez = z / (CHUNK_BLOCK_COUNT * CHUNK_COUNTZ);
@@ -41,7 +46,8 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
   // get the chunk
 
   // get the chunk
-  int chunkx = (x / CHUNK_BLOCK_COUNT), chunkz = (z / CHUNK_BLOCK_COUNT);
+  int chunkx = (x / CHUNK_BLOCK_COUNT) % CHUNK_COUNTX,
+      chunkz = (z / CHUNK_BLOCK_COUNT) % CHUNK_COUNTZ;
 
   auto &chunk = biome->chunks[chunkx][chunkz];
 

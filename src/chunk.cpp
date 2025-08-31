@@ -118,7 +118,7 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
       // Use the height map texture to get the height value of x, z
       for (int y = 0; y < CHUNK_BLOCK_COUNT; y++) {
         glm::ivec3 ofs = {z, y, x};
-        blocks[z][y][x] = block(biomepos + ofs, y < height);  // mark them solid
+        blocks[z][y][x] = block(ofs, y < height);  // mark them solid
       }
     }
   }
@@ -203,10 +203,10 @@ void chunk::Render(int setup) {
 void chunk::Draw() {
   chunkva->Bind();
   glUniform3f(
-      worldpos_uniform,
-      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX),
+      chunkpos_uniform,
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX) + biomepos.x,
       0.0,
-      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ));
+      CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ) + biomepos.z);
   if (wireframemode) {
     // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
     glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
