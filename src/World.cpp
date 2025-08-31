@@ -66,6 +66,8 @@ chunk *World::get_chunk_by_center(const glm::ivec3 &pos) {
 
   if (pos_cpy.x < 0 || pos_cpy.y < 0 || pos_cpy.z < 0) return nullptr;
 
+  if (y < 0 || y >= CHUNK_BLOCK_COUNT) return nullptr;
+
   // get the biome
   int biomex = x / (CHUNK_BLOCK_COUNT * CHUNK_COUNTX),
       biomez = z / (CHUNK_BLOCK_COUNT * CHUNK_COUNTZ);
@@ -77,12 +79,35 @@ chunk *World::get_chunk_by_center(const glm::ivec3 &pos) {
   // get the chunk
 
   // get the chunk
-  int chunkx = (x / CHUNK_BLOCK_COUNT), chunkz = (z / CHUNK_BLOCK_COUNT);
+  int chunkx = (x / CHUNK_BLOCK_COUNT) % CHUNK_COUNTX,
+      chunkz = (z / CHUNK_BLOCK_COUNT) % CHUNK_COUNTZ;
 
   auto &chunk = biome->chunks[chunkx][chunkz];
 
   if (!chunk) return nullptr;
   return chunk ? chunk.get() : nullptr;
+}
+
+Biome *World::get_biome_by_center(const glm::ivec3 &pos) {
+  // get the biome
+  // get x and z cords
+  glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
+  int x = pos_cpy.x / (BLOCK_SIZE), y = pos_cpy.y / (BLOCK_SIZE), z = pos_cpy.z / (BLOCK_SIZE);
+
+  if (pos_cpy.x < 0 || pos_cpy.y < 0 || pos_cpy.z < 0) return nullptr;
+
+  if (y < 0 || y >= CHUNK_BLOCK_COUNT) return nullptr;
+
+  // get the biome
+  int biomex = x / (CHUNK_BLOCK_COUNT * CHUNK_COUNTX),
+      biomez = z / (CHUNK_BLOCK_COUNT * CHUNK_COUNTZ);
+
+  if (biomex >= BIOME_COUNTX || biomez >= BIOME_COUNTZ) return nullptr;
+
+  auto &biome = biomes[biomex][biomez];
+  if (!biome) return nullptr;
+
+  return biome ? biome.get() : nullptr;
 }
 
 bool World::isSolid(const glm::ivec3 &pos) {

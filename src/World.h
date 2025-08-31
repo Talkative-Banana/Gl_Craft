@@ -23,6 +23,7 @@ class World {
   bool isVisible(const glm::ivec3 &pos);
   block *get_block_by_center(const glm::ivec3 &pos);
   chunk *get_chunk_by_center(const glm::ivec3 &pos);
+  Biome *get_biome_by_center(const glm::ivec3 &pos);
   void RenderWorld();
   void Draw();
 };
