@@ -216,6 +216,6 @@ void chunk::Draw() {
     // 12 * Total Number of attributes
     glDrawElements(GL_TRIANGLES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
     // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
-    glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
+    // glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
   }
 }
