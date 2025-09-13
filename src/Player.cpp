@@ -40,14 +40,16 @@ void Player::handle_input() {
 
   if (Input::IsKeyPressed(GLFW_KEY_W)) {
     glm::vec3 nextPos = m_position + planarvec * m_speed;
-    glm::vec3 blockCenter = toBlockCenter(nextPos);
-    if (!world->isSolid(blockCenter)) {
+    glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
+    glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
       m_position = nextPos;
     }
   } else if (Input::IsKeyPressed(GLFW_KEY_S)) {
     glm::vec3 nextPos = m_position - planarvec * m_speed;
-    glm::vec3 blockCenter = toBlockCenter(nextPos);
-    if (!world->isSolid(blockCenter)) {
+    glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
+    glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
       m_position = nextPos;
     }
   }
@@ -55,15 +57,17 @@ void Player::handle_input() {
   if (Input::IsKeyPressed(GLFW_KEY_A)) {
     // Check if obstructed by block
     glm::vec3 nextPos = m_position - m_speed * glm::normalize(glm::cross(m_forward, m_up));
-    glm::vec3 blockCenter = toBlockCenter(nextPos);
-    if (!world->isSolid(blockCenter)) {
+    glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
+    glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
       m_position = nextPos;
     }
   } else if (Input::IsKeyPressed(GLFW_KEY_D)) {
     // Check if obstructed by block
     glm::vec3 nextPos = m_position + m_speed * glm::normalize(glm::cross(m_forward, m_up));
-    glm::vec3 blockCenter = toBlockCenter(nextPos);
-    if (!world->isSolid(blockCenter)) {
+    glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
+    glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
       m_position = nextPos;
     }
   }
@@ -89,12 +93,8 @@ void Player::handle_input() {
     m_forward = glm::vec3(0.0f, 0.0f, 1.0f);
   }
 
-  if (Input::IsKeyPressed(GLFW_KEY_E)) {
-    enable_gravity = false;
-  }
-
-  if (Input::IsKeyPressed(GLFW_KEY_R)) {
-    enable_gravity = true;
+  if (Input::WasKeyPressed(GLFW_KEY_G)) {
+    enable_gravity = !enable_gravity;
   }
 
   auto [x, y] = Input::GetMousePosition();
