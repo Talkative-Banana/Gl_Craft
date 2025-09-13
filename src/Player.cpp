@@ -12,8 +12,8 @@ Player::Player() {
 
 void Player::handle_input() {
   // Gravity
+  glm::vec3 v = glm::floor(m_position / BLOCK_SIZE) * BLOCK_SIZE + glm::vec3(HALF_BLOCK_SIZE);
   if (enable_gravity) {
-    glm::vec3 v = glm::floor(m_position / BLOCK_SIZE) * BLOCK_SIZE + glm::vec3(HALF_BLOCK_SIZE);
     bool adjusted = false;
     if (world && (!(world->isSolid(v - glm::vec3(0, PLAYER_HEIGHT, 0)))) && (v.y > 1.0f)) {
       v.y -= BLOCK_SIZE;
@@ -30,17 +30,42 @@ void Player::handle_input() {
     if (adjusted) m_position.y = v.y;
   }
 
-  glm::vec3 planarvec = glm::vec3(m_forward.x, 0.0, m_forward.z);
+  auto toBlockCenter = [](glm::vec3 pos) {
+    glm::ivec3 block = glm::floor(pos / BLOCK_SIZE);  // which block
+    return (glm::vec3(block) + 0.5f) * BLOCK_SIZE -
+           glm::vec3(0, BLOCK_SIZE, 0);  // center of that block
+  };
+
+  glm::vec3 planarvec = glm::normalize(glm::vec3(m_forward.x, 0.0f, m_forward.z));
+
   if (Input::IsKeyPressed(GLFW_KEY_W)) {
-    m_position = m_position + planarvec * m_speed;
+    glm::vec3 nextPos = m_position + planarvec * m_speed;
+    glm::vec3 blockCenter = toBlockCenter(nextPos);
+    if (!world->isSolid(blockCenter)) {
+      m_position = nextPos;
+    }
   } else if (Input::IsKeyPressed(GLFW_KEY_S)) {
-    m_position = m_position - planarvec * m_speed;
+    glm::vec3 nextPos = m_position - planarvec * m_speed;
+    glm::vec3 blockCenter = toBlockCenter(nextPos);
+    if (!world->isSolid(blockCenter)) {
+      m_position = nextPos;
+    }
   }
 
   if (Input::IsKeyPressed(GLFW_KEY_A)) {
-    m_position = m_position - m_speed * glm::normalize(glm::cross(m_forward, m_up));
+    // Check if obstructed by block
+    glm::vec3 nextPos = m_position - m_speed * glm::normalize(glm::cross(m_forward, m_up));
+    glm::vec3 blockCenter = toBlockCenter(nextPos);
+    if (!world->isSolid(blockCenter)) {
+      m_position = nextPos;
+    }
   } else if (Input::IsKeyPressed(GLFW_KEY_D)) {
-    m_position = m_position + m_speed * glm::normalize(glm::cross(m_forward, m_up));
+    // Check if obstructed by block
+    glm::vec3 nextPos = m_position + m_speed * glm::normalize(glm::cross(m_forward, m_up));
+    glm::vec3 blockCenter = toBlockCenter(nextPos);
+    if (!world->isSolid(blockCenter)) {
+      m_position = nextPos;
+    }
   }
 
   if (Input::IsKeyPressed(GLFW_KEY_UP)) {

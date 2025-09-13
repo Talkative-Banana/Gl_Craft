@@ -1,7 +1,7 @@
 #pragma once
 constexpr static float BLOCK_SIZE = 2.0;       // BLOCK LENGTH
 constexpr static float HALF_BLOCK_SIZE = 1.0;  // HALF_BLOCK LENGTH
-constexpr static float NEAR_PLANE = 1.0f;
+constexpr static float NEAR_PLANE = 0.01f;
 constexpr static float FAR_PLANE = 1000.0f;
 constexpr static int TOTAL_STEPS = 32;
 constexpr static int RENDER_DISTANCE = 256;

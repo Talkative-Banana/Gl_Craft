@@ -88,7 +88,7 @@ int main(int, char **) {
 
   unsigned int axis_VAO;
 
-  Material mat(SNOW_BLOCK);
+  Material mat(GRASS_BLOCK);
   TextureCubeMap tcm(mat.GetString());
 
   static int vVertex_attrib = -1;
