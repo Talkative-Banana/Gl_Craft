@@ -19,6 +19,7 @@ constexpr static int SNOW_BLOCK = 4;
 constexpr static float OFFSET = 0.01f;
 constexpr static float PLAYER_HEIGHT = 2 * BLOCK_SIZE;
 constexpr static float GRAVITY = 0.98f;
+constexpr static int PLAYER_COUNT = 128;
 
 // Non const
 static int SCREEN_HEIGHT = 640;

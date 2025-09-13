@@ -41,7 +41,8 @@ glm::mat4 modelT, viewT,
     projectionT;  // The model, view and projection transformations
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
 char textKeyDescription[IMGUI_TEXT_CAPACITY];
-GLuint Nokeypressed, wireframemode = 0, activePlayer = 0;
+GLuint Nokeypressed, wireframemode = 0, activePlayer = 0, players_cnt = 2;
+std::array<std::unique_ptr<Player>, PLAYER_COUNT> players;
 
 void createAxesLine(unsigned int &, unsigned int &);
 
@@ -51,7 +52,7 @@ void setupViewTransformation(unsigned int &, std::unique_ptr<CameraController> &
 void setupProjectionTransformation(unsigned int &, std::unique_ptr<CameraController> &);
 void camTrans(glm::vec3 &);
 Window *_window = nullptr;
-bool enable_gravity;
+bool enable_gravity = 1;
 
 void draw_axis(unsigned int axis_VAO, unsigned int shaderProgram) {
   glBindVertexArray(axis_VAO);
@@ -144,8 +145,10 @@ int main(int, char **) {
     exit(0);
   }
 
-  std::unique_ptr<Player> player1 = std::make_unique<Player>();
-  std::unique_ptr<Player> player2 = std::make_unique<Player>();
+  // Initalize all the players
+  for (int i = 0; i < players_cnt; i++) {
+    players[i] = std::make_unique<Player>();
+  }
 
   std::unique_ptr<AssetManager> asset_manager = std::make_unique<AssetManager>();
 
@@ -175,19 +178,10 @@ int main(int, char **) {
     glfwPollEvents();
 
     // handle player input
-    if (activePlayer == 0) {
-      player1->handle_input();
-      // World Calculations
-      world->SetupWorld(player1->m_cameracontroller->GetCamera()->GetPosition());
-      world->Update_queue(player1->m_cameracontroller->GetCamera()->GetPosition());
-    }
-
-    if (activePlayer == 1) {
-      player2->handle_input();
-      // World Calculations
-      world->SetupWorld(player2->m_cameracontroller->GetCamera()->GetPosition());
-      world->Update_queue(player2->m_cameracontroller->GetCamera()->GetPosition());
-    }
+    players[activePlayer]->handle_input();
+    // World Calculations
+    world->SetupWorld(players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition());
+    world->Update_queue(players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition());
 
     if (Input::WasKeyPressed(GLFW_KEY_TAB)) {
       strcpy(textKeyStatus, "TAB");
@@ -244,7 +238,8 @@ int main(int, char **) {
 
     if (Input::WasKeyPressed(GLFW_KEY_P)) {
       // Switch Player
-      activePlayer ^= 1;
+      activePlayer += 1;
+      activePlayer %= players_cnt;
     }
 
     if (Input::WasKeyPressed(GLFW_KEY_K)) {
@@ -276,14 +271,14 @@ int main(int, char **) {
       ImGui::Text("Key Description: %s", textKeyDescription);
       ImGui::Text(
           "Player 1 position: (%.2f, %.2f, %.2f)",
-          player1->m_cameracontroller->GetCamera()->GetPosition().x,
-          player1->m_cameracontroller->GetCamera()->GetPosition().y,
-          player1->m_cameracontroller->GetCamera()->GetPosition().z);
+          players[0]->m_cameracontroller->GetCamera()->GetPosition().x,
+          players[0]->m_cameracontroller->GetCamera()->GetPosition().y,
+          players[0]->m_cameracontroller->GetCamera()->GetPosition().z);
       ImGui::Text(
           "Player 2 position: (%.2f, %.2f, %.2f)",
-          player2->m_cameracontroller->GetCamera()->GetPosition().x,
-          player2->m_cameracontroller->GetCamera()->GetPosition().y,
-          player2->m_cameracontroller->GetCamera()->GetPosition().z);
+          players[1]->m_cameracontroller->GetCamera()->GetPosition().x,
+          players[1]->m_cameracontroller->GetCamera()->GetPosition().y,
+          players[1]->m_cameracontroller->GetCamera()->GetPosition().z);
     }
     ImGui::End();
 
@@ -293,10 +288,7 @@ int main(int, char **) {
     glfwGetFramebufferSize(window, &display_w, &display_h);
     _window->SetHeight(display_h);
     _window->SetWidth(display_w);
-    if (activePlayer == 0)
-      player1->m_cameracontroller->SetAspectRatio((float)display_w / (float)display_h);
-    if (activePlayer == 1)
-      player2->m_cameracontroller->SetAspectRatio((float)display_w / (float)display_h);
+    players[activePlayer]->m_cameracontroller->SetAspectRatio((float)display_w / (float)display_h);
     glViewport(0, 0, display_w, display_h);
 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
@@ -305,50 +297,26 @@ int main(int, char **) {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    if (activePlayer == 0) {
-      mesh1->render(player1->m_cameracontroller);
-      mesh2->render(player1->m_cameracontroller);
-      glUniform3f(
-          lightpos_uniform,
-          player1->m_cameracontroller->GetCamera()->GetPosition().x,
-          player1->m_cameracontroller->GetCamera()->GetPosition().y,
-          player1->m_cameracontroller->GetCamera()->GetPosition().z);
+    mesh1->render(players[activePlayer]->m_cameracontroller);
+    mesh2->render(players[activePlayer]->m_cameracontroller);
+    glUniform3f(
+        lightpos_uniform,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().x,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().y,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().z);
 
-      glUniform3f(
-          cameraPos_uniform,
-          player1->m_cameracontroller->GetCamera()->GetPosition().x,
-          player1->m_cameracontroller->GetCamera()->GetPosition().y,
-          player1->m_cameracontroller->GetCamera()->GetPosition().z);
-    }
-
-    if (activePlayer == 1) {
-      mesh1->render(player2->m_cameracontroller);
-      mesh2->render(player2->m_cameracontroller);
-      glUniform3f(
-          lightpos_uniform,
-          player2->m_cameracontroller->GetCamera()->GetPosition().x,
-          player2->m_cameracontroller->GetCamera()->GetPosition().y,
-          player2->m_cameracontroller->GetCamera()->GetPosition().z);
-
-      glUniform3f(
-          cameraPos_uniform,
-          player2->m_cameracontroller->GetCamera()->GetPosition().x,
-          player2->m_cameracontroller->GetCamera()->GetPosition().y,
-          player2->m_cameracontroller->GetCamera()->GetPosition().z);
-    }
+    glUniform3f(
+        cameraPos_uniform,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().x,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().y,
+        players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().z);
 
     glUseProgram(shaderProgram);
     // Setup MVP matrix
     setupModelTransformationCube(shaderProgram);
-    if (activePlayer == 0) {
-      setupViewTransformation(shaderProgram, player1->m_cameracontroller);
-      setupProjectionTransformation(shaderProgram, player1->m_cameracontroller);
-    }
+    setupViewTransformation(shaderProgram, players[activePlayer]->m_cameracontroller);
+    setupProjectionTransformation(shaderProgram, players[activePlayer]->m_cameracontroller);
 
-    if (activePlayer == 1) {
-      setupViewTransformation(shaderProgram, player2->m_cameracontroller);
-      setupProjectionTransformation(shaderProgram, player2->m_cameracontroller);
-    }
     // glBindVertexArray(cube_VAO);
     tcm.Bind();
     world->Draw();
