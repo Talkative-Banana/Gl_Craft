@@ -269,16 +269,13 @@ int main(int, char **) {
           "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       ImGui::Text("Key Status: %s", textKeyStatus);
       ImGui::Text("Key Description: %s", textKeyDescription);
+      ImGui::Text("Active Player: %d", activePlayer);
       ImGui::Text(
-          "Player 1 position: (%.2f, %.2f, %.2f)",
-          players[0]->m_cameracontroller->GetCamera()->GetPosition().x,
-          players[0]->m_cameracontroller->GetCamera()->GetPosition().y,
-          players[0]->m_cameracontroller->GetCamera()->GetPosition().z);
-      ImGui::Text(
-          "Player 2 position: (%.2f, %.2f, %.2f)",
-          players[1]->m_cameracontroller->GetCamera()->GetPosition().x,
-          players[1]->m_cameracontroller->GetCamera()->GetPosition().y,
-          players[1]->m_cameracontroller->GetCamera()->GetPosition().z);
+          "Player %d position: (%.2f, %.2f, %.2f)",
+          activePlayer,
+          players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().x,
+          players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().y,
+          players[activePlayer]->m_cameracontroller->GetCamera()->GetPosition().z);
     }
     ImGui::End();
 
