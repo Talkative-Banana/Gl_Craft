@@ -203,8 +203,7 @@ int main(int, char **) {
         std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
                   << " " << ray.m_hitcords.z << std::endl;
         auto block = world->get_block_by_center(ray.m_hitcords);
-
-        block->remove();
+        if (block) block->remove();
         auto chunk = world->get_chunk_by_center(ray.m_hitcords);
         chunk->Render(0);
 
@@ -226,7 +225,7 @@ int main(int, char **) {
                   << " " << ray.m_hitcords.z << std::endl;
         glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
         auto block = world->get_block_by_center(prev_blk);
-        block->add(ray.m_hitcords);
+        if (block) block->add(ray.m_hitcords);
         auto chunk = world->get_chunk_by_center(prev_blk);
         if (chunk) chunk->Render(0);
 
