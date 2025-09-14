@@ -21,6 +21,11 @@ constexpr static float PLAYER_HEIGHT = 2 * BLOCK_SIZE;
 constexpr static float GRAVITY = 0.98f;
 constexpr static int PLAYER_COUNT = 128;
 
+constexpr static int BACK_FACE = 1 << 17;
+constexpr static int FRONT_FACE = 1 << 18;
+constexpr static int LEFT_FACE = 1 << 19;
+constexpr static int RIGHT_FACE = 1 << 20;
+
 // Non const
 static int SCREEN_HEIGHT = 640;
 static int SCREEN_WIDTH = 640;

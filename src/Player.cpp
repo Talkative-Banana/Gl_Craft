@@ -42,14 +42,14 @@ void Player::handle_input() {
     glm::vec3 nextPos = m_position + planarvec * m_speed;
     glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
     glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
-    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3) || !enable_gravity) {
       m_position = nextPos;
     }
   } else if (Input::IsKeyPressed(GLFW_KEY_S)) {
     glm::vec3 nextPos = m_position - planarvec * m_speed;
     glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
     glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
-    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3) || !enable_gravity) {
       m_position = nextPos;
     }
   }
@@ -59,7 +59,7 @@ void Player::handle_input() {
     glm::vec3 nextPos = m_position - m_speed * glm::normalize(glm::cross(m_forward, m_up));
     glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
     glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
-    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3) || !enable_gravity) {
       m_position = nextPos;
     }
   } else if (Input::IsKeyPressed(GLFW_KEY_D)) {
@@ -67,7 +67,7 @@ void Player::handle_input() {
     glm::vec3 nextPos = m_position + m_speed * glm::normalize(glm::cross(m_forward, m_up));
     glm::vec3 blockCenter_h2 = toBlockCenter(nextPos);
     glm::vec3 blockCenter_h3 = blockCenter_h2 + glm::vec3(0, BLOCK_SIZE, 0);
-    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3)) {
+    if (!world->isSolid(blockCenter_h2) && !world->isSolid(blockCenter_h3) || !enable_gravity) {
       m_position = nextPos;
     }
   }

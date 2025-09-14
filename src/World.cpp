@@ -37,7 +37,7 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
   return &block;
 }
 
-chunk *World::get_chunk_by_center(const glm::ivec3 &pos) {
+std::shared_ptr<chunk> World::get_chunk_by_center(const glm::ivec3 &pos) {
   // get the biome
   // get x and z cords
   glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
@@ -64,10 +64,10 @@ chunk *World::get_chunk_by_center(const glm::ivec3 &pos) {
   auto &chunk = biome->chunks[chunkx][chunkz];
 
   if (!chunk) return nullptr;
-  return chunk ? chunk.get() : nullptr;
+  return chunk ? chunk : nullptr;
 }
 
-Biome *World::get_biome_by_center(const glm::ivec3 &pos) {
+std::shared_ptr<Biome> World::get_biome_by_center(const glm::ivec3 &pos) {
   // get the biome
   // get x and z cords
   glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
@@ -86,7 +86,7 @@ Biome *World::get_biome_by_center(const glm::ivec3 &pos) {
   auto &biome = biomes[biomex][biomez];
   if (!biome) return nullptr;
 
-  return biome ? biome.get() : nullptr;
+  return biome ? biome : nullptr;
 }
 
 bool World::isSolid(const glm::ivec3 &pos) {
@@ -151,15 +151,20 @@ void World::SetupWorld(glm::vec3 playerpos) {
     }
   }
 
-  RenderWorld();
+  auto q = setup_queue;
+  // Render World with Inter Chunk walls
+  RenderWorld(true);
+  // Remove the inter chunk walls
+  setup_queue = q;
+  RenderWorld(false);
 }
 
-void World::RenderWorld() {
+void World::RenderWorld(bool firstRun) {
   std::lock_guard<std::mutex> lock(setup_mutex);
   while (!setup_queue.empty()) {
     auto b = setup_queue.front();
     setup_queue.pop();
-    b->RenderBiome();
+    b->RenderBiome(firstRun);  // firstRun
     if (render_queue.find(b) == render_queue.end()) render_queue.insert(b);
   }
 }

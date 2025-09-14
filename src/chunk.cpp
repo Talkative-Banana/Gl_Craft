@@ -128,7 +128,13 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
   }
 }
 
-void chunk::Render(int setup) {
+void chunk::Render(
+    int setup,
+    bool firstRun,
+    std::shared_ptr<chunk> left,
+    std::shared_ptr<chunk> front,
+    std::shared_ptr<chunk> right,
+    std::shared_ptr<chunk> back) {
   // Rerendering
   if (!displaychunk) return;
   rendervert.clear();
@@ -145,7 +151,48 @@ void chunk::Render(int setup) {
           // break;  // unsolid blocks
           continue;
         }
-        GLuint mask = chunk::RenderFace({i, j, k});
+        GLuint mask = 0;
+        if (firstRun) {
+          // If its first run just save the mask
+          mask = chunk::RenderFace({i, j, k});
+          blocks[i][j][k].blmask |= (mask << 17);
+          // continue;
+        } else {
+          // Second Run extract the mask
+          if (i == 0 && right) {
+            auto &blk1 = blocks[0][j][k];
+            auto &blk2 = right->blocks[CHUNK_BLOCK_COUNT - 1][j][k];
+            if (((blk1.blmask >> 15) & 1) && ((blk2.blmask >> 15) & 1)) {
+              // Remove left face from current block
+              blk1.blmask &= ~LEFT_FACE;
+            }
+          } else if (i == CHUNK_BLOCK_COUNT - 1 && left) {
+            auto &blk1 = blocks[CHUNK_BLOCK_COUNT - 1][j][k];
+            auto &blk2 = left->blocks[0][j][k];
+            if (((blk1.blmask >> 15) & 1) && ((blk2.blmask >> 15) & 1)) {
+              // Remove right face from current block
+              blk1.blmask &= ~RIGHT_FACE;
+            }
+          }
+          if (k == 0 && back) {
+            auto &blk1 = blocks[i][j][0];
+            auto &blk2 = back->blocks[i][j][CHUNK_BLOCK_COUNT - 1];
+            if (((blk1.blmask >> 15) & 1) && ((blk2.blmask >> 15) & 1)) {
+              // Remove back face from current block
+              blk1.blmask &= ~BACK_FACE;
+            }
+          } else if (k == CHUNK_BLOCK_COUNT - 1 && front) {
+            auto &blk1 = blocks[i][j][CHUNK_BLOCK_COUNT - 1];
+            auto &blk2 = front->blocks[i][j][0];
+            if (((blk1.blmask >> 15) & 1) && ((blk2.blmask >> 15) & 1)) {
+              // Remove front face from current block
+              blk1.blmask &= ~FRONT_FACE;
+            }
+          } else {
+            // No update needed middle block
+          }
+          mask = (blocks[i][j][k].blmask >> 17) & 63;
+        }
         std::vector<GLuint> indices;
         std::vector<GLuint> blockrendervert;
         blocks[i][j][k].Render(mask, indices, blockrendervert);

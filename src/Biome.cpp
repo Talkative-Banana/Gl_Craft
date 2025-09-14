@@ -9,11 +9,30 @@ static void load_p(decltype(Biome::chunks) &chunks, glm::ivec3 &Biomepos, int i,
   }
 }
 
-static void render_p(decltype(Biome::chunks) &chunks, int i) {
+static void render_p(decltype(Biome::chunks) &chunks, int i, bool firstRun) {
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
     int idx = CHUNK_COUNTZ * i + j;
-    auto &chunk = chunks[i][j];
-    chunk->Render(1);
+    auto &_chunk = chunks[i][j];
+    if (firstRun)
+      _chunk->Render(1, firstRun, nullptr, nullptr, nullptr, nullptr);
+    else {
+      if (i == 0 || i == CHUNK_COUNTX - 1 || j == 0 || j == CHUNK_COUNTZ - 1) {
+        // Have to check neigbouring biome
+        std::shared_ptr<chunk> left;
+        std::shared_ptr<chunk> front;
+        std::shared_ptr<chunk> right;
+        std::shared_ptr<chunk> back;
+        if (i != CHUNK_COUNTX - 1) left = chunks[i + 1][j];
+        if (i != 0) right = chunks[i - 1][j];
+        if (j != CHUNK_COUNTZ - 1) front = chunks[i][j + 1];
+        if (j != 0) back = chunks[i][j - 1];
+        _chunk->Render(1, firstRun, left, front, right, back);
+      } else {
+        // Within currenct chunk
+        _chunk->Render(
+            1, firstRun, chunks[i + 1][j], chunks[i][j + 1], chunks[i - 1][j], chunks[i][j - 1]);
+      }
+    }
   }
 }
 
@@ -30,13 +49,13 @@ Biome::Biome(int t, glm::ivec3 pos, GLboolean display) {
   for (auto &thread : threads) thread.join();
 }
 
-void Biome::RenderBiome() {
+void Biome::RenderBiome(bool firstRun) {
   if (!displaybiome) return;
 
   GLuint idx = 0;
   std::array<std::thread, CHUNK_COUNTX> threads;
   for (int i = 0; i < CHUNK_COUNTX; i++) {
-    threads[i] = std::thread(render_p, std::ref(chunks), i);
+    threads[i] = std::thread(render_p, std::ref(chunks), i, firstRun);
   }
 
   for (auto &thread : threads) thread.join();

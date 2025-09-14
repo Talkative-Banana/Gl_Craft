@@ -35,7 +35,13 @@ class chunk {
 
   chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
-  void Render(int setup);
+  void Render(
+      int setup,
+      bool firstRun,
+      std::shared_ptr<chunk>,   // left
+      std::shared_ptr<chunk>,   // forward
+      std::shared_ptr<chunk>,   // right
+      std::shared_ptr<chunk>);  // back
   void Setup_Landscape(GLint X, GLint Y);
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);

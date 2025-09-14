@@ -16,9 +16,11 @@ class Biome {
   std::unordered_set<std::shared_ptr<chunk>> render_queue;
 
  public:
+  GLuint x_cord;
+  GLuint z_cord;
   std::array<std::array<std::shared_ptr<chunk>, CHUNK_COUNTZ>, CHUNK_COUNTX> chunks;
   Biome(int t, glm::ivec3 pos, GLboolean display);
-  void RenderBiome();
+  void RenderBiome(bool firstRun);
   void Draw();
   void Update_queue(glm::vec3 playerpos);
 };
