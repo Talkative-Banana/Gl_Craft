@@ -155,6 +155,7 @@ void chunk::Render(
         if (firstRun) {
           // If its first run just save the mask
           mask = chunk::RenderFace({i, j, k});
+          blocks[i][j][k].blmask &= ~FACE_MASK;
           blocks[i][j][k].blmask |= (mask << 17);
           // continue;
         } else {

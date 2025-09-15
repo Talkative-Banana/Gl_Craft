@@ -25,6 +25,8 @@ constexpr static int BACK_FACE = 1 << 17;
 constexpr static int FRONT_FACE = 1 << 18;
 constexpr static int LEFT_FACE = 1 << 19;
 constexpr static int RIGHT_FACE = 1 << 20;
+constexpr static int FACE_MASK_BITS = 6;
+constexpr static int FACE_MASK = ((1 << FACE_MASK_BITS) - 1) << 17;
 
 // Non const
 static int SCREEN_HEIGHT = 640;

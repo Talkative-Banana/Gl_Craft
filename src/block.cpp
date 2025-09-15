@@ -106,6 +106,6 @@ void block::remove() {
   blmask &= ~(1 << 16);  // clear visible bit
 }
 
-void block::add(glm::ivec3& pos) {
+void block::add() {
   blmask |= (3 << 15);  // add solid and visble bit
 }

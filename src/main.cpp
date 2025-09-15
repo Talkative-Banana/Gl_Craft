@@ -190,6 +190,19 @@ int main(int, char **) {
       Nokeypressed = 0;
     }
 
+    auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<chunk>> {
+      std::shared_ptr<chunk> left, front, right, back;
+      left = world->get_chunk_by_center(
+          vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+      front = world->get_chunk_by_center(
+          vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+      right = world->get_chunk_by_center(
+          vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+      back = world->get_chunk_by_center(
+          vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+      return {left, front, right, back};
+    };
+
     if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
       strcpy(textKeyStatus, "Right click");
       strcpy(textKeyDescription, "Casting ray");
@@ -206,51 +219,60 @@ int main(int, char **) {
         if (block) block->remove();
         auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
         auto vec = ray.m_hitcords;
-        std::shared_ptr<chunk> left, front, right, back;
-        left = world->get_chunk_by_center(
-            vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
-        front = world->get_chunk_by_center(
-            vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
-        right = world->get_chunk_by_center(
-            vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
-        back = world->get_chunk_by_center(
-            vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
-        _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
 
         int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
         int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
         // If last block update adjacent chunk
+        auto chunks1 = get_neighbors(vec);
+        _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+
         bool update_boundary = false;
-        if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1 && front) {
+        if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
           update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
           std::cout << "[FRONT] Updating neighbouring chunk\n";
-          front->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          front->Render(0, false, nullptr, nullptr, nullptr, _chunk);
+          if (chunks1[1]) {
+            chunks1[1]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[1]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
         }
 
-        if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1 && left) {
+        if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
           update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
           std::cout << "[LEFT] Updating neighbouring chunk\n";
-          left->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          left->Render(0, false, nullptr, nullptr, _chunk, nullptr);
+          if (chunks1[0]) {
+            chunks1[0]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[0]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
         }
 
-        if (cordz == 1 && back) {
+        if (cordz == 1) {
           update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
           std::cout << "[BACK] Updating neighbouring chunk\n";
-          back->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          back->Render(0, false, nullptr, _chunk, nullptr, nullptr);
+          if (chunks1[3]) {
+            chunks1[3]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[3]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
         }
 
-        if (cordx == 1 && right) {
+        if (cordx == 1) {
           update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
           std::cout << "[RIGHT] Updating neighbouring chunk\n";
-          right->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          right->Render(0, false, _chunk, nullptr, nullptr, nullptr);
+          if (chunks1[2]) {
+            chunks1[2]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[2]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
         }
 
         if (update_boundary) {
-          _chunk->Render(0, false, left, front, right, back);
+          _chunk->Render(0, false, chunks1[0], chunks1[1], chunks1[2], chunks1[3]);
         }
 
         // world->RenderWorld();
@@ -271,58 +293,64 @@ int main(int, char **) {
                   << " " << ray.m_hitcords.z << std::endl;
         glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
         auto block = world->get_block_by_center(prev_blk);
-        if (block) block->add(ray.m_hitcords);
+        if (block) block->add();
         auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
-        if (_chunk) {
-          auto vec = ray.m_hitcords;
-          std::shared_ptr<chunk> left, front, right, back;
-          left = world->get_chunk_by_center(
-              vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
-          front = world->get_chunk_by_center(
+        auto vec = ray.m_hitcords;
+
+        int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+        int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+        // If last block update adjacent chunk
+        auto chunks1 = get_neighbors(vec);
+        _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+
+        bool update_boundary = false;
+        if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+          update_boundary = true;
+          auto chunks2 = get_neighbors(
               vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
-          right = world->get_chunk_by_center(
-              vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
-          back = world->get_chunk_by_center(
-              vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
-          _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-
-          int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
-          int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
-          // If last block update adjacent chunk
-          bool update_boundary = false;
-          if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
-            update_boundary = true;
-            std::cout << "[FRONT] Updating neighbouring chunk\n";
-            front->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            front->Render(0, false, nullptr, nullptr, nullptr, _chunk);
-          }
-
-          if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
-            update_boundary = true;
-            std::cout << "[LEFT] Updating neighbouring chunk\n";
-            left->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            left->Render(0, false, nullptr, nullptr, _chunk, nullptr);
-          }
-
-          if (cordz == 1) {
-            update_boundary = true;
-            std::cout << "[BACK] Updating neighbouring chunk\n";
-            back->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            back->Render(0, false, nullptr, _chunk, nullptr, nullptr);
-          }
-
-          if (cordx == 1) {
-            update_boundary = true;
-            std::cout << "[RIGHT] Updating neighbouring chunk\n";
-            right->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            right->Render(0, false, _chunk, nullptr, nullptr, nullptr);
-          }
-
-          if (update_boundary) {
-            _chunk->Render(0, false, left, front, right, back);
+          std::cout << "[FRONT] Updating neighbouring chunk\n";
+          if (chunks1[1]) {
+            chunks1[1]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[1]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
           }
         }
-        // world->RenderWorld();
+
+        if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+          update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+          std::cout << "[LEFT] Updating neighbouring chunk\n";
+          if (chunks1[0]) {
+            chunks1[0]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[0]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
+        }
+
+        if (cordz == 1) {
+          update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+          std::cout << "[BACK] Updating neighbouring chunk\n";
+          if (chunks1[3]) {
+            chunks1[3]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[3]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
+        }
+
+        if (cordx == 1) {
+          update_boundary = true;
+          auto chunks2 = get_neighbors(
+              vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+          std::cout << "[RIGHT] Updating neighbouring chunk\n";
+          if (chunks1[2]) {
+            chunks1[2]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+            chunks1[2]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+          }
+        }
+
+        if (update_boundary) {
+          _chunk->Render(0, false, chunks1[0], chunks1[1], chunks1[2], chunks1[3]);
+        }
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
