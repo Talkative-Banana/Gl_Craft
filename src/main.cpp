@@ -225,28 +225,28 @@ int main(int, char **) {
           update_boundary = true;
           std::cout << "[FRONT] Updating neighbouring chunk\n";
           front->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          front->Render(0, false, left, front, right, back);
+          front->Render(0, false, nullptr, nullptr, nullptr, _chunk);
         }
 
         if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
           update_boundary = true;
           std::cout << "[LEFT] Updating neighbouring chunk\n";
           left->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          left->Render(0, false, left, front, right, back);
+          left->Render(0, false, nullptr, nullptr, _chunk, nullptr);
         }
 
         if (cordz == 1) {
           update_boundary = true;
           std::cout << "[BACK] Updating neighbouring chunk\n";
           back->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          // back->Render(0, false, left, front, right, back);
+          back->Render(0, false, nullptr, _chunk, nullptr, nullptr);
         }
 
         if (cordx == 1) {
           update_boundary = true;
           std::cout << "[RIGHT] Updating neighbouring chunk\n";
           right->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-          right->Render(0, false, left, front, right, back);
+          right->Render(0, false, _chunk, nullptr, nullptr, nullptr);
         }
 
         if (update_boundary) {
@@ -272,7 +272,7 @@ int main(int, char **) {
         glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
         auto block = world->get_block_by_center(prev_blk);
         if (block) block->add(ray.m_hitcords);
-        auto _chunk = world->get_chunk_by_center(prev_blk);
+        auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
         if (_chunk) {
           auto vec = ray.m_hitcords;
           std::shared_ptr<chunk> left, front, right, back;
@@ -294,28 +294,28 @@ int main(int, char **) {
             update_boundary = true;
             std::cout << "[FRONT] Updating neighbouring chunk\n";
             front->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            front->Render(0, false, left, front, right, back);
+            front->Render(0, false, nullptr, nullptr, nullptr, _chunk);
           }
 
           if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
             update_boundary = true;
             std::cout << "[LEFT] Updating neighbouring chunk\n";
             left->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            left->Render(0, false, left, front, right, back);
+            left->Render(0, false, nullptr, nullptr, _chunk, nullptr);
           }
 
           if (cordz == 1) {
             update_boundary = true;
             std::cout << "[BACK] Updating neighbouring chunk\n";
             back->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            back->Render(0, false, left, front, right, back);
+            back->Render(0, false, nullptr, _chunk, nullptr, nullptr);
           }
 
           if (cordx == 1) {
             update_boundary = true;
             std::cout << "[RIGHT] Updating neighbouring chunk\n";
             right->Render(0, true, nullptr, nullptr, nullptr, nullptr);
-            right->Render(0, false, left, front, right, back);
+            right->Render(0, false, _chunk, nullptr, nullptr, nullptr);
           }
 
           if (update_boundary) {
