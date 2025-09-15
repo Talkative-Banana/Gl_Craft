@@ -221,28 +221,28 @@ int main(int, char **) {
         int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
         // If last block update adjacent chunk
         bool update_boundary = false;
-        if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1 && front) {
           update_boundary = true;
           std::cout << "[FRONT] Updating neighbouring chunk\n";
           front->Render(0, true, nullptr, nullptr, nullptr, nullptr);
           front->Render(0, false, nullptr, nullptr, nullptr, _chunk);
         }
 
-        if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1 && left) {
           update_boundary = true;
           std::cout << "[LEFT] Updating neighbouring chunk\n";
           left->Render(0, true, nullptr, nullptr, nullptr, nullptr);
           left->Render(0, false, nullptr, nullptr, _chunk, nullptr);
         }
 
-        if (cordz == 1) {
+        if (cordz == 1 && back) {
           update_boundary = true;
           std::cout << "[BACK] Updating neighbouring chunk\n";
           back->Render(0, true, nullptr, nullptr, nullptr, nullptr);
           back->Render(0, false, nullptr, _chunk, nullptr, nullptr);
         }
 
-        if (cordx == 1) {
+        if (cordx == 1 && right) {
           update_boundary = true;
           std::cout << "[RIGHT] Updating neighbouring chunk\n";
           right->Render(0, true, nullptr, nullptr, nullptr, nullptr);
