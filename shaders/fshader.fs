@@ -13,5 +13,8 @@ void main() {
    vec2 tileSize = 1.0 / vec2(atlasSize, atlasSize);
    vec2 atlasUV = TexCoord * tileSize + vec2(tile.x, tile.y) * tileSize;
 
-   outColor = isoscale * texture(atlas, atlasUV);
+   // outColor = isoscale * texture(atlas, atlasUV);
+
+   vec4 texColor = texture(atlas, atlasUV);
+   outColor = vec4(texColor.rgb * isoscale, texColor.a);
 }

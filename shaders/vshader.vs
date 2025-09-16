@@ -70,7 +70,6 @@ void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
 		// Z face → use (x,y)
 		tile.x = 3;
 		tile.y = 0;
-		isoscale = 0.980;
 		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
                     (centeroff & 2u) >> 1);  // Y bit
 	}
@@ -78,7 +77,6 @@ void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
 		// Y face → use (x,z)
 		tile.x = _NormalDir.y < 0 ? 2 : 0;
 		tile.y = 0;
-		isoscale = 0.800;
 		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
                     (centeroff & 1u));       // Z bit
 	}
@@ -86,7 +84,6 @@ void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
 		// X face → use (z,y)
 		tile.x = 3;
 		tile.y = 0;
-		isoscale = 0.608;
 		TexCoord = vec2((centeroff & 1u),        // Z bit
                     (centeroff & 2u) >> 1);  // Y bit
 	}
