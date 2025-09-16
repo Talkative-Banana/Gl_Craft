@@ -10,9 +10,10 @@ uniform mat4 vProjection;
 
 // uniform vec4 vColor;
 
-out vec3 TexCoord;
+out vec2 tile;
 out float isoscale;
 out vec3 NormalDir;
+out vec2 TexCoord; 
 
 vec3 Center(vec3 pos, uint centeroff){
 	vec3 center = pos;
@@ -64,6 +65,32 @@ ivec3 Normal(uint normaldir){
 	}
 }
 
+void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
+	if (_NormalDir.z != 0) {
+		// Z face → use (x,y)
+		tile.x = 3;
+		tile.y = 0;
+		isoscale = 0.980;
+		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
+                    (centeroff & 2u) >> 1);  // Y bit
+	}
+	else if (_NormalDir.y != 0) {
+		// Y face → use (x,z)
+		tile.x = _NormalDir.y < 0 ? 2 : 0;
+		tile.y = 0;
+		isoscale = 0.800;
+		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
+                    (centeroff & 1u));       // Z bit
+	}
+	else {
+		// X face → use (z,y)
+		tile.x = 3;
+		tile.y = 0;
+		isoscale = 0.608;
+		TexCoord = vec2((centeroff & 1u),        // Z bit
+                    (centeroff & 2u) >> 1);  // Y bit
+	}
+}
 
 void main() {
 	uint positionX = (vVertex)        & 63u;
@@ -76,16 +103,20 @@ void main() {
 	vec3 centercord = Center(pos, centeroff);
 	gl_Position = vProjection * vView * vModel * vec4(pos + chunkpos, 1.0);
 
-	TexCoord = pos - centercord; //Interpolate color
+	vec3 texcoord = pos - centercord; 
 	ivec3 _NormalDir = Normal(normaldir);
 
 	NormalDir = _NormalDir;
-	if(NormalDir.y != 0){
+
+	setup_textures(_NormalDir, vVertex, centeroff);
+	// figure out which 2D coords to use based on face
+	if (_NormalDir.z != 0) {
 		isoscale = 0.980;
-	} else if(NormalDir.x != 0){
+	}
+	else if (_NormalDir.y != 0) {
 		isoscale = 0.800;
-	} else{
+	}
+	else {
 		isoscale = 0.608;
 	}
-
 }

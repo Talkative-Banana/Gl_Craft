@@ -36,7 +36,7 @@ glm::ivec3 _wps = {0, 0, 0};
 std::unique_ptr<World> world = std::make_unique<World>(42, _wps);
 glm::vec3 chunkpos;
 GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, chunkpos_uniform,
-    vColor_uniform;
+    vColor_uniform, atlas_uniform;
 glm::mat4 modelT, viewT,
     projectionT;  // The model, view and projection transformations
 char textKeyStatus[IMGUI_TEXT_CAPACITY];
@@ -89,14 +89,14 @@ int main(int, char **) {
 
   unsigned int axis_VAO;
 
-  Material mat(GRASS_BLOCK);
-  TextureCubeMap tcm(mat.GetString());
+  Texture atlas("textures/default_texture.png");
 
   static int vVertex_attrib = -1;
   static int side_uniform = -1;
   static int vNormal_attrib = -1;
   static int cameraPos_uniform = -1;
   static int lightpos_uniform = -1;
+  static int atlast_uniform = -1;
   if (vVertex_attrib == -1) {
     vVertex_attrib = glGetAttribLocation(shaderProgram, "vVertex");
     if (vVertex_attrib == -1) {
@@ -132,6 +132,12 @@ int main(int, char **) {
       fprintf(stderr, "Could not bind location: side\n");
       exit(0);
     }
+  }
+
+  atlas_uniform = glGetUniformLocation(shaderProgram, "atlas");
+  if (atlas_uniform == -1) {
+    std::cerr << "Could not bind: atlas\n";
+    exit(0);
   }
   glUniform1f(side_uniform, BLOCK_SIZE);
 
@@ -420,7 +426,8 @@ int main(int, char **) {
     setupProjectionTransformation(shaderProgram, players[activePlayer]->m_cameracontroller);
 
     // glBindVertexArray(cube_VAO);
-    tcm.Bind();
+    atlas.Bind();
+    glUniform1i(atlas_uniform, 0);  // bind sampler to texture unit 0
     world->Draw();
     glDisable(GL_DEPTH_TEST);  // Disable depth test for drawing axes. We want
                                // axes to be drawn on top of all
