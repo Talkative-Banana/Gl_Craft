@@ -1,6 +1,20 @@
 #version 330 core
 
+// DIRT BLOCK  0
+// GRASS BLOCK 1
+// STONE BLOCK 2
+
 layout(location = 0) in uint vVertex;
+
+uint blocks_X[256];
+uint blocks_Y[256];
+
+uint GRASS_BLOCK_X = (3u) | (3u << 4u) | (3u << 8u) | (3u << 12u) | (0u << 16u) | (2u << 20u);
+uint GRASS_BLOCK_Y = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
+uint DIRT_BLOCK_X  = (2u) | (2u << 4u) | (2u << 8u) | (2u << 12u) | (2u << 16u) | (2u << 20u);
+uint DIRT_BLOCK_Y  = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
+uint STONE_BLOCK_X  = (1u) | (1u << 4u) | (1u << 8u) | (1u << 12u) | (1u << 16u) | (1u << 20u);
+uint STONE_BLOCK_Y  = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
 
 uniform float side;
 uniform vec3 chunkpos;
@@ -10,9 +24,10 @@ uniform mat4 vProjection;
 
 // uniform vec4 vColor;
 
-out vec3 TexCoord;
+out vec2 tile;
 out float isoscale;
 out vec3 NormalDir;
+out vec2 TexCoord; 
 
 vec3 Center(vec3 pos, uint centeroff){
 	vec3 center = pos;
@@ -64,6 +79,57 @@ ivec3 Normal(uint normaldir){
 	}
 }
 
+void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
+	uint blktype = (vVertex >> 24u) & 63u;
+	uint frontx = (blocks_X[blktype] >> 8u) & 15u;
+	uint fronty = (blocks_Y[blktype] >> 8u) & 15u;
+	uint backx = (blocks_X[blktype] >> 0u) & 15u;
+	uint backy = (blocks_Y[blktype] >> 0u) & 15u;
+	uint topx = (blocks_X[blktype] >> 16u) & 15u;
+	uint topy = (blocks_Y[blktype] >> 16u) & 15u;
+	uint bottomx = (blocks_X[blktype] >> 20u) & 15u;
+	uint bottomy = (blocks_Y[blktype] >> 20u) & 15u;
+	uint leftx = (blocks_X[blktype] >> 4u) & 15u;
+	uint lefty = (blocks_Y[blktype] >> 4u) & 15u;
+	uint rightx = (blocks_X[blktype] >> 12u) & 15u;
+	uint righty = (blocks_Y[blktype] >> 12u) & 15u;
+	if (_NormalDir.z != 0) {
+		// Z face → use (x,y)
+		if(_NormalDir.z > 0){ // Front Face
+			tile.x = frontx;
+			tile.y = fronty;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 2u) >> 1);
+		} else { // Back Face
+			tile.x = backx;
+			tile.y = backy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 2u) >> 1);
+		}
+	}
+	else if (_NormalDir.y != 0) {
+		// Y face → use (x,z)
+		if(_NormalDir.y > 0){ // Top Face
+			tile.x = topx;
+			tile.y = topy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 1u));
+		} else { // Bottom Face
+			tile.x = bottomx;
+			tile.y = bottomy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 1u));
+		}
+	}
+	else {
+		// X face → use (z,y)
+		if(_NormalDir.x < 0){ // Left Face
+			tile.x = leftx;
+			tile.y = lefty;
+			TexCoord = vec2((centeroff & 1u), (centeroff & 2u) >> 1);
+		} else { // Right Face
+			tile.x = rightx;
+			tile.y = righty;
+			TexCoord = vec2((centeroff & 1u), (centeroff & 2u) >> 1);
+		}
+	}
+}
 
 void main() {
 	uint positionX = (vVertex)        & 63u;
@@ -76,16 +142,30 @@ void main() {
 	vec3 centercord = Center(pos, centeroff);
 	gl_Position = vProjection * vView * vModel * vec4(pos + chunkpos, 1.0);
 
-	TexCoord = pos - centercord; //Interpolate color
+	vec3 texcoord = pos - centercord; 
 	ivec3 _NormalDir = Normal(normaldir);
 
 	NormalDir = _NormalDir;
-	if(NormalDir.y != 0){
+
+	// X Axis
+	blocks_X[0] = GRASS_BLOCK_X;
+	blocks_X[1] = DIRT_BLOCK_X;
+	blocks_X[2] = STONE_BLOCK_X;
+
+	// Y Axis
+	blocks_Y[0] = GRASS_BLOCK_Y;
+	blocks_Y[1] = DIRT_BLOCK_Y;
+	blocks_Y[2] = STONE_BLOCK_Y;
+
+	setup_textures(_NormalDir, vVertex, centeroff);
+	// figure out which 2D coords to use based on face
+	if (_NormalDir.z != 0) {
 		isoscale = 0.980;
-	} else if(NormalDir.x != 0){
+	}
+	else if (_NormalDir.y != 0) {
 		isoscale = 0.800;
-	} else{
+	}
+	else {
 		isoscale = 0.608;
 	}
-
 }
