@@ -1,4 +1,4 @@
-# Gl_Craft
+# glcraft
 Minecraft clone in C++ with OpenGL.
 
 # Preview
