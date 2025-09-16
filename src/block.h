@@ -13,7 +13,7 @@ class block {
   // 00000000_00000000_00000000_00000000
   //    ^^^^^ ^^^^^^^^ ^^^^^^^^ ^^^^^^^^
   //    ||||| |||||||| |||||||| ||||||||
-  //     tttt tmmmmmmv sxxxxxyy yyyzzzzz
+  //    ttttt tmmmmmmv sxxxxxyy yyyzzzzz
   //             rlfb
   uint32_t blmask;
   static constexpr std::array<std::array<unsigned int, 6>, 6> faceindices = {
@@ -25,11 +25,11 @@ class block {
        {{23, 22, 21, 23, 21, 20}}}};  // Bottom
 
 
-  block(const glm::ivec3& pos, GLboolean solid);
+  block(const glm::ivec3& pos, GLboolean solid, GLuint bltype);
   block();
 
   void Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert);
-  GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal);
+  GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint blktype);
   void add();
   void remove();
 };

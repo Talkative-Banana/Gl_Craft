@@ -1,6 +1,20 @@
 #version 330 core
 
+// DIRT BLOCK  0
+// GRASS BLOCK 1
+// STONE BLOCK 2
+
 layout(location = 0) in uint vVertex;
+
+uint blocks_X[256];
+uint blocks_Y[256];
+
+uint GRASS_BLOCK_X = (3u) | (3u << 4u) | (3u << 8u) | (3u << 12u) | (0u << 16u) | (2u << 20u);
+uint GRASS_BLOCK_Y = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
+uint DIRT_BLOCK_X  = (2u) | (2u << 4u) | (2u << 8u) | (2u << 12u) | (2u << 16u) | (2u << 20u);
+uint DIRT_BLOCK_Y  = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
+uint STONE_BLOCK_X  = (1u) | (1u << 4u) | (1u << 8u) | (1u << 12u) | (1u << 16u) | (1u << 20u);
+uint STONE_BLOCK_Y  = (0u) | (0u << 4u) | (0u << 8u) | (0u << 12u) | (0u << 16u) | (0u << 20u);
 
 uniform float side;
 uniform vec3 chunkpos;
@@ -66,26 +80,54 @@ ivec3 Normal(uint normaldir){
 }
 
 void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
+	uint blktype = (vVertex >> 24u) & 63u;
+	uint frontx = (blocks_X[blktype] >> 8u) & 15u;
+	uint fronty = (blocks_Y[blktype] >> 8u) & 15u;
+	uint backx = (blocks_X[blktype] >> 0u) & 15u;
+	uint backy = (blocks_Y[blktype] >> 0u) & 15u;
+	uint topx = (blocks_X[blktype] >> 16u) & 15u;
+	uint topy = (blocks_Y[blktype] >> 16u) & 15u;
+	uint bottomx = (blocks_X[blktype] >> 20u) & 15u;
+	uint bottomy = (blocks_Y[blktype] >> 20u) & 15u;
+	uint leftx = (blocks_X[blktype] >> 4u) & 15u;
+	uint lefty = (blocks_Y[blktype] >> 4u) & 15u;
+	uint rightx = (blocks_X[blktype] >> 12u) & 15u;
+	uint righty = (blocks_Y[blktype] >> 12u) & 15u;
 	if (_NormalDir.z != 0) {
 		// Z face → use (x,y)
-		tile.x = 3;
-		tile.y = 0;
-		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
-                    (centeroff & 2u) >> 1);  // Y bit
+		if(_NormalDir.z > 0){ // Front Face
+			tile.x = frontx;
+			tile.y = fronty;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 2u) >> 1);
+		} else { // Back Face
+			tile.x = backx;
+			tile.y = backy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 2u) >> 1);
+		}
 	}
 	else if (_NormalDir.y != 0) {
 		// Y face → use (x,z)
-		tile.x = _NormalDir.y < 0 ? 2 : 0;
-		tile.y = 0;
-		TexCoord = vec2((centeroff & 4u) >> 2,   // X bit
-                    (centeroff & 1u));       // Z bit
+		if(_NormalDir.y > 0){ // Top Face
+			tile.x = topx;
+			tile.y = topy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 1u));
+		} else { // Bottom Face
+			tile.x = bottomx;
+			tile.y = bottomy;
+			TexCoord = vec2((centeroff & 4u) >> 2, (centeroff & 1u));
+		}
 	}
 	else {
 		// X face → use (z,y)
-		tile.x = 3;
-		tile.y = 0;
-		TexCoord = vec2((centeroff & 1u),        // Z bit
-                    (centeroff & 2u) >> 1);  // Y bit
+		if(_NormalDir.x < 0){ // Left Face
+			tile.x = leftx;
+			tile.y = lefty;
+			TexCoord = vec2((centeroff & 1u), (centeroff & 2u) >> 1);
+		} else { // Right Face
+			tile.x = rightx;
+			tile.y = righty;
+			TexCoord = vec2((centeroff & 1u), (centeroff & 2u) >> 1);
+		}
 	}
 }
 
@@ -104,6 +146,16 @@ void main() {
 	ivec3 _NormalDir = Normal(normaldir);
 
 	NormalDir = _NormalDir;
+
+	// X Axis
+	blocks_X[0] = GRASS_BLOCK_X;
+	blocks_X[1] = DIRT_BLOCK_X;
+	blocks_X[2] = STONE_BLOCK_X;
+
+	// Y Axis
+	blocks_Y[0] = GRASS_BLOCK_Y;
+	blocks_Y[1] = DIRT_BLOCK_Y;
+	blocks_Y[2] = STONE_BLOCK_Y;
 
 	setup_textures(_NormalDir, vVertex, centeroff);
 	// figure out which 2D coords to use based on face
