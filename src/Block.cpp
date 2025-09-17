@@ -1,23 +1,23 @@
-#include "block.h"
+#include "Block.h"
 
 #include "Renderer.h"
 
-block::block(const glm::ivec3& pos, GLboolean solid, GLuint bltype) {
+Block::Block(const glm::ivec3& pos, GLboolean solid, GLuint bltype) {
   blmask = (bltype << 23) | (pos.x << 10) | (pos.y << 5) | (pos.z);
   if (solid) blmask |= (1 << 15);
 }
 
-block::block() : blmask(0) {
+Block::Block() : blmask(0) {
 }
 
-GLuint block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint bltype) {
+GLuint Block::Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint bltype) {
   GLuint mask = 0;
   // tttttttnnnccczzzzzzyyyyyyxxxxxx 7 all add [block can have their final point at 32]
   mask |= X | (Y << 6) | (Z << 12) | (cent << 18) | (normal << 21) | (bltype << 24);
   return mask;
 }
 
-std::vector<GLuint> block::GenerateVerticies() {
+std::vector<GLuint> Block::GenerateVerticies() {
   GLuint x = (blmask >> 10) & 31, y = (blmask >> 5) & 31, z = (blmask) & 31,
          blktype = (blmask >> 23) & 63;
   // Vertex Position
@@ -88,7 +88,7 @@ std::vector<GLuint> block::GenerateVerticies() {
   return vertices;
 }
 
-void block::Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert) {
+void Block::Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert) {
   if (((blmask >> 15) & 1) == 0) return;  // not solid
   rendervert = GenerateVerticies();
 
@@ -102,11 +102,11 @@ void block::Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint
   }
 }
 
-void block::remove() {
+void Block::remove() {
   blmask &= ~(1 << 15);  // clear solid bit
   blmask &= ~(1 << 16);  // clear visible bit
 }
 
-void block::add() {
+void Block::add() {
   blmask |= (3 << 15);  // add solid and visble bit
 }

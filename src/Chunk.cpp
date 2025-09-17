@@ -1,4 +1,4 @@
-#include "chunk.h"
+#include "Chunk.h"
 
 #include <cstdlib>
 #include <random>
@@ -6,7 +6,7 @@
 
 #include "Renderer.h"
 
-chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean display) {
+Chunk::Chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean display) {
   id = _id;
   count = 0;
   biomepos = _biomepos;
@@ -19,7 +19,7 @@ chunk::chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean disp
   Setup_Landscape(position.x, position.z);
 }
 
-inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
+inline GLboolean Chunk::isSolid(const std::vector<GLint> &position) {
   if ((position[0] >= 0) && (position[0] < CHUNK_BLOCK_COUNT) && (position[1] >= 0) &&
       (position[1] < CHUNK_BLOCK_COUNT) && (position[2] >= 0) &&
       (position[2] < CHUNK_BLOCK_COUNT)) {
@@ -33,7 +33,7 @@ inline GLboolean chunk::isSolid(const std::vector<GLint> &position) {
 // k blue i red j green
 // ctrl x -> red facing me
 
-GLuint chunk::RenderFace(std::vector<GLint> &&position) {
+GLuint Chunk::RenderFace(std::vector<GLint> &&position) {
   // 1 -> back face: 2 -> front face: 3 -> left face: 4 -> right face: 5 -> top
   // face: 6 -> bottom face
   GLuint mask = 0;
@@ -74,7 +74,7 @@ GLuint chunk::RenderFace(std::vector<GLint> &&position) {
   return mask;
 }
 
-void chunk::Setup_Landscape(GLint X, GLint Z) {
+void Chunk::Setup_Landscape(GLint X, GLint Z) {
   // Generate a random seed
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -125,19 +125,19 @@ void chunk::Setup_Landscape(GLint X, GLint Z) {
         GLuint bltype = 1;
         if (y == height - 1) bltype = 0;
         if (y <= 10) bltype = 2;
-        blocks[z][y][x] = block(ofs, y < height, bltype);  // mark them solid
+        blocks[z][y][x] = Block(ofs, y < height, bltype);  // mark them solid
       }
     }
   }
 }
 
-void chunk::Render(
+void Chunk::Render(
     int setup,
     bool firstRun,
-    std::shared_ptr<chunk> left,
-    std::shared_ptr<chunk> front,
-    std::shared_ptr<chunk> right,
-    std::shared_ptr<chunk> back) {
+    std::shared_ptr<Chunk> left,
+    std::shared_ptr<Chunk> front,
+    std::shared_ptr<Chunk> right,
+    std::shared_ptr<Chunk> back) {
   // Rerendering
   if (!displaychunk) return;
   rendervert.clear();
@@ -157,7 +157,7 @@ void chunk::Render(
         GLuint mask = 0;
         if (firstRun) {
           // If its first run just save the mask
-          mask = chunk::RenderFace({i, j, k});
+          mask = Chunk::RenderFace({i, j, k});
           blocks[i][j][k].blmask &= ~FACE_MASK;
           blocks[i][j][k].blmask |= (mask << 17);
           // continue;
@@ -255,7 +255,7 @@ void chunk::Render(
   }
 }
 
-void chunk::Draw() {
+void Chunk::Draw() {
   if (!displaychunk) return;
   chunkva->Bind();
   glUniform3f(chunkpos_uniform, chunkpos.x, chunkpos.y, chunkpos.z);

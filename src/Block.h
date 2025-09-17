@@ -1,10 +1,10 @@
 #include <array>
 
-#include "constants.hpp"
-#include "utils.h"
+#include "Constants.hpp"
+#include "Utils.h"
 #pragma once
 
-class block {
+class Block {
  private:
   std::vector<GLuint> GenerateVerticies();
 
@@ -25,8 +25,8 @@ class block {
        {{23, 22, 21, 23, 21, 20}}}};  // Bottom
 
 
-  block(const glm::ivec3& pos, GLboolean solid, GLuint bltype);
-  block();
+  Block(const glm::ivec3& pos, GLboolean solid, GLuint bltype);
+  Block();
 
   void Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert);
   GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint blktype);

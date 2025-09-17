@@ -15,8 +15,8 @@ find_package(GLEW REQUIRED)
 link_directories(${LIBNOISE_DIR})
 
 set(SOURCES
-  "src/main.cpp"
-  "src/utils.cpp"
+  "src/Main.cpp"
+  "src/Utils.cpp"
   "src/Renderer.cpp"
   "src/IndexBuffer.cpp"
   "src/VertexBuffer.cpp"
@@ -25,8 +25,8 @@ set(SOURCES
   "src/CameraController.cpp"
   "src/Texture.cpp"
   "src/TextureCubeMap.cpp"
-  "src/block.cpp"
-  "src/chunk.cpp"
+  "src/Block.cpp"
+  "src/Chunk.cpp"
   "src/Biome.cpp"
   "src/Window.cpp"
   "src/WindowsInput.cpp"

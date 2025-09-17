@@ -4,9 +4,9 @@
 #include <glm/gtx/norm.hpp>
 #include <memory>
 
+#include "Constants.hpp"
+#include "Utils.h"
 #include "World.h"
-#include "constants.hpp"
-#include "utils.h"
 
 class Ray {
  public:

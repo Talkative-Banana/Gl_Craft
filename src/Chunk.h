@@ -3,39 +3,39 @@
 
 #include <memory>
 
+#include "Block.h"
+#include "Constants.hpp"
 #include "IndexBuffer.h"
+#include "Utils.h"
 #include "VertexArray.h"
-#include "block.h"
-#include "constants.hpp"
-#include "utils.h"
 
 #pragma once
 
 extern GLint chunkpos_uniform;
 extern GLuint wireframemode;
 
-class chunk {
+class Chunk {
  public:
   GLboolean displaychunk;
   GLuint id, count, cntblocks;
   glm::ivec3 biomepos, chunkpos;
 
-  std::array<std::array<std::array<block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
+  std::array<std::array<std::array<Block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
       blocks;
   std::vector<GLuint> cube_vertices;
   std::vector<GLuint> cube_indices;
   std::unique_ptr<VertexArray> chunkva;
   std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
-  chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
+  Chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
   void Render(
       int setup,
       bool firstRun,
-      std::shared_ptr<chunk>,   // left
-      std::shared_ptr<chunk>,   // forward
-      std::shared_ptr<chunk>,   // right
-      std::shared_ptr<chunk>);  // back
+      std::shared_ptr<Chunk>,   // left
+      std::shared_ptr<Chunk>,   // forward
+      std::shared_ptr<Chunk>,   // right
+      std::shared_ptr<Chunk>);  // back
   void Setup_Landscape(GLint X, GLint Y);
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);

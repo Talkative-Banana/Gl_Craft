@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "Utils.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
@@ -16,8 +16,10 @@
 
 #include "AssetManager.h"
 #include "CameraController.h"
+#include "Constants.hpp"
 #include "IndexBuffer.h"
 #include "Input.h"
+#include "Main.h"
 #include "Material.h"
 #include "Player.h"
 #include "Ray.h"
@@ -27,8 +29,6 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "World.h"
-#include "constants.hpp"
-#include "main.h"
 #define IMGUI_TEXT_CAPACITY 256
 
 // Globals
@@ -73,8 +73,8 @@ void draw_axis(unsigned int axis_VAO, unsigned int shaderProgram) {
 
 int main(int, char **) {
   // Size of Structs
-  std::cout << "Size of block is: " << sizeof(block) << std::endl;
-  std::cout << "Size of chunk is: " << sizeof(chunk) << std::endl;
+  std::cout << "Size of block is: " << sizeof(Block) << std::endl;
+  std::cout << "Size of chunk is: " << sizeof(Chunk) << std::endl;
   std::cout << "Size of biome is: " << sizeof(Biome) << std::endl;
   // Setup window
   _window = new Window(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -196,8 +196,8 @@ int main(int, char **) {
       Nokeypressed = 0;
     }
 
-    auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<chunk>> {
-      std::shared_ptr<chunk> left, front, right, back;
+    auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<Chunk>> {
+      std::shared_ptr<Chunk> left, front, right, back;
       left = world->get_chunk_by_center(
           vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
       front = world->get_chunk_by_center(

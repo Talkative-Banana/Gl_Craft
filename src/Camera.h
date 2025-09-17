@@ -2,7 +2,7 @@
 
 #include <glm/gtx/transform.hpp>
 
-#include "constants.hpp"
+#include "Constants.hpp"
 
 class Camera {
  private:

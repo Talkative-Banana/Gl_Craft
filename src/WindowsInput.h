@@ -1,5 +1,5 @@
 #include "Input.h"
-#include "utils.h"
+#include "Utils.h"
 
 class WindowsInput : public Input {
  protected:

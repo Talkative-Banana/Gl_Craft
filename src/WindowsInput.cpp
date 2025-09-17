@@ -1,7 +1,7 @@
 #include "WindowsInput.h"
 
 #include "Input.h"
-#include "main.h"
+#include "Main.h"
 
 Input* Input::s_Instance = new WindowsInput();
 

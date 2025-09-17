@@ -1,5 +1,5 @@
 #pragma once
-#include "utils.h"
+#include "Utils.h"
 
 struct AssetVertex {
   glm::vec3 position;

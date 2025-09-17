@@ -5,11 +5,11 @@
 #include "AssetVertex.h"
 #include "CameraController.h"
 #include "IndexBuffer.h"
+#include "Utils.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "string.h"
-#include "utils.h"
 
 extern GLint vModel_uniform, vView_uniform, vProjection_uniform, side_uniform, worldpos_uniform,
     vColor_uniform;

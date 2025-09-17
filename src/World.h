@@ -10,11 +10,11 @@
 #include <unordered_set>
 
 #include "Biome.h"
+#include "Constants.hpp"
 #include "IndexBuffer.h"
 #include "Renderer.h"
+#include "Utils.h"
 #include "VertexArray.h"
-#include "constants.hpp"
-#include "utils.h"
 
 class World {
  private:
@@ -38,8 +38,8 @@ class World {
   void SetupWorld(glm::vec3 playerpos);
   bool isSolid(const glm::ivec3 &pos);
   bool isVisible(const glm::ivec3 &pos);
-  block *get_block_by_center(const glm::ivec3 &pos);
-  std::shared_ptr<chunk> get_chunk_by_center(const glm::ivec3 &pos);
+  Block *get_block_by_center(const glm::ivec3 &pos);
+  std::shared_ptr<Chunk> get_chunk_by_center(const glm::ivec3 &pos);
   std::shared_ptr<Biome> get_biome_by_center(const glm::ivec3 &pos);
   void RenderWorld(bool firstRun);
   void Draw();

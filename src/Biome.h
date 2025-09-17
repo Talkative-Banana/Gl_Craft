@@ -3,22 +3,22 @@
 #include <thread>
 #include <unordered_set>
 
+#include "Chunk.h"
+#include "Constants.hpp"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
-#include "chunk.h"
-#include "constants.hpp"
 
 class Biome {
  private:
   int type;
   glm::ivec3 Biomepos;
   GLboolean displaybiome;
-  std::unordered_set<std::shared_ptr<chunk>> render_queue;
+  std::unordered_set<std::shared_ptr<Chunk>> render_queue;
 
  public:
   GLuint x_cord;
   GLuint z_cord;
-  std::array<std::array<std::shared_ptr<chunk>, CHUNK_COUNTZ>, CHUNK_COUNTX> chunks;
+  std::array<std::array<std::shared_ptr<Chunk>, CHUNK_COUNTZ>, CHUNK_COUNTX> chunks;
   Biome(int t, glm::ivec3 pos, GLboolean display);
   void RenderBiome(bool firstRun);
   void Draw();

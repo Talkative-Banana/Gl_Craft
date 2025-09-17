@@ -4,8 +4,8 @@
 
 #include "AssetVertex.h"
 #include "Mesh.h"
+#include "Utils.h"
 #include "string.h"
-#include "utils.h"
 
 class AssetManager {
  public:

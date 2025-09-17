@@ -4,7 +4,7 @@ World::World(int seed, const glm::ivec3 &pos) : m_seed(seed), m_worldpos(pos) {
   worker = std::thread(&World::workerLoop, this);
 };
 
-block *World::get_block_by_center(const glm::ivec3 &pos) {
+Block *World::get_block_by_center(const glm::ivec3 &pos) {
   // get the biome
   // get x and z cords
   glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
@@ -37,7 +37,7 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
   return &block;
 }
 
-std::shared_ptr<chunk> World::get_chunk_by_center(const glm::ivec3 &pos) {
+std::shared_ptr<Chunk> World::get_chunk_by_center(const glm::ivec3 &pos) {
   // get the biome
   // get x and z cords
   glm::ivec3 pos_cpy = pos - glm::ivec3(HALF_BLOCK_SIZE);
@@ -89,13 +89,13 @@ std::shared_ptr<Biome> World::get_biome_by_center(const glm::ivec3 &pos) {
 }
 
 bool World::isSolid(const glm::ivec3 &pos) {
-  block *b = get_block_by_center(pos);
+  Block *b = get_block_by_center(pos);
   if (!b) return false;
   return (b && (((b->blmask) >> 15) & 1) == 1);
 }
 
 bool World::isVisible(const glm::ivec3 &pos) {
-  block *b = get_block_by_center(pos);
+  Block *b = get_block_by_center(pos);
   return (b && (((b->blmask) >> 16) & 1) == 1);
 }
 

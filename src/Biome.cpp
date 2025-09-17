@@ -8,7 +8,7 @@ extern std::unique_ptr<World> world;
 static void load_p(decltype(Biome::chunks) &chunks, glm::ivec3 &Biomepos, int i, bool display) {
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
     int idx = CHUNK_COUNTZ * i + j;
-    chunks[i][j] = std::make_shared<chunk>(idx, Biomepos, glm::ivec3(i, 0, j), true);
+    chunks[i][j] = std::make_shared<Chunk>(idx, Biomepos, glm::ivec3(i, 0, j), true);
   }
 }
 
@@ -23,8 +23,8 @@ static void render_p(decltype(Biome::chunks) &chunks, int i, bool firstRun) {
         // Have to check neigbouring biome
         // get the center of chunks 1st block
         glm::ivec3 p = _chunk->chunkpos + glm::ivec3(HALF_BLOCK_SIZE);
-        auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<chunk>> {
-          std::shared_ptr<chunk> left, front, right, back;
+        auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<Chunk>> {
+          std::shared_ptr<Chunk> left, front, right, back;
           left = world->get_chunk_by_center(
               vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
           front = world->get_chunk_by_center(
