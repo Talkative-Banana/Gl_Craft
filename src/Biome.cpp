@@ -1,6 +1,9 @@
 #include "Biome.h"
 
 #include "Renderer.h"
+#include "World.h"
+
+extern std::unique_ptr<World> world;
 
 static void load_p(decltype(Biome::chunks) &chunks, glm::ivec3 &Biomepos, int i, bool display) {
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
@@ -18,17 +21,25 @@ static void render_p(decltype(Biome::chunks) &chunks, int i, bool firstRun) {
     else {
       if (i == 0 || i == CHUNK_COUNTX - 1 || j == 0 || j == CHUNK_COUNTZ - 1) {
         // Have to check neigbouring biome
-        std::shared_ptr<chunk> left;
-        std::shared_ptr<chunk> front;
-        std::shared_ptr<chunk> right;
-        std::shared_ptr<chunk> back;
-        if (i != CHUNK_COUNTX - 1) left = chunks[i + 1][j];
-        if (i != 0) right = chunks[i - 1][j];
-        if (j != CHUNK_COUNTZ - 1) front = chunks[i][j + 1];
-        if (j != 0) back = chunks[i][j - 1];
-        _chunk->Render(1, firstRun, left, front, right, back);
+        // get the center of chunks 1st block
+        glm::ivec3 p = _chunk->chunkpos + glm::ivec3(HALF_BLOCK_SIZE);
+        auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<chunk>> {
+          std::shared_ptr<chunk> left, front, right, back;
+          left = world->get_chunk_by_center(
+              vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+          front = world->get_chunk_by_center(
+              vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+          right = world->get_chunk_by_center(
+              vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+          back = world->get_chunk_by_center(
+              vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+          return {left, front, right, back};
+        };
+
+        auto __chunks = get_neighbors(p);
+        _chunk->Render(1, firstRun, __chunks[0], __chunks[1], __chunks[2], __chunks[3]);
       } else {
-        // Within currenct chunk
+        // Within current chunk
         _chunk->Render(
             1, firstRun, chunks[i + 1][j], chunks[i][j + 1], chunks[i - 1][j], chunks[i][j - 1]);
       }

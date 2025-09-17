@@ -20,7 +20,7 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
 
   if (biomex >= BIOME_COUNTX || biomez >= BIOME_COUNTZ) return nullptr;
 
-  auto &biome = biomes[biomex][biomez];
+  auto biome = biomes[biomex][biomez];
   if (!biome) return nullptr;
   // get the chunk
 
@@ -28,7 +28,7 @@ block *World::get_block_by_center(const glm::ivec3 &pos) {
   int chunkx = (x / CHUNK_BLOCK_COUNT) % CHUNK_COUNTX,
       chunkz = (z / CHUNK_BLOCK_COUNT) % CHUNK_COUNTZ;
 
-  auto &chunk = biome->chunks[chunkx][chunkz];
+  auto chunk = biome->chunks[chunkx][chunkz];
 
   if (!chunk) return nullptr;
   // get the block
@@ -53,7 +53,7 @@ std::shared_ptr<chunk> World::get_chunk_by_center(const glm::ivec3 &pos) {
 
   if (biomex >= BIOME_COUNTX || biomez >= BIOME_COUNTZ) return nullptr;
 
-  auto &biome = biomes[biomex][biomez];
+  auto biome = biomes[biomex][biomez];
   if (!biome) return nullptr;
   // get the chunk
 
@@ -61,9 +61,8 @@ std::shared_ptr<chunk> World::get_chunk_by_center(const glm::ivec3 &pos) {
   int chunkx = (x / CHUNK_BLOCK_COUNT) % CHUNK_COUNTX,
       chunkz = (z / CHUNK_BLOCK_COUNT) % CHUNK_COUNTZ;
 
-  auto &chunk = biome->chunks[chunkx][chunkz];
+  auto chunk = biome->chunks[chunkx][chunkz];
 
-  if (!chunk) return nullptr;
   return chunk ? chunk : nullptr;
 }
 
@@ -83,7 +82,7 @@ std::shared_ptr<Biome> World::get_biome_by_center(const glm::ivec3 &pos) {
 
   if (biomex >= BIOME_COUNTX || biomez >= BIOME_COUNTZ) return nullptr;
 
-  auto &biome = biomes[biomex][biomez];
+  auto biome = biomes[biomex][biomez];
   if (!biome) return nullptr;
 
   return biome ? biome : nullptr;
@@ -132,7 +131,7 @@ void World::SetupWorld(glm::vec3 playerpos) {
       float common = CHUNK_COUNTX * CHUNK_BLOCK_COUNT * BLOCK_SIZE;
       glm::ivec3 biome_pos = glm::ivec3(common * i, 0, common * j);
       int X = biome_pos.x - playerpos.x, Z = biome_pos.z - playerpos.z;
-      auto &biome = biomes[i][j];
+      auto biome = biomes[i][j];
       if ((((X * X) + (Z * Z)) <= (RENDER_DISTANCE * RENDER_DISTANCE)) &&
           (job_scheduled.find(idx) == job_scheduled.end())) {
         // Costly move it to a seprate thread

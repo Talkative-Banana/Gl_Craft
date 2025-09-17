@@ -16,21 +16,15 @@ extern GLuint wireframemode;
 
 class chunk {
  public:
-  glm::ivec3 biomepos;
-  glm::ivec3 chunkpos;
-
   GLboolean displaychunk;
+  GLuint id, count, cntblocks;
+  glm::ivec3 biomepos, chunkpos;
+
   std::array<std::array<std::array<block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
       blocks;
   std::vector<GLuint> cube_vertices;
   std::vector<GLuint> cube_indices;
   std::unique_ptr<VertexArray> chunkva;
-  GLuint cntblocks;
-
-
- public:
-  GLuint id;
-  GLuint count;
   std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
   chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
