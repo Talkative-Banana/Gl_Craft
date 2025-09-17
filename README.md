@@ -11,48 +11,28 @@ Added perlin noise for terrain generation
 
 ![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/image.png)
 
-**Grass Chunk**
+**Multiple types of blocks in a Chunk**
 
-![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/GrassBlock.png)
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/Multiple_Blocks.png)
 
-**Sand Chunk**
 
-![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/SandBlock.png)
+**Hollow Chunk**
 
-**Dirt Chunk**
+Chunks are hollow from the inside just like you ;)
 
-![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/DirtBlock.png)
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/Hollow_Chunks2.png)
+
+**Hollow Chunk Wireframe**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/Hollow_Chunks.png)
+
 
 ## Quick Start
-Visit https://github.com/Mojang/bedrock-samples/releases and get the souce file for textures in a texture directory.
-
-![image](https://github.com/Talkative-Banana/Gl_Craft/assets/100795948/5ca83734-75fc-4040-adb7-dd5a806b983e)
-
-Extract the .zip or .tar file
-
-* #### Top level directory layout:
-        ./
-        ├── depends
-        ├── shaders
-        ├── src
-        ├── stb
-        ├── textures
-            ├── bedrock-samples-1.21.0.3/
-            ├── bedrock-samples-1.21.0.3.zip
 
 ### GNU/Linux
 ``` bash
 chmod +x build.sh clean.sh
-sudo apt update && sudo apt install -y \
-    libgl1-mesa-dev \
-    libglu1-mesa-dev \
-    freeglut3-dev \
-    libx11-dev \
-    xorg-dev \
-    libglfw3-dev \
-    libglm-dev \
-    libglew-dev
-
+sudo apt update && sudo apt install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libx11-dev xorg-dev libglfw3-dev libglm-dev libglew-dev
 ./build.sh
 ```
 ### Windows
