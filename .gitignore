@@ -3,7 +3,6 @@
 *.ini
 .user
 build/
-textures/
 GlCraft
 GLCraft.exemaps/
 maps/*
