@@ -1,7 +1,24 @@
 #include "World.h"
 
+#include <fstream>
+
 World::World(int seed, const glm::ivec3 &pos) : m_seed(seed), m_worldpos(pos) {
+  // Read saved files if any
   worker = std::thread(&World::workerLoop, this);
+  std::ifstream input_bin_file("save/save.bin", std::ios::binary);
+  if (!input_bin_file) {
+    std::cerr << "Failed to open save file.\n";
+    return;
+  }
+
+  int count = 1;
+  input_bin_file.read(reinterpret_cast<char *>(&count), sizeof(count));
+  for (int i = 0; i < count; i++) {
+    Chunk chunk;
+    if (!chunk.Deserialize(input_bin_file)) break;
+    std::cout << "Loaded a chunk with ID: " << chunk.save_id << std::endl;
+    load_map[chunk.save_id] = std::move(chunk);
+  }
 };
 
 Block *World::get_block_by_center(const glm::ivec3 &pos) {
@@ -177,4 +194,33 @@ void World::Draw() {
 
 void World::Update_queue(glm::vec3 playerpos) {
   for (auto &biome : render_queue) biome->Update_queue(playerpos);
+}
+
+// Saving Scope
+void World::save() {
+  std::ofstream save_file("save/save.bin", std::ios::binary | std::ios::trunc);
+  // Save All the dirty chunks
+  for (int i = 0; i < BIOME_COUNTZ; i++) {
+    for (int j = 0; j < BIOME_COUNTX; j++) {
+      auto biome = biomes[i][j];
+      if (!biome || !biome->dirtybit) continue;
+      for (int k = 0; k < CHUNK_COUNTZ; k++) {
+        for (int l = 0; l < CHUNK_COUNTX; l++) {
+          auto chunk = biome->chunks[k][l];
+          if (!chunk || !chunk->dirtybit) continue;
+          std::cout << "Saving chunk with ID: " << i << " " << j << " " << k << " " << l
+                    << std::endl;
+          save_map[chunk->save_id] = chunk;
+        }
+      }
+    }
+  }
+  int count = save_map.size();
+  save_file.write(reinterpret_cast<char *>(&count), sizeof(count));
+  std::cout << "Saving " << count << " chunks\n";
+  for (auto [id, chunk] : save_map) {
+    std::cout << "Saving chunk with ID: " << id << std::endl;
+    chunk->Serialize(save_file);
+  }
+  std::cout << "Game Saved\n";
 }

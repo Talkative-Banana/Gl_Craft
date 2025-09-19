@@ -1,5 +1,7 @@
 #include "Biome.h"
 
+#include <fstream>
+
 #include "Renderer.h"
 #include "World.h"
 
@@ -8,7 +10,7 @@ extern std::unique_ptr<World> world;
 static void load_p(decltype(Biome::chunks) &chunks, glm::ivec3 &Biomepos, int i, bool display) {
   for (int j = 0; j < CHUNK_COUNTZ; j++) {
     int idx = CHUNK_COUNTZ * i + j;
-    chunks[i][j] = std::make_shared<Chunk>(idx, Biomepos, glm::ivec3(i, 0, j), true);
+    chunks[i][j] = std::make_shared<Chunk>(idx, Biomepos, glm::ivec3(i, 0, j), display);
   }
 }
 
@@ -53,11 +55,17 @@ Biome::Biome(int t, glm::ivec3 pos, GLboolean display) {
   displaybiome = display;
 
   GLuint idx = 0;
+  dirtybit = false;
   std::array<std::thread, CHUNK_COUNTX> threads;
   for (int i = 0; i < CHUNK_COUNTX; i++) {
     threads[i] = std::thread(load_p, std::ref(chunks), std::ref(Biomepos), i, true);
   }
   for (auto &thread : threads) thread.join();
+  for (int i = 0; i < CHUNK_COUNTX; i++) {
+    for (int j = 0; j < CHUNK_COUNTZ; j++) {
+      dirtybit |= chunks[i][j]->dirtybit;
+    }
+  }
 }
 
 void Biome::RenderBiome(bool firstRun) {

@@ -16,8 +16,8 @@ extern GLuint wireframemode;
 
 class Chunk {
  public:
-  GLboolean displaychunk;
-  GLuint id, count, cntblocks;
+  GLboolean displaychunk, dirtybit;
+  GLuint id, count, cntblocks, save_id;
   glm::ivec3 biomepos, chunkpos;
 
   std::array<std::array<std::array<Block, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>, CHUNK_BLOCK_COUNT>
@@ -27,6 +27,7 @@ class Chunk {
   std::unique_ptr<VertexArray> chunkva;
   std::vector<std::pair<std::vector<GLuint>, std::vector<GLuint>>> rendervert;
 
+  Chunk();
   Chunk(uint _id, glm::ivec3 biomepos, glm::ivec3 position, GLboolean display);
 
   void Render(
@@ -40,4 +41,6 @@ class Chunk {
   GLuint RenderFace(std::vector<GLint> &&position);
   inline GLboolean isSolid(const std::vector<GLint> &postion);
   void Draw();
+  void Serialize(std::ostream &os) const;
+  bool Deserialize(std::istream &is);
 };

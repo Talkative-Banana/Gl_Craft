@@ -5,18 +5,36 @@
 #include <string>
 
 #include "Renderer.h"
+#include "World.h"
+
+extern std::unique_ptr<World> world;
+
+Chunk::Chunk() {
+}
 
 Chunk::Chunk(uint _id, glm::ivec3 _biomepos, glm::ivec3 position, GLboolean display) {
+  // Check if the chunk needs to be loaded from disk
   id = _id;
   count = 0;
   biomepos = _biomepos;
   displaychunk = display;
+  uint biome_uq_id = BIOME_COUNTZ * _biomepos.x + _biomepos.z;
+  save_id = (biome_uq_id << static_cast<int>(log2(CHUNK_COUNTZ * CHUNK_COUNTX))) + _id;
   chunkpos = glm::vec3(
       CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id / CHUNK_COUNTX) + biomepos.x,
       0.0,
       CHUNK_BLOCK_COUNT * BLOCK_SIZE * (id % CHUNK_COUNTZ) + biomepos.z);
 
-  Setup_Landscape(position.x, position.z);
+  if (world->load_map.find(save_id) != world->load_map.end()) {
+    // Empty Chunk
+    std::cout << "Setting A chunk with loaded ID: " << save_id << std::endl;
+    Chunk &loaded_chunk = world->load_map[save_id];
+    blocks = loaded_chunk.blocks;
+    dirtybit = true;
+  } else {
+    Setup_Landscape(position.x, position.z);
+    dirtybit = false;
+  }
 }
 
 inline GLboolean Chunk::isSolid(const std::vector<GLint> &position) {
@@ -269,4 +287,29 @@ void Chunk::Draw() {
     // glUniform4f(vColor_uniform, 0.0, 0.0, 0.0, 1.0);
     // glDrawElements(GL_LINES, cntblocks * 12 * 1, GL_UNSIGNED_INT, nullptr);
   }
+}
+
+void Chunk::Serialize(std::ostream &os) const {
+  os.write(reinterpret_cast<const char *>(&id), sizeof(id));
+  os.write(reinterpret_cast<const char *>(&save_id), sizeof(save_id));
+  os.write(reinterpret_cast<const char *>(&biomepos.x), sizeof(biomepos.x));
+  os.write(reinterpret_cast<const char *>(&biomepos.y), sizeof(biomepos.y));
+  os.write(reinterpret_cast<const char *>(&biomepos.z), sizeof(biomepos.z));
+  os.write(reinterpret_cast<const char *>(&chunkpos.x), sizeof(chunkpos.x));
+  os.write(reinterpret_cast<const char *>(&chunkpos.y), sizeof(chunkpos.y));
+  os.write(reinterpret_cast<const char *>(&chunkpos.z), sizeof(chunkpos.z));
+  os.write(reinterpret_cast<const char *>(&blocks), sizeof(blocks));
+}
+
+bool Chunk::Deserialize(std::istream &is) {
+  if (!is.read(reinterpret_cast<char *>(&id), sizeof(id))) return false;
+  if (!is.read(reinterpret_cast<char *>(&save_id), sizeof(save_id))) return false;
+  if (!is.read(reinterpret_cast<char *>(&biomepos.x), sizeof(biomepos.x))) return false;
+  if (!is.read(reinterpret_cast<char *>(&biomepos.y), sizeof(biomepos.y))) return false;
+  if (!is.read(reinterpret_cast<char *>(&biomepos.z), sizeof(biomepos.z))) return false;
+  if (!is.read(reinterpret_cast<char *>(&chunkpos.x), sizeof(chunkpos.x))) return false;
+  if (!is.read(reinterpret_cast<char *>(&chunkpos.y), sizeof(chunkpos.y))) return false;
+  if (!is.read(reinterpret_cast<char *>(&chunkpos.z), sizeof(chunkpos.z))) return false;
+  if (!is.read(reinterpret_cast<char *>(&blocks), sizeof(blocks))) return false;
+  return true;
 }

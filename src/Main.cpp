@@ -7,6 +7,7 @@
 #include <../stb/stb_image.h>
 #include <../stb/stb_image_write.h>
 
+#include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -224,6 +225,10 @@ int main(int, char **) {
         auto block = world->get_block_by_center(ray.m_hitcords);
         if (block) block->remove();
         auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
+        auto _biome = world->get_biome_by_center(ray.m_hitcords);
+        // Set the dirty bit
+        _chunk->dirtybit = true;
+        _biome->dirtybit = true;
         auto vec = ray.m_hitcords;
 
         int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
@@ -294,6 +299,11 @@ int main(int, char **) {
         auto block = world->get_block_by_center(prev_blk);
         if (block) block->add();
         auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
+        auto _biome = world->get_biome_by_center(ray.m_hitcords);
+        // Update dirty bit
+        _chunk->dirtybit = true;
+        _biome->dirtybit = true;
+
         auto vec = ray.m_hitcords;
 
         int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
@@ -438,6 +448,7 @@ int main(int, char **) {
     glfwSwapBuffers(window);
   }
 
+  world->save();
   // Cleanup
   cleanup(window);
   return 0;

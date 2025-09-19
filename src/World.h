@@ -7,7 +7,7 @@
 #include <mutex>
 #include <queue>
 #include <set>
-#include <unordered_set>
+#include <unordered_map>
 
 #include "Biome.h"
 #include "Constants.hpp"
@@ -34,6 +34,8 @@ class World {
 
  public:
   std::array<std::array<std::shared_ptr<Biome>, BIOME_COUNTZ>, BIOME_COUNTX> biomes;
+  std::unordered_map<uint, Chunk> load_map;
+  std::unordered_map<uint, std::shared_ptr<Chunk>> save_map;
   World(int seed, const glm::ivec3 &pos);
   void SetupWorld(glm::vec3 playerpos);
   bool isSolid(const glm::ivec3 &pos);
@@ -44,4 +46,5 @@ class World {
   void RenderWorld(bool firstRun);
   void Draw();
   void Update_queue(glm::vec3 playerpos);
+  void save();
 };
