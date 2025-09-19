@@ -129,6 +129,7 @@ void World::workerLoop() {
 
     // heavy work outside lock
     int idx = BIOME_COUNTX * i + j;
+    if (biomes[i][j]) continue;
     auto biome = std::make_shared<Biome>(idx, pos, true);
 
     {
@@ -149,7 +150,7 @@ void World::SetupWorld(glm::vec3 playerpos) {
       glm::ivec3 biome_pos = glm::ivec3(common * i, 0, common * j);
       int X = biome_pos.x - playerpos.x, Z = biome_pos.z - playerpos.z;
       auto biome = biomes[i][j];
-      if ((((X * X) + (Z * Z)) <= (RENDER_DISTANCE * RENDER_DISTANCE)) &&
+      if (((X <= RENDER_DISTANCE) && (Z <= RENDER_DISTANCE)) &&
           (job_scheduled.find(idx) == job_scheduled.end())) {
         // Costly move it to a seprate thread
         {
