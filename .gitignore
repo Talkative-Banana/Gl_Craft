@@ -7,6 +7,6 @@ GlCraft
 GLCraft.exemaps/
 maps/*
 perf*
-save/*
+save/*.bin
 
 !maps/.gitkeep
