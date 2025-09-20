@@ -142,7 +142,6 @@ void World::workerLoop() {
 
 void World::SetupWorld(glm::vec3 playerpos) {
   // Do not set up for all the biomes
-  std::thread thread;
   for (int i = 0; i < BIOME_COUNTX; i++) {
     for (int j = 0; j < BIOME_COUNTZ; j++) {
       int idx = BIOME_COUNTX * i + j;
