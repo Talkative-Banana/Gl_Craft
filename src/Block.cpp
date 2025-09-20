@@ -90,6 +90,10 @@ std::vector<GLuint> Block::GenerateVerticies(GLuint ambient_occ) {
   return vertices;
 }
 
+bool Block::is_transparent(GLuint blkmask) {
+  return ((blmask & TYPE_MASK) >> 23) == 4;
+}
+
 void Block::Render(
     GLuint mask,
     GLuint ambient_occ,
@@ -99,6 +103,8 @@ void Block::Render(
   rendervert = GenerateVerticies(ambient_occ);
 
   GLuint idx = 0;
+  // If a transparent block
+  if (is_transparent(blmask)) mask = 63;
   while (mask != 0) {
     blmask |= (1 << 16);  // mark them visible if any side is visble
     if (mask & 1) {
@@ -113,8 +119,10 @@ void Block::remove() {
   blmask &= ~(1 << 16);  // clear visible bit
 }
 
-void Block::add() {
+void Block::add(int bltype) {
   blmask |= (3 << 15);  // add solid and visble bit
+  blmask &= ~(TYPE_MASK);
+  blmask |= (bltype << 23);
 }
 
 bool Block::isSolid() {

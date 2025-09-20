@@ -17,5 +17,6 @@ void main() {
    // outColor = isoscale * texture(atlas, atlasUV);
 
    vec4 texColor = texture(atlas, atlasUV);
+   if (texColor.a < 0.1) discard;
    outColor = vec4(texColor.rgb * isoscale * aoFactor, texColor.a);
 }

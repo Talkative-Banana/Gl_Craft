@@ -181,6 +181,7 @@ int main(int, char **) {
   mesh1->setup();
   mesh2->setup();
 
+  int bltype = 0;
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
@@ -297,7 +298,7 @@ int main(int, char **) {
                   << " " << ray.m_hitcords.z << std::endl;
         glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
         auto block = world->get_block_by_center(prev_blk);
-        if (block) block->add();
+        if (block) block->add(bltype);
         auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
         auto _biome = world->get_biome_by_center(ray.m_hitcords);
         // Update dirty bit
@@ -373,6 +374,11 @@ int main(int, char **) {
       mesh2->pos.y = asset_height;
     }
 
+    if (Input::WasKeyPressed(GLFW_KEY_0)) {
+      bltype += 1;
+      bltype %= BLOCK_TYPES;
+    }
+
     if (Nokeypressed) {
       strcpy(textKeyStatus, "Listening for key events...");
       strcpy(textKeyDescription, "Listening for key events...");
@@ -391,6 +397,7 @@ int main(int, char **) {
       ImGui::Text("Key Status: %s", textKeyStatus);
       ImGui::Text("Key Description: %s", textKeyDescription);
       ImGui::Text("Active Player: %d", activePlayer);
+      ImGui::Text("Block Selected: %s", BLOCK_ARRAY[bltype].c_str());
       ImGui::Text(
           "Player %d position: (%.2f, %.2f, %.2f)",
           activePlayer,
@@ -412,6 +419,8 @@ int main(int, char **) {
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);  // Enable OC
+    glEnable(GL_BLEND);      // Enable BLENDING
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 

@@ -1,4 +1,7 @@
 #pragma once
+
+#include <array>
+#include <string>
 constexpr static float BLOCK_SIZE = 2.0;       // BLOCK LENGTH
 constexpr static float HALF_BLOCK_SIZE = 1.0;  // HALF_BLOCK LENGTH
 constexpr static float NEAR_PLANE = 0.01f;
@@ -21,14 +24,20 @@ constexpr static float OFFSET = 0.01f;
 constexpr static float PLAYER_HEIGHT = 2 * BLOCK_SIZE;
 constexpr static float GRAVITY = 0.98f;
 constexpr static int PLAYER_COUNT = 128;
+constexpr static int BLOCK_TYPES = 5;
 
 constexpr static int BACK_FACE = 1 << 17;
 constexpr static int FRONT_FACE = 1 << 18;
 constexpr static int LEFT_FACE = 1 << 19;
 constexpr static int RIGHT_FACE = 1 << 20;
 constexpr static int FACE_MASK_BITS = 6;
+constexpr static int TYPE_MASK_BITS = 5;
 constexpr static int FACE_MASK = ((1 << FACE_MASK_BITS) - 1) << 17;
+constexpr static int TYPE_MASK = ((1 << TYPE_MASK_BITS) - 1) << 23;
 
 // Non const
 static int SCREEN_HEIGHT = 640;
 static int SCREEN_WIDTH = 640;
+
+static std::array<std::string, BLOCK_TYPES> BLOCK_ARRAY =
+    {"GRASS", "DIRT", "STONE", "BARK", "LEAF"};
