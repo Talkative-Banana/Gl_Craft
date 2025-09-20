@@ -1,6 +1,7 @@
 #version 330 core
 
 in vec2 tile;
+in float aoFactor;
 in vec3 NormalDir;
 in float isoscale;
 in vec2 TexCoord;
@@ -16,5 +17,5 @@ void main() {
    // outColor = isoscale * texture(atlas, atlasUV);
 
    vec4 texColor = texture(atlas, atlasUV);
-   outColor = vec4(texColor.rgb * isoscale, texColor.a);
+   outColor = vec4(texColor.rgb * isoscale * aoFactor, texColor.a);
 }

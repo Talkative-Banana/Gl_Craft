@@ -6,14 +6,14 @@
 
 class Block {
  private:
-  std::vector<GLuint> GenerateVerticies();
+  std::vector<GLuint> GenerateVerticies(GLuint ambient_occ);
 
  public:
   // visible solid
   // 00000000_00000000_00000000_00000000
-  //    ^^^^^ ^^^^^^^^ ^^^^^^^^ ^^^^^^^^
-  //    ||||| |||||||| |||||||| ||||||||
-  //    ttttt tmmmmmmv sxxxxxyy yyyzzzzz
+  // ^^^^^^^^ ^^^^^^^^ ^^^^^^^^ ^^^^^^^^
+  // |||||||| |||||||| |||||||| ||||||||
+  // ooootttt tmmmmmmv sxxxxxyy yyyzzzzz
   //             rlfb
   uint32_t blmask;
   static constexpr std::array<std::array<unsigned int, 6>, 6> faceindices = {
@@ -28,8 +28,13 @@ class Block {
   Block(const glm::ivec3& pos, GLboolean solid, GLuint bltype);
   Block();
 
-  void Render(GLuint mask, std::vector<GLuint>& indices, std::vector<GLuint>& rendervert);
-  GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint blktype);
+  void Render(
+      GLuint mask,
+      GLuint ambient_occ,
+      std::vector<GLuint>& indices,
+      std::vector<GLuint>& rendervert);
+  GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint blktype, GLuint ac);
   void add();
   void remove();
+  bool isSolid();
 };

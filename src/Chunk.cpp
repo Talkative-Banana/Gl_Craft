@@ -215,9 +215,39 @@ void Chunk::Render(
           }
           mask = (blocks[i][j][k].blmask >> 17) & 63;
         }
+
+        glm::ivec3 block_pos = chunkpos +
+                               glm::ivec3(BLOCK_SIZE * i, BLOCK_SIZE * j, BLOCK_SIZE * k) +
+                               glm::ivec3(HALF_BLOCK_SIZE, HALF_BLOCK_SIZE, HALF_BLOCK_SIZE);
+
+        // Offsets for 8 neighbors around this block (XZ plane)
+        static const glm::ivec3 neighborOffsets[8] = {
+            {0, BLOCK_SIZE, -BLOCK_SIZE},            // b0
+            {-BLOCK_SIZE, BLOCK_SIZE, -BLOCK_SIZE},  // b1   543
+            {-BLOCK_SIZE, BLOCK_SIZE, 0},            // b2   6 2
+            {-BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},   // b3   701
+            {0, BLOCK_SIZE, BLOCK_SIZE},             // b4
+            {BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},    // b5
+            {BLOCK_SIZE, BLOCK_SIZE, 0},             // b6
+            {BLOCK_SIZE, BLOCK_SIZE, -BLOCK_SIZE}    // b7
+        };
+
+        GLuint ac = 0;
+        for (int n = 0; n < 8; n++) {
+          auto neighbor = world->get_block_by_center(block_pos + neighborOffsets[n]);
+          if (neighbor && neighbor->isSolid()) {
+            ac |= (1u << n);  // set bit if solid
+          }
+        }
+
+        // Optional extra flag (your original had b0 repeated at bit 8)
+        if (auto b0 =
+                world->get_block_by_center(block_pos + glm::ivec3(0, BLOCK_SIZE, -BLOCK_SIZE))) {
+          if (b0->isSolid()) ac |= (1u << 8);
+        }
         std::vector<GLuint> indices;
         std::vector<GLuint> blockrendervert;
-        blocks[i][j][k].Render(mask, indices, blockrendervert);
+        blocks[i][j][k].Render(mask, ac, indices, blockrendervert);
         for (auto &ind : indices) ind += idx;
         rendervert.push_back({blockrendervert, indices});
         idx += 24, count++;

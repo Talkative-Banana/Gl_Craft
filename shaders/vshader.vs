@@ -28,6 +28,7 @@ out vec2 tile;
 out float isoscale;
 out vec3 NormalDir;
 out vec2 TexCoord; 
+out float aoFactor;
 
 vec3 Center(vec3 pos, uint centeroff){
 	vec3 center = pos;
@@ -80,7 +81,8 @@ ivec3 Normal(uint normaldir){
 }
 
 void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
-	uint blktype = (vVertex >> 24u) & 63u;
+	// Block Faces
+	uint blktype = (vVertex >> 24u) & 31u;
 	uint frontx = (blocks_X[blktype] >> 8u) & 15u;
 	uint fronty = (blocks_Y[blktype] >> 8u) & 15u;
 	uint backx = (blocks_X[blktype] >> 0u) & 15u;
@@ -93,6 +95,7 @@ void setup_textures(ivec3 _NormalDir, uint vVertex, uint centeroff){
 	uint lefty = (blocks_Y[blktype] >> 4u) & 15u;
 	uint rightx = (blocks_X[blktype] >> 12u) & 15u;
 	uint righty = (blocks_Y[blktype] >> 12u) & 15u;
+
 	if (_NormalDir.z != 0) {
 		// Z face → use (x,y)
 		if(_NormalDir.z > 0){ // Front Face
@@ -136,8 +139,21 @@ void main() {
 	uint positionY = (vVertex >> 6u)  & 63u;
 	uint positionZ = (vVertex >> 12u) & 63u;
 	uint centeroff = (vVertex >> 18u) & 7u;
-	uint normaldir = (vVertex >> 21u) & 7u;
-	
+	uint normaldir = (vVertex >> 21u) & 7u;	
+	uint ac = (vVertex >> 29u) & 7u; // 3 bits: x, z, diag (example layout)
+
+	uint side1 = ((ac & 1u) != 0u) ? 1u : 0u;   // bit 0
+	uint diag  = ((ac & 2u) != 0u) ? 1u : 0u;   // bit 1
+	uint side2 = ((ac & 4u) != 0u) ? 1u : 0u;   // bit 2
+
+	uint occ;
+	if ((side1 != 0u) && (side2 != 0u)) {
+		// both neighbors present → darkest (ignore diagonal)
+		occ = 3u;
+	} else {
+		occ = side1 + side2 + diag;
+	}
+	aoFactor = 1.0f - (occ * 0.25f);  // 1.0, 0.75, 0.5, 0.25
 	vec3 pos = vec3(side * positionX, side * positionY, side * positionZ);
 	vec3 centercord = Center(pos, centeroff);
 	gl_Position = vProjection * vView * vModel * vec4(pos + chunkpos, 1.0);
