@@ -270,6 +270,7 @@ void World::load_model(glm::ivec3 pos, std::string model) {
           continue;
         Block block;
         input_model_bin_file.read(reinterpret_cast<char *>(&block), sizeof(block));
+        if (!block.isSolid()) continue;
         _chunk = get_chunk_by_center(
             {pos.x + i * BLOCK_SIZE, pos.y + j * BLOCK_SIZE, pos.z + k * BLOCK_SIZE});  // 63 1 63
         _chunk->dirtybit = 1;
