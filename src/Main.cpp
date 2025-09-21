@@ -211,7 +211,8 @@ int main(int, char **) {
       return {left, front, right, back};
     };
 
-    if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+    if (!Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT) &&
+        Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
       strcpy(textKeyStatus, "Right click");
       strcpy(textKeyDescription, "Casting ray");
 
@@ -284,7 +285,9 @@ int main(int, char **) {
       } else {
         std::cout << "Ray didn't hit any block\n";
       }
-    } else if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
+    } else if (
+        !Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT) &&
+        Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
       strcpy(textKeyStatus, "Middle click");
       strcpy(textKeyDescription, "Casting ray");
 
@@ -377,6 +380,36 @@ int main(int, char **) {
     if (Input::WasKeyPressed(GLFW_KEY_0)) {
       bltype += 1;
       bltype %= BLOCK_TYPES;
+    } else if (Input::WasKeyPressed(GLFW_KEY_9)) {
+      bltype -= 1 + BLOCK_TYPES;
+      bltype %= BLOCK_TYPES;
+    }
+
+    if (Input::WasKeyPressed(GLFW_KEY_1)) {
+      // Save the model in chunk 0 included between ref
+      auto chunk = world->get_chunk_by_center(
+          glm::ivec3(
+              CHUNK_BLOCK_COUNT * BLOCK_SIZE + HALF_BLOCK_SIZE,
+              HALF_BLOCK_SIZE,
+              CHUNK_BLOCK_COUNT * BLOCK_SIZE + HALF_BLOCK_SIZE));
+
+      world->save_model(chunk);
+    }
+
+    if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+      if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+        if (ray.did_hit(world)) {
+          std::cout << "[SHIFT] Ray hit a block with center: " << ray.m_hitcords.x << " "
+                    << ray.m_hitcords.y << " " << ray.m_hitcords.z << std::endl;
+          auto chunk = world->get_chunk_by_center(ray.m_hitcords);
+          world->load_model(ray.m_hitcords + glm::ivec3(0, BLOCK_SIZE, 0), "models/tree.bin");
+        }
+      }
     }
 
     if (Nokeypressed) {

@@ -43,6 +43,8 @@ class World {
   Block *get_block_by_center(const glm::ivec3 &pos);
   std::shared_ptr<Chunk> get_chunk_by_center(const glm::ivec3 &pos);
   std::shared_ptr<Biome> get_biome_by_center(const glm::ivec3 &pos);
+  void save_model(std::shared_ptr<Chunk> chunk);
+  void load_model(glm::ivec3 pos, std::string model);
   void RenderWorld(bool firstRun);
   void Draw();
   void Update_queue(glm::vec3 playerpos);

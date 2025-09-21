@@ -36,6 +36,7 @@ class Block {
   void add(int bltype);
   void remove();
   bool isSolid();
+  bool is_ref();
   bool is_transparent(GLuint blkmask);
   GLuint Mask(GLuint X, GLuint Y, GLuint Z, GLuint cent, GLuint normal, GLuint blktype, GLuint ac);
 };

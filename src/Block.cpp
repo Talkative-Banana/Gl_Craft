@@ -91,7 +91,11 @@ std::vector<GLuint> Block::GenerateVerticies(GLuint ambient_occ) {
 }
 
 bool Block::is_transparent(GLuint blkmask) {
-  return ((blmask & TYPE_MASK) >> 23) == 4;
+  return ((blmask & TYPE_MASK) >> 23) == 4 && isSolid();
+}
+
+bool Block::is_ref() {
+  return ((blmask & TYPE_MASK) >> 23) == 5 && isSolid();
 }
 
 void Block::Render(
