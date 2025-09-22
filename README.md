@@ -3,11 +3,7 @@ Minecraft clone in C++ with OpenGL.
 
 # Preview
 
-Asset Importer
-
-![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/asset.png)
-
-Added perlin noise for terrain generation
+**Added perlin noise for terrain generation**
 
 ![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/image.png)
 
@@ -26,6 +22,13 @@ Chunks are hollow from the inside just like you ;)
 
 ![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/Hollow_Chunks.png)
 
+**Trees**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/Trees.png)
+
+**Asset Importer**
+
+![image](https://github.com/Talkative-Banana/Gl_Craft/blob/master/preview/asset.png)
 
 ## Quick Start
 
