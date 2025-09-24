@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "Window.h"
 
-extern Window* _window;
+extern std::unique_ptr<Window> _window;

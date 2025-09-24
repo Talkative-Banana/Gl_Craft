@@ -6,4 +6,4 @@ cmake ..
 make -j4
 cd ..
 ./GlCraft
-./clean.sh
+# ./clean.sh

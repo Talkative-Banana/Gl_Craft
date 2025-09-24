@@ -35,6 +35,7 @@ constexpr static int TYPE_MASK_BITS = 5;
 constexpr static int FACE_MASK = ((1 << FACE_MASK_BITS) - 1) << 17;
 constexpr static int TYPE_MASK = ((1 << TYPE_MASK_BITS) - 1) << 23;
 
+constexpr static int IMGUI_TEXT_CAPACITY = 256;
 // Non const
 static int SCREEN_HEIGHT = 640;
 static int SCREEN_WIDTH = 640;

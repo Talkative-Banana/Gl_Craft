@@ -1,16 +1,19 @@
 #include "Player.h"
 
-Player::Player(const glm::vec3& pos, const glm::vec3& dir) : m_position(pos), m_forward(dir) {
+Player::Player(const glm::vec3 &pos, const glm::vec3 &dir) : m_position(pos), m_forward(dir) {
   m_cameracontroller = std::make_unique<CameraController>(SCREEN_HEIGHT / SCREEN_WIDTH);
   m_cameracontroller->UpdateCamera(m_position, m_forward);
+  window = _window->GetWindow();
 }
 
 Player::Player() {
   m_cameracontroller = std::make_unique<CameraController>(SCREEN_HEIGHT / SCREEN_WIDTH);
   m_cameracontroller->UpdateCamera(m_position, m_forward);
+  window = _window->GetWindow();
 }
 
 void Player::handle_input() {
+
   // Gravity
   glm::vec3 v = glm::floor(m_position / BLOCK_SIZE) * BLOCK_SIZE + glm::vec3(HALF_BLOCK_SIZE);
   if (enable_gravity) {
@@ -118,4 +121,357 @@ void Player::handle_input() {
 
   // Update the camera as well
   m_cameracontroller->UpdateCamera(m_position, m_forward);
+
+  if (Input::WasKeyPressed(GLFW_KEY_TAB)) {
+    strcpy(textKeyStatus, "TAB");
+    strcpy(textKeyDescription, "Switching Mode");
+    wireframemode ^= 1;
+    Nokeypressed = 0;
+  }
+
+  auto get_neighbors = [](glm::ivec3 vec) -> std::vector<std::shared_ptr<Chunk>> {
+    std::shared_ptr<Chunk> left, front, right, back;
+    left = world->get_chunk_by_center(
+        vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+    front = world->get_chunk_by_center(
+        vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+    right = world->get_chunk_by_center(
+        vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+    back = world->get_chunk_by_center(
+        vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+    return {left, front, right, back};
+  };
+
+  if (!Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT) &&
+      Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+    strcpy(textKeyStatus, "Right click");
+    strcpy(textKeyDescription, "Casting ray");
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+
+    Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+    if (ray.did_hit(world)) {  // Remove a block
+      std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
+                << " " << ray.m_hitcords.z << std::endl;
+      auto block = world->get_block_by_center(ray.m_hitcords);
+      if (block) block->remove();
+      auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
+      auto _biome = world->get_biome_by_center(ray.m_hitcords);
+      // Set the dirty bit
+      _chunk->dirtybit = true;
+      _biome->dirtybit = true;
+      auto vec = ray.m_hitcords;
+
+      int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+      int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+      // If last block update adjacent chunk
+      auto chunks1 = get_neighbors(vec);
+      _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+
+      bool update_boundary = false;
+      if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        auto chunks2 =
+            get_neighbors(vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+        if (chunks1[1]) {
+          std::cout << "[FRONT] Updating neighbouring chunk\n";
+          chunks1[1]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[1]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        auto chunks2 =
+            get_neighbors(vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+        if (chunks1[0]) {
+          std::cout << "[LEFT] Updating neighbouring chunk\n";
+          chunks1[0]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[0]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordz == 1) {
+        auto chunks2 =
+            get_neighbors(vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+        if (chunks1[3]) {
+          std::cout << "[BACK] Updating neighbouring chunk\n";
+          chunks1[3]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[3]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordx == 1) {
+        auto chunks2 =
+            get_neighbors(vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+        if (chunks1[2]) {
+          std::cout << "[RIGHT] Updating neighbouring chunk\n";
+          chunks1[2]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[2]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+      _chunk->Render(0, false, chunks1[0], chunks1[1], chunks1[2], chunks1[3]);
+
+      // world->RenderWorld();
+    } else {
+      std::cout << "Ray didn't hit any block\n";
+    }
+  } else if (
+      !Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT) &&
+      Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {  // Add a block
+    strcpy(textKeyStatus, "Middle click");
+    strcpy(textKeyDescription, "Casting ray");
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+
+    Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+    if (ray.did_hit(world)) {
+      std::cout << "Ray hit a block with center: " << ray.m_hitcords.x << " " << ray.m_hitcords.y
+                << " " << ray.m_hitcords.z << std::endl;
+      glm::ivec3 prev_blk = ray.m_hitcords + ray.m_hitnormal * static_cast<int>(BLOCK_SIZE);
+      auto block = world->get_block_by_center(prev_blk);
+      if (block) block->add(bltype);
+      auto _chunk = world->get_chunk_by_center(ray.m_hitcords);
+      auto _biome = world->get_biome_by_center(ray.m_hitcords);
+      // Update dirty bit
+      _chunk->dirtybit = true;
+      _biome->dirtybit = true;
+
+      auto vec = ray.m_hitcords;
+
+      int cordz = (ray.m_hitcords.z % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+      int cordx = (ray.m_hitcords.x % static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE));
+      // If last block update adjacent chunk
+      auto chunks1 = get_neighbors(vec);
+      _chunk->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+
+      if (cordz == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        auto chunks2 =
+            get_neighbors(vec + glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+        if (chunks1[1]) {
+          std::cout << "[FRONT] Updating neighbouring chunk\n";
+          chunks1[1]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[1]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordx == static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE) - 1) {
+        auto chunks2 =
+            get_neighbors(vec + glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+        if (chunks1[0]) {
+          std::cout << "[LEFT] Updating neighbouring chunk\n";
+          chunks1[0]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[0]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordz == 1) {
+        auto chunks2 =
+            get_neighbors(vec - glm::ivec3(0, 0, static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE)));
+        if (chunks1[3]) {
+          std::cout << "[BACK] Updating neighbouring chunk\n";
+          chunks1[3]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[3]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+
+      if (cordx == 1) {
+        auto chunks2 =
+            get_neighbors(vec - glm::ivec3(static_cast<int>(CHUNK_BLOCK_COUNT * BLOCK_SIZE), 0, 0));
+        if (chunks1[2]) {
+          std::cout << "[RIGHT] Updating neighbouring chunk\n";
+          chunks1[2]->Render(0, true, nullptr, nullptr, nullptr, nullptr);
+          chunks1[2]->Render(0, false, chunks2[0], chunks2[1], chunks2[2], chunks2[3]);
+        }
+      }
+      _chunk->Render(0, false, chunks1[0], chunks1[1], chunks1[2], chunks1[3]);
+    } else {
+      std::cout << "Ray didn't hit any block\n";
+    }
+  }
+
+  if (Input::WasKeyPressed(GLFW_KEY_0)) {
+    bltype += 1;
+    bltype %= BLOCK_TYPES;
+  } else if (Input::WasKeyPressed(GLFW_KEY_9)) {
+    bltype -= 1 + BLOCK_TYPES;
+    bltype %= BLOCK_TYPES;
+  }
+
+  if (Input::WasKeyPressed(GLFW_KEY_1)) {
+    // Save the model in chunk 0 included between ref
+    auto chunk = world->get_chunk_by_center(
+        glm::ivec3(
+            CHUNK_BLOCK_COUNT * BLOCK_SIZE + HALF_BLOCK_SIZE,
+            HALF_BLOCK_SIZE,
+            CHUNK_BLOCK_COUNT * BLOCK_SIZE + HALF_BLOCK_SIZE));
+
+    world->save_model(chunk);
+  }
+
+  if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+    if (Input::WasMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
+      double mouseX, mouseY;
+      glfwGetCursorPos(window, &mouseX, &mouseY);
+
+      Ray ray = screenPosToWorldRay(window, mouseX, mouseY, viewT, projectionT);
+
+      if (ray.did_hit(world)) {
+        std::cout << "[SHIFT] Ray hit a block with center: " << ray.m_hitcords.x << " "
+                  << ray.m_hitcords.y << " " << ray.m_hitcords.z << std::endl;
+        auto chunk = world->get_chunk_by_center(ray.m_hitcords);
+        world->load_model(ray.m_hitcords + glm::ivec3(0, BLOCK_SIZE, 0), "models/tree.bin");
+      }
+    }
+  }
+
+  if (Nokeypressed) {
+    strcpy(textKeyStatus, "Listening for key events...");
+    strcpy(textKeyDescription, "Listening for key events...");
+  }
+}
+
+void Player::handle_stats() {
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  // ImGui UI menu
+  ImGui::Begin("Main", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+  if (ImGui::CollapsingHeader("Information", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Text(
+        "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Key Status: %s", textKeyStatus);
+    ImGui::Text("Key Description: %s", textKeyDescription);
+    ImGui::Text("Active Player: %d", activePlayer);
+    ImGui::Text("Block Selected: %s", BLOCK_ARRAY[bltype].c_str());
+    ImGui::Text(
+        "Player %d position: (%.2f, %.2f, %.2f)",
+        activePlayer,
+        m_cameracontroller->GetCamera()->GetPosition().x,
+        m_cameracontroller->GetCamera()->GetPosition().y,
+        m_cameracontroller->GetCamera()->GetPosition().z);
+  }
+  ImGui::End();
+
+  // Rendering
+  ImGui::Render();
+  glfwGetFramebufferSize(window, &display_w, &display_h);
+  _window->SetHeight(display_h);
+  _window->SetWidth(display_w);
+}
+
+void Player::setupModelTransformationCube(unsigned int &program) {
+  // Modelling transformations (Model -> World coordinates)
+  modelT = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 1.0, 1.0));
+  modelT = glm::translate(modelT, glm::vec3(0.0f, 0.0f, 0.0f));
+
+  // Pass on the modelling matrix to the vertex shader
+  glUseProgram(program);
+  vModel_uniform = glGetUniformLocation(program, "vModel");
+  if (vModel_uniform == -1) {
+    fprintf(stderr, "Could not bind location: vModel\n");
+    exit(0);
+  }
+  glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
+}
+
+void Player::setupModelTransformationAxis(
+    unsigned int &program,
+    float rot_angle,
+    glm::vec3 rot_axis) {
+  // Modelling transformations (Model -> World coordinates)
+  modelT = glm::rotate(glm::mat4(1.0f), rot_angle, rot_axis);
+
+  // Pass on the modelling matrix to the vertex shader
+  glUseProgram(program);
+  vModel_uniform = glGetUniformLocation(program, "vModel");
+  if (vModel_uniform == -1) {
+    fprintf(stderr, "Could not bind location: vModel\n");
+    exit(0);
+  }
+  glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(modelT));
+}
+
+void Player::setupViewTransformation(
+    unsigned int &program,
+    std::unique_ptr<CameraController> &occ) {
+  // Viewing transformations (World -> Camera coordinates
+  //  viewT = glm::lookAt(glm::vec3(camPosition), glm::vec3(0.0, 0.0, 0.0),
+  //  glm::vec3(0.0, 1.0, 0.0));
+  viewT = occ->GetCamera()->GetViewMatrix();
+
+  // Pass-on the viewing matrix to the vertex shader
+  glUseProgram(program);
+  vView_uniform = glGetUniformLocation(program, "vView");
+  if (vView_uniform == -1) {
+    fprintf(stderr, "Could not bind location: vView\n");
+    exit(0);
+  }
+  glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(viewT));
+}
+
+void Player::setupProjectionTransformation(
+    unsigned int &program,
+    std::unique_ptr<CameraController> &occ) {
+  // Projection transformation
+  projectionT = occ->GetCamera()->GetProjectionMatrix();
+
+  // Pass on the projection matrix to the vertex shader
+  glUseProgram(program);
+  vProjection_uniform = glGetUniformLocation(program, "vProjection");
+  if (vProjection_uniform == -1) {
+    fprintf(stderr, "Could not bind location: vProjection\n");
+    exit(0);
+  }
+  glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE, glm::value_ptr(projectionT));
+}
+
+void Player::handle_transformations() {
+  m_cameracontroller->SetAspectRatio((float)display_w / (float)display_h);
+  glViewport(0, 0, display_w, display_h);
+
+  glUseProgram(shaderProgram);
+  // Setup MVP matrix
+  glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+  glEnable(GL_DEPTH_TEST);  // restore
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_CULL_FACE);  // Enable OC
+  glEnable(GL_BLEND);      // Enable BLENDING
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);
+
+  // Render the mesh
+  for (auto mesh : meshes) {
+    mesh->render(m_cameracontroller);
+  }
+
+  glUniform3f(
+      lightpos_uniform,
+      m_cameracontroller->GetCamera()->GetPosition().x,
+      m_cameracontroller->GetCamera()->GetPosition().y,
+      m_cameracontroller->GetCamera()->GetPosition().z);
+
+  glUniform3f(
+      cameraPos_uniform,
+      m_cameracontroller->GetCamera()->GetPosition().x,
+      m_cameracontroller->GetCamera()->GetPosition().y,
+      m_cameracontroller->GetCamera()->GetPosition().z);
+
+  setupModelTransformationCube(shaderProgram);
+  setupViewTransformation(shaderProgram, m_cameracontroller);
+  setupProjectionTransformation(shaderProgram, m_cameracontroller);
+}
+
+void Player::update() {
+  // handle player Input
+  handle_input();
+  // Display stats
+  handle_stats();
+
+  handle_transformations();
 }
